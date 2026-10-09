@@ -13,5 +13,5 @@ window.URKER_CONFIG = {
   //   listings — «Барахолка / Объявления / Потеряшки» (нужен 06_listings.sql)
   //   claims   — «Это ваш бизнес? Дополните карточку» (нужен 08_claims.sql)
   //   ads      — рекламный баннер на главной и место «Закрепиться наверху» (пока скрыто)
-  features: { listings: false, claims: false, ads: false }
+  features: { listings: true, claims: false, ads: false }
 };

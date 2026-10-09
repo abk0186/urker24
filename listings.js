@@ -20,10 +20,10 @@ A.addDict({
  lClosed:{market:'Продано',ads:'Неактуально',lost:'Нашлось'},lViews:n=>`👁 ${n}`,lPosted:'Опубликовано',lWhere:'Где',lWhen:'Когда',lShare:'Поделиться в WhatsApp',
  lHighlight:'Выделено',lNotFound:'Объявление не найдено или снято',lExpires:'Активно до',
  pTitle:'Подать объявление',pChoose:'Где разместить?',pKind:'Тип',pCat:'Категория',pTitleF:'Заголовок',pTitlePh:'Например: детская коляска, почти новая',
- pBody:'Описание',pPriceMode:'Цена',pPriceFixed:'Цена, ₸',pNeg:'Договорная',pFree:'Даром',pNone:'Без цены',pPlace:'Где (улица, дом — по желанию)',pPlaceLost:'Где потеряли / нашли',
+ pBody:'Описание',pPriceMode:'Цена',pPriceFixed:'Цена, ₸',pFixedR:'Указать цену',pNeg:'Договорная',pFree:'Даром',pNone:'Без цены',pPlace:'Где (улица, дом — по желанию)',pPlaceLost:'Где потеряли / нашли',
  pDate:'Когда',pPhone:'Телефон для связи (обязательно)',pWa:'На этот номер можно писать в WhatsApp',pPhotos:'Фото (до 5)',pSend:'Отправить',
  pNoteLive:'Объявление проверит модератор, обычно в течение дня. Срок показа — 30 дней (потеряшки — 60), можно продлить.',
- pNoteDemo:'Демо-режим: объявление не отправится. В рабочей версии оно уйдёт на проверку.',
+ pNoteDemo:'Сейчас нет связи с сервером. Попробуйте позже.',
  pErrTitle:'Напишите заголовок (не короче 3 символов)',pErrPhone:'Укажите номер телефона: 8XXXXXXXXXX',pErrPrice:'Укажите цену или выберите «Договорная»',pTooMany:'Можно добавить не больше 5 фото',
  pUploading:'Загружаем фото…',pDone:'Готово!',pDonePending:'Объявление отправлено на проверку. После одобрения оно появится на сайте.',pDoneLive:'Объявление опубликовано.',
  pSecret:'Ваша секретная ссылка для изменения и удаления. Сохраните её — без неё управлять объявлением нельзя:',pCopy:'📋 Скопировать ссылку',pCopied:'Ссылка скопирована',
@@ -48,10 +48,10 @@ A.addDict({
  lClosed:{market:'Сатылды',ads:'Өзекті емес',lost:'Табылды'},lViews:n=>`👁 ${n}`,lPosted:'Жарияланды',lWhere:'Қайда',lWhen:'Қашан',lShare:'WhatsApp-та бөлісу',
  lHighlight:'Ерекшеленген',lNotFound:'Хабарландыру табылмады немесе алынып тасталды',lExpires:'Белсенді мерзімі',
  pTitle:'Хабарландыру беру',pChoose:'Қай бөлімге?',pKind:'Түрі',pCat:'Санаты',pTitleF:'Тақырыбы',pTitlePh:'Мысалы: балалар арбасы, жаңа дерлік',
- pBody:'Сипаттамасы',pPriceMode:'Бағасы',pPriceFixed:'Бағасы, ₸',pNeg:'Келісімді',pFree:'Тегін',pNone:'Бағасыз',pPlace:'Қайда (көше, үй — міндетті емес)',pPlaceLost:'Қайда жоғалттыңыз / таптыңыз',
+ pBody:'Сипаттамасы',pPriceMode:'Бағасы',pPriceFixed:'Бағасы, ₸',pFixedR:'Бағасын көрсету',pNeg:'Келісімді',pFree:'Тегін',pNone:'Бағасыз',pPlace:'Қайда (көше, үй — міндетті емес)',pPlaceLost:'Қайда жоғалттыңыз / таптыңыз',
  pDate:'Қашан',pPhone:'Байланыс телефоны (міндетті)',pWa:'Бұл нөмірге WhatsApp-та жазуға болады',pPhotos:'Фото (5-ке дейін)',pSend:'Жіберу',
  pNoteLive:'Хабарландыруды модератор тексереді, әдетте бір күн ішінде. Көрсету мерзімі — 30 күн (жоғалғандар — 60), ұзартуға болады.',
- pNoteDemo:'Демо-режим: хабарландыру жіберілмейді. Жұмыс нұсқасында тексеруге кетеді.',
+ pNoteDemo:'Қазір сервермен байланыс жоқ. Кейінірек көріңіз.',
  pErrTitle:'Тақырыпты жазыңыз (кемінде 3 таңба)',pErrPhone:'Телефон нөмірін көрсетіңіз: 8XXXXXXXXXX',pErrPrice:'Бағаны көрсетіңіз немесе «Келісімді» таңдаңыз',pTooMany:'5 фотодан артық қосуға болмайды',
  pUploading:'Фото жүктелуде…',pDone:'Дайын!',pDonePending:'Хабарландыру тексеруге жіберілді. Мақұлданғаннан кейін сайтта шығады.',pDoneLive:'Хабарландыру жарияланды.',
  pSecret:'Өзгерту және жою үшін құпия сілтемеңіз. Оны сақтап қойыңыз — онсыз хабарландыруды басқару мүмкін емес:',pCopy:'📋 Сілтемені көшіру',pCopied:'Сілтеме көшірілді',
@@ -144,7 +144,7 @@ function form(sec,row,onSubmit){
   <div class="f"><label for="lt">${t('pTitleF')}</label><input id="lt" maxlength="120" value="${esc(row.title||'')}" placeholder="${t('pTitlePh')}"></div>
   <div class="f"><label for="lb">${t('pBody')}</label><textarea id="lb" maxlength="3000">${esc(row.body||'')}</textarea></div>
   <div class="f" id="pricef"><label>${t('pPriceMode')}</label><div class="chips wrap" id="pm">
-   <label class="radio"><input type="radio" name="pm" value="fixed"> ₸</label><label class="radio"><input type="radio" name="pm" value="negotiable"> ${t('pNeg')}</label>
+   <label class="radio"><input type="radio" name="pm" value="fixed"> ${t('pFixedR')}</label><label class="radio"><input type="radio" name="pm" value="negotiable"> ${t('pNeg')}</label>
    ${sec==='market'?'':`<label class="radio"><input type="radio" name="pm" value="none"> ${t('pNone')}</label>`}</div>
    <input id="lp" inputmode="numeric" maxlength="14" placeholder="${t('pPriceFixed')}" value="${row.price!=null?esc(row.price):''}" style="margin-top:8px"></div>
   <div class="f"><label for="lpl">${sec==='lost'?t('pPlaceLost'):t('pPlace')}</label><input id="lpl" maxlength="120" value="${esc(row.place||'')}"></div>

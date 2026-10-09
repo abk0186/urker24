@@ -328,3 +328,8 @@ form .chk{min-height:44px;align-items:center}
 @media (prefers-reduced-motion:reduce){.pwa-bar span{animation:none}}
 .ann-h h2{flex:1 1 0}
 @media (max-width:380px){.langbar{gap:6px}.langbar .lb-l{font-size:13px}.langbar button{font-size:15px;padding-left:2px;padding-right:2px}}
+/* поле «Фото»: кнопка выбора файлов в стиле сайта (текст кнопки — на языке телефона) */
+.f input[type=file]{width:100%;max-width:100%;font:inherit;font-size:14px;color:var(--muted);padding:6px 0}
+.f input[type=file]::file-selector-button{min-height:44px;margin-right:10px;padding:0 16px;border:2px solid var(--accent);border-radius:12px;background:#fff;color:var(--accent);font:inherit;font-weight:700;cursor:pointer}
+.f input[type=file]{color:transparent}            /* «файл не выбран» не показываем — выбранные фото видны миниатюрами */
+.thumbs img,.thumbs .th{width:96px;height:96px}
