@@ -1,17 +1,20 @@
 (function(){
 'use strict';
 const SB=window.SBCreate({auth:true}), D=window.URKER_DATA;
+// Выключатели разделов (config.js → features): вкладки и поля появляются после запуска 06 / 08 SQL
+const FEAT=(window.URKER_CONFIG||{}).features||{}, F_LIST=!!FEAT.listings, F_CLAIM=!!FEAT.claims;
 const $=(s,r=document)=>r.querySelector(s), adm=$('#adm');
-let lang=localStorage.getItem('urker_lang')==='kz'?'kz':'ru';
+const detectLang=()=>{const s=localStorage.getItem('urker_lang');if(s==='kz'||s==='ru')return s;try{const l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);return l.some(x=>/^(kk|kz)\b/i.test(String(x)))?'kz':'ru'}catch(e){return 'ru'}};
+let lang=detectLang();
 const T={ru:{title:'Уркер · Админка',login:'Вход для администратора',email:'Email',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
  magicSent:'Ссылка для входа отправлена на почту.',badLogin:'Неверный email или пароль',noBackend:'База не подключена: заполните config.js (адрес и anon-ключ Supabase).',
  noAccess:'У этого аккаунта нет прав администратора.',logout:'Выйти',
- tabs:{stats:'📊 Статистика',pending:'Заявки',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
+ tabs:{stats:'📊 Статистика',pending:'Заявки',listings:'🗂 Объявления жителей',claims:'✔ Владельцы',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
  approve:'Одобрить',reject:'Отклонить',save:'Сохранить',del:'Удалить',hide:'Скрыть',show:'Показать',edit:'Изменить',cancel:'Отмена',add:'+ Добавить',
  toAnn:'→ Сделать объявлением',done:'Обработано',saved:'Сохранено',deleted:'Удалено',confirmDel:'Удалить безвозвратно?',empty:'Пусто',
  needSub:'Выберите подкатегорию перед одобрением',search:'Поиск по имени, номеру, описанию…',
  f:{name:'Имя / название',section_id:'Раздел',sub_id:'Подкатегория',note:'Описание на карточке',address:'Адрес',phone:'Телефон (8XXXXXXXXXX)',wa:'WhatsApp (7XXXXXXXXXX, пусто = из телефона)',
-  recommended:'⭐ Рекомендован чатом',is_new:'🆕 Новый',vip:'📌 VIP / закреплён',vip_until:'VIP до (пусто = бессрочно)',sort_order:'Порядок',status:'Статус',admin_note:'Заметка админа',
+  recommended:'⭐ Рекомендован чатом',is_new:'🆕 Новый',vip:'📌 VIP / закреплён',vip_until:'VIP до (пусто = бессрочно)',sort_order:'Порядок',status:'Статус',admin_note:'Заметка админа',verified:'✔ Проверено (платный профиль в будущем)',business_name:'Название бизнеса',owner_name:'Имя владельца',instagram:'Instagram (handle без @)',gis_url:'Ссылка 2ГИС',hours:'Часы работы',descr_ru:'Описание RU (≤300)',descr_kz:'Описание KZ (≤300)',
   type:'Тип',title_ru:'Заголовок (RU)',title_kz:'Заголовок (KZ)',area_ru:'Улицы / район (RU)',area_kz:'Улицы / район (KZ)',source_ru:'Источник (RU)',source_kz:'Источник (KZ)',
   start_at:'Начало',end_at:'Окончание',urgent:'❗ Срочно',is_demo:'Пример (демо)',text_ru:'Текст (RU)',text_kz:'Текст (KZ)',emoji:'Эмодзи',link_url:'Ссылка (https://…)',
   active:'Включено',starts_at:'Показывать с',ends_at:'Показывать до',category:'Рубрика',lead_ru:'Кратко / анонс (RU)',lead_kz:'Кратко / анонс (KZ)',
@@ -30,12 +33,12 @@ const T={ru:{title:'Уркер · Админка',login:'Вход для адм�
  kz:{title:'Үркер · Әкімші беті',login:'Әкімшінің кіруі',email:'Email',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
  magicSent:'Кіру сілтемесі поштаға жіберілді.',badLogin:'Email немесе құпиясөз қате',noBackend:'База қосылмаған: config.js файлын толтырыңыз (Supabase мекенжайы мен anon-кілті).',
  noAccess:'Бұл аккаунтта әкімші құқығы жоқ.',logout:'Шығу',
- tabs:{stats:'📊 Статистика',pending:'Өтінімдер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
+ tabs:{stats:'📊 Статистика',pending:'Өтінімдер',listings:'🗂 Тұрғындар хабарландырулары',claims:'✔ Иелер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
  approve:'Мақұлдау',reject:'Қабылдамау',save:'Сақтау',del:'Жою',hide:'Жасыру',show:'Көрсету',edit:'Өзгерту',cancel:'Болдырмау',add:'+ Қосу',
  toAnn:'→ Хабарландыру жасау',done:'Өңделді',saved:'Сақталды',deleted:'Жойылды',confirmDel:'Біржола жою керек пе?',empty:'Бос',
  needSub:'Мақұлдамас бұрын ішкі бөлімді таңдаңыз',search:'Аты, нөмірі, сипаттамасы бойынша іздеу…',
  f:{name:'Аты / атауы',section_id:'Бөлім',sub_id:'Ішкі бөлім',note:'Карточкадағы сипаттама',address:'Мекенжай',phone:'Телефон (8XXXXXXXXXX)',wa:'WhatsApp (7XXXXXXXXXX, бос болса — телефоннан)',
-  recommended:'⭐ Чат ұсынған',is_new:'🆕 Жаңа',vip:'📌 VIP / бекітілген',vip_until:'VIP мерзімі (бос — шектеусіз)',sort_order:'Реті',status:'Мәртебесі',admin_note:'Әкімші жазбасы',
+  recommended:'⭐ Чат ұсынған',is_new:'🆕 Жаңа',vip:'📌 VIP / бекітілген',vip_until:'VIP мерзімі (бос — шектеусіз)',sort_order:'Реті',status:'Мәртебесі',admin_note:'Әкімші жазбасы',verified:'✔ Тексерілген (болашақта ақылы профиль)',business_name:'Бизнес атауы',owner_name:'Иесінің аты',instagram:'Instagram (@-сыз)',gis_url:'2ГИС сілтемесі',hours:'Жұмыс уақыты',descr_ru:'Сипаттама RU (≤300)',descr_kz:'Сипаттама KZ (≤300)',
   type:'Түрі',title_ru:'Тақырыбы (RU)',title_kz:'Тақырыбы (KZ)',area_ru:'Көшелер / аудан (RU)',area_kz:'Көшелер / аудан (KZ)',source_ru:'Дереккөз (RU)',source_kz:'Дереккөз (KZ)',
   start_at:'Басталуы',end_at:'Аяқталуы',urgent:'❗ Шұғыл',is_demo:'Мысал (демо)',text_ru:'Мәтін (RU)',text_kz:'Мәтін (KZ)',emoji:'Эмодзи',link_url:'Сілтеме (https://…)',
   active:'Қосулы',starts_at:'Көрсету басталуы',ends_at:'Көрсету аяқталуы',category:'Айдар',lead_ru:'Қысқаша / анонс (RU)',lead_kz:'Қысқаша / анонс (KZ)',
@@ -77,7 +80,7 @@ function field(name,val,kind,opts){
 function collect(form,spec){const o={};for(const [n,k] of spec){const el=form.elements[n];if(!el)continue;
  if(k==='bool')o[n]=el.checked;else if(k==='dt')o[n]=fromLocalInput(el.value);else if(k==='long')o[n]=el.value.replace(/\r/g,'').trim();else if(k==='num')o[n]=el.value===''?0:+el.value;else o[n]=el.value.trim()}return o}
 const SPEC_SPEC=()=>[['name'],['phone'],['section_id','select',D.sections.map(s=>[s.id,s.emoji+' '+secT(s)])],['sub_id','select'],['note','text'],['address',null,{full:true}],['wa'],
- ['sort_order','num'],['recommended','bool'],['is_new','bool'],['vip','bool'],['vip_until','dt'],['status','select',['pending','approved','rejected','hidden'].map(s=>[s,t('st')[s]])],['admin_note','text']];
+ ['sort_order','num'],['recommended','bool'],['is_new','bool'],['vip','bool'],['vip_until','dt'],...(F_CLAIM?[['verified','bool'],['business_name'],['owner_name'],['instagram'],['gis_url',null,{full:true}],['hours'],['descr_ru','text'],['descr_kz','text']]:[]),['status','select',['pending','approved','rejected','hidden'].map(s=>[s,t('st')[s]])],['admin_note','text']];
 const ANN_SPEC=()=>[['type','select',Object.keys(T.ru.types).map(k=>[k,t('types')[k]])],['status','select',['draft','published','archived'].map(s=>[s,t('st')[s]])],
  ['title_ru',null,{full:true}],['title_kz',null,{full:true}],['area_ru'],['area_kz'],['source_ru'],['source_kz'],['start_at','dt'],['end_at','dt'],['urgent','bool'],['is_demo','bool']];
 const AD_SPEC=()=>[['emoji'],['active','bool'],['title_ru'],['title_kz'],['text_ru','text'],['text_kz','text'],['link_url',null,{full:true}],['wa'],['starts_at','dt'],['ends_at','dt'],['sort_order','num']];
@@ -92,17 +95,120 @@ function editor(spec,row,extraBtns){
 async function counts(){
  const [p,r,m,n]=await Promise.all([SB.get('specialists?select=id&status=eq.pending'),SB.get('reviews?select=id&status=eq.pending'),SB.get('reports?select=id&status=eq.pending'),
   SB.get('news_suggestions?select=id&status=eq.pending').catch(()=>[])]);
- return{pending:p.length,reviews:r.length,reports:m.length,news:n.length};
+ const l=F_LIST?await SB.get('listings?select=id&status=eq.pending').catch(()=>[]):[];const cl=F_CLAIM?await SB.get('spec_claims?select=id&status=eq.pending').catch(()=>[]):[];
+ return{pending:p.length,reviews:r.length,reports:m.length,news:n.length,listings:l.length,claims:cl.length};
 }
 async function specNames(){if(!CACHE.names){const rows=await SB.get('specialists?select=id,name,phone,sub_id');CACHE.names=Object.fromEntries(rows.map(r=>[r.id,r]))}return CACHE.names}
 
 // ---------- views ----------
+// ---------- объявления жителей ----------
+const LS_T={ru:{tab:'🗂 Объявления жителей',pm:{negotiable:'договорная',free:'даром',none:''},settings:'Настройки',premod:'Премодерация (новые объявления ждут проверки)',ttl:'Срок показа, дней',ttlLost:'Потеряшки, дней',paid:'Платные «поднять/выделить» (пока выключено, оплаты нет)',
+  st:{pending:'на проверке',approved:'опубликовано',closed:'закрыто',rejected:'отклонено',deleted:'удалено автором',expired:'истёк срок'},sec:{market:'🛍 Барахолка',ads:'📋 Объявления',lost:'🐾 Потеряшки'},
+  all:'Все',approve:'Одобрить',reject:'Отклонить',hl:'⭐ Выделить',unhl:'⭐ Снять выделение',bump:'⬆ Поднять',extend:'+30 дней',purge:'🧹 Удалить фото снятых объявлений',purged:n=>`Удалено фото: ${n}`,
+  views:'просм.',until:'до',bumped:'поднято',noPhotos:'без фото',f:{title:'Заголовок',body:'Описание',kind:'Тип',category:'Категория',price:'Цена, ₸',price_mode:'Цена: режим',place:'Где',event_date:'Когда',phone:'Телефон (7XXXXXXXXXX)',has_wa:'Есть WhatsApp',admin_note:'Заметка админа',verified:'✔ Проверено (платный профиль в будущем)',business_name:'Название бизнеса',owner_name:'Имя владельца',instagram:'Instagram (handle без @)',gis_url:'Ссылка 2ГИС',hours:'Часы работы',descr_ru:'Описание RU (≤300)',descr_kz:'Описание KZ (≤300)',expires_at:'Показывать до',status:'Статус'}},
+ kz:{tab:'🗂 Тұрғындар хабарландырулары',pm:{negotiable:'келісім бойынша',free:'тегін',none:''},settings:'Баптаулар',premod:'Алдын ала модерация (жаңа хабарландырулар тексеруді күтеді)',ttl:'Көрсету мерзімі, күн',ttlLost:'Жоғалғандар, күн',paid:'Ақылы «көтеру/ерекшелеу» (әзірге өшірулі, төлем жоқ)',
+  st:{pending:'тексеруде',approved:'жарияланды',closed:'жабылды',rejected:'қабылданбады',deleted:'автор жойды',expired:'мерзімі өтті'},sec:{market:'🛍 Барахолка',ads:'📋 Хабарландырулар',lost:'🐾 Жоғалғандар'},
+  all:'Барлығы',approve:'Мақұлдау',reject:'Қабылдамау',hl:'⭐ Ерекшелеу',unhl:'⭐ Ерекшелеуді алу',bump:'⬆ Көтеру',extend:'+30 күн',purge:'🧹 Алынған хабарландырулардың фотоларын жою',purged:n=>`Жойылған фото: ${n}`,
+  views:'қаралым',until:'дейін',bumped:'көтерілген',noPhotos:'фотосыз',f:{title:'Тақырыбы',body:'Сипаттамасы',kind:'Түрі',category:'Санаты',price:'Бағасы, ₸',price_mode:'Баға режимі',place:'Қайда',event_date:'Қашан',phone:'Телефон (7XXXXXXXXXX)',has_wa:'WhatsApp бар',admin_note:'Әкімші жазбасы',verified:'✔ Тексерілген (болашақта ақылы профиль)',business_name:'Бизнес атауы',owner_name:'Иесінің аты',instagram:'Instagram (@-сыз)',gis_url:'2ГИС сілтемесі',hours:'Жұмыс уақыты',descr_ru:'Сипаттама RU (≤300)',descr_kz:'Сипаттама KZ (≤300)',expires_at:'Көрсету мерзімі',status:'Мәртебесі'}}};
+const LT=()=>LS_T[lang];
+const L_LBL={"ru":{"k":{"sell":"Продам","buy":"Куплю","free":"Отдам даром","rent_offer":"Сдам","rent_seek":"Сниму","job_offer":"Вакансия","job_seek":"Ищу работу","gig":"Подработка","service":"Услуги частных лиц","ride":"Попутчики","other":"Разное","lost":"Потерял","found":"Нашёл"},"c":{"market":{"kids":"Детское","clothes":"Одежда","tech":"Техника","furniture":"Мебель","home":"Для дома и дачи","auto":"Авто и запчасти","animals":"Животные и скот","build":"Стройматериалы","other":"Прочее"},"ads":{"house":"Дом","flat":"Квартира","room":"Комната","garage":"Гараж","equipment":"Техника","other":"Другое"},"lost":{"animals":"Животные","docs":"Документы","keys":"Ключи","things":"Вещи","other":"Другое"}}},"kz":{"k":{"sell":"Сатамын","buy":"Сатып аламын","free":"Тегін беремін","rent_offer":"Жалға беремін","rent_seek":"Жалға аламын","job_offer":"Бос жұмыс орны","job_seek":"Жұмыс іздеймін","gig":"Қосымша жұмыс","service":"Жеке қызметтер","ride":"Жолсеріктер","other":"Әртүрлі","lost":"Жоғалттым","found":"Таптым"},"c":{"market":{"kids":"Балаларға","clothes":"Киім","tech":"Техника","furniture":"Жиһаз","home":"Үй мен саяжайға","auto":"Көлік және бөлшектер","animals":"Жануарлар мен мал","build":"Құрылыс материалдары","other":"Басқа"},"ads":{"house":"Үй","flat":"Пәтер","room":"Бөлме","garage":"Гараж","equipment":"Техника","other":"Басқа"},"lost":{"animals":"Жануарлар","docs":"Құжаттар","keys":"Кілттер","things":"Заттар","other":"Басқа"}}}};
+const lKindT=r=>(L_LBL[lang].k||{})[r.kind]||r.kind,lCatT=r=>((L_LBL[lang].c||{})[r.section]||{})[r.category]||r.category;
+const L_KINDS={market:['sell','buy','free'],ads:['rent_offer','rent_seek','job_offer','job_seek','gig','service','ride','other'],lost:['lost','found']};
+const L_CATS={market:['kids','clothes','tech','furniture','home','auto','animals','build','other'],ads:['house','flat','room','garage','equipment','other'],lost:['animals','docs','keys','things','other']};
+let LF={status:'pending',section:''};
+const lPhoto=p=>p&&p.path?SB.publicUrl('listings',p.path):'';
+async function vListings(box){
+ const L=LT();
+ const [set]=await SB.get('listing_settings?select=*');
+ let q='listings?select=*&order=created_at.desc&limit=300';
+ if(LF.status==='expired')q+='&status=eq.approved&expires_at=lt.'+new Date().toISOString();else if(LF.status)q+='&status=eq.'+LF.status;
+ if(LF.section)q+='&section=eq.'+LF.section;
+ const rows=await SB.get(q);const now=Date.now();
+ box.innerHTML=`<details class="row"><summary><b>⚙️ ${L.settings}</b> — ${set.premoderation?'✅':'⚠️'} ${esc(L.premod)}</summary><form class="ed" id="lset">
+   <div class="full"><label class="ck"><input type="checkbox" name="premoderation" ${set.premoderation?'checked':''}> ${esc(L.premod)}</label></div>
+   <div><label>${L.ttl}</label><input type="number" name="ttl_days" min="1" max="365" value="${set.ttl_days}"></div><div><label>${L.ttlLost}</label><input type="number" name="ttl_lost_days" min="1" max="365" value="${set.ttl_lost_days}"></div>
+   <div class="full"><label class="ck"><input type="checkbox" name="paid_features" disabled ${set.paid_features?'checked':''}> ${esc(L.paid)}</label></div>
+   <div class="full acts"><button class="b pri">${t('save')}</button> <button type="button" class="b" id="purge">${L.purge}</button></div></form></details>
+  <div class="tabs">${['pending','approved','closed','expired','rejected','deleted',''].map(s=>`<button data-ls="${s}" class="${LF.status===s?'on':''}">${s?L.st[s]:L.all}</button>`).join('')}</div>
+  <div class="tabs">${['','market','ads','lost'].map(s=>`<button data-lsec="${s}" class="${LF.section===s?'on':''}">${s?L.sec[s]:L.all}</button>`).join('')}</div>`
+  +(rows.length?rows.map(r=>{const exp=new Date(r.expires_at).getTime()<now;const ph=(r.photos||[]);return `<div class="row lrow" data-id="${r.id}">
+   ${ph[0]?`<img class="lthumb" src="${esc(lPhoto(ph[0]))}" alt="">`:`<div class="lthumb ph">${L.sec[r.section].split(' ')[0]}</div>`}
+   <div class="lmain"><h3>${r.highlighted?'⭐ ':''}${esc(r.title)}</h3>
+   <div class="meta">${pill(r.status)}${exp&&r.status==='approved'?`<span class="pill rejected">${L.st.expired}</span>`:''} ${esc(L.sec[r.section])} · ${esc(lKindT(r))} · ${esc(lCatT(r))} · ${r.price_mode==='fixed'?esc(r.price)+' ₸':esc(L.pm[r.price_mode]||'')} · 📞 ${esc(r.phone)}${r.has_wa?' (WA)':''}
+    · ${fmtDT(r.created_at)} · ${L.until} ${fmtDT(r.expires_at)} · 👁 ${r.views} · 🖼 ${ph.length||L.noPhotos}${r.bumped_at?` · ⬆ ${L.bumped} ${fmtDT(r.bumped_at)}`:''} · ${t('device')}: ${esc(String(r.device_id||'').slice(0,8))}</div>
+   ${r.body?`<p class="pre">${esc(r.body)}</p>`:''}${r.place?`<p>📍 ${esc(r.place)}${r.event_date?' · 🗓 '+esc(r.event_date):''}</p>`:''}
+   ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
+   <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
+    ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`:''}${['rejected','deleted','closed'].includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
+    <button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>
+    <button class="b no" data-a="del">${t('del')}</button></div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
+ box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LF.status=b.dataset.ls;vListings(box)});
+ box.querySelectorAll('[data-lsec]').forEach(b=>b.onclick=()=>{LF.section=b.dataset.lsec;vListings(box)});
+ $('#lset').onsubmit=async ev=>{ev.preventDefault();const f=ev.target;try{await SB.update('listing_settings','id=eq.1',{premoderation:f.elements.premoderation.checked,ttl_days:+f.elements.ttl_days.value||30,ttl_lost_days:+f.elements.ttl_lost_days.value||60});toast(t('saved'));render()}catch(e){toast(e.message)}};
+ $('#purge').onclick=async()=>{try{const old=await SB.get('listings?select=id,photos,status,expires_at&or=(status.in.(deleted,rejected),expires_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+',closed_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+')');
+   let n=0;for(const r of old){if(!(r.photos||[]).length)continue;for(const p of r.photos){if(p.path){await SB.removeFile('listings',p.path).catch(()=>{});n++}}await SB.update('listings','id=eq.'+r.id,{photos:[]})}toast(LT().purged(n));vListings(box)}catch(e){toast(e.message)}};
+ box.querySelectorAll('.lrow').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
+  try{if(a==='approved'||a==='rejected')await SB.update('listings','id=eq.'+r.id,{status:a});
+   if(a==='hl')await SB.update('listings','id=eq.'+r.id,{highlighted:!r.highlighted});
+   if(a==='bump')await SB.update('listings','id=eq.'+r.id,{bumped_at:new Date().toISOString()});
+   if(a==='extend')await SB.update('listings','id=eq.'+r.id,{expires_at:new Date(Math.max(Date.now(),new Date(r.expires_at).getTime())+30*864e5).toISOString()});
+   if(a==='del'){if(!confirm(t('confirmDel')))return;for(const p of (r.photos||[]))if(p.path)await SB.removeFile('listings',p.path).catch(()=>{});await SB.remove('listings','id=eq.'+r.id);toast(t('deleted'));return vListings(box)}
+   if(a==='edit'){const slot=el.querySelector('.slot');const F=LT().f;
+    const sel=(n,opts,v)=>`<div><label>${F[n]}</label><select name="${n}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
+    slot.innerHTML=`<form class="ed"><div class="full"><label>${F.title}</label><input name="title" value="${esc(r.title)}"></div><div class="full"><label>${F.body}</label><textarea name="body" rows="4">${esc(r.body)}</textarea></div>
+     ${sel('kind',L_KINDS[r.section],r.kind)}${sel('category',L_CATS[r.section],r.category)}${sel('price_mode',['fixed','negotiable','free','none'],r.price_mode)}<div><label>${F.price}</label><input name="price" type="number" value="${r.price??''}"></div>
+     <div><label>${F.place}</label><input name="place" value="${esc(r.place)}"></div><div><label>${F.phone}</label><input name="phone" value="${esc(r.phone)}"></div>
+     <div><label class="ck"><input type="checkbox" name="has_wa" ${r.has_wa?'checked':''}> ${F.has_wa}</label></div><div class="full"><label>${F.admin_note}</label><input name="admin_note" value="${esc(r.admin_note)}"></div>
+     <div class="full acts"><button class="b pri">${t('save')}</button><button type="button" class="b" data-x>${t('cancel')}</button></div></form>`;
+    const f=slot.querySelector('form');f.querySelector('[data-x]').onclick=()=>{slot.innerHTML=''};
+    f.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(['title','body','kind','category','price_mode','place','phone','admin_note'].map(n=>[n,f.elements[n].value.trim()]));
+     v.price=v.price_mode==='fixed'&&f.elements.price.value!==''?+f.elements.price.value:null;v.has_wa=f.elements.has_wa.checked;
+     try{await SB.update('listings','id=eq.'+r.id,v);toast(t('saved'));vListings(box)}catch(err){toast(err.message)}};return}
+   toast(t('saved'));render()}catch(e){toast(e.message)}}});
+}
+// ---------- заявки владельцев («Это ваш бизнес?») ----------
+const CL_T={ru:{tab:'✔ Владельцы',settings:'Платные функции профиля (на будущее)',photosFree:'Фото работ бесплатно (сейчас — да)',paid:'Платные профили «✔ Проверено» (оплаты пока нет)',
+  match:'✅ Телефон совпадает с карточкой — вероятно владелец',nomatch:'⚠️ Телефон не совпадает — проверьте вручную (позвоните по номеру карточки)',apply:'✔ Применить к карточке',reject:'Отклонить',del:'Удалить',
+  verify:'✔ Отметить «Проверено»',unverify:'Снять «Проверено»',applied:'Данные перенесены в карточку',now:'Сейчас на карточке',claim:'Заявка',st:{pending:'на проверке',approved:'применено',rejected:'отклонено'},
+  f:{owner_name:'Имя владельца',business_name:'Название',instagram:'Instagram',gis_url:'2ГИС',hours:'Часы',descr_ru:'Описание RU',descr_kz:'Описание KZ',phone:'Телефон заявителя'}},
+ kz:{tab:'✔ Иелер',settings:'Профильдің ақылы функциялары (болашақта)',photosFree:'Жұмыс фотолары тегін (қазір — иә)',paid:'«✔ Тексерілген» ақылы профильдер (әзірге төлем жоқ)',
+  match:'✅ Телефон карточкамен сәйкес — иесі болуы ықтимал',nomatch:'⚠️ Телефон сәйкес емес — қолмен тексеріңіз (карточкадағы нөмірге қоңырау шалыңыз)',apply:'✔ Карточкаға қолдану',reject:'Қабылдамау',del:'Жою',
+  verify:'✔ «Тексерілген» деп белгілеу',unverify:'«Тексерілген» белгісін алу',applied:'Деректер карточкаға көшірілді',now:'Қазір карточкада',claim:'Өтінім',st:{pending:'тексеруде',approved:'қолданылды',rejected:'қабылданбады'},
+  f:{owner_name:'Иесінің аты',business_name:'Атауы',instagram:'Instagram',gis_url:'2ГИС',hours:'Уақыты',descr_ru:'Сипаттама RU',descr_kz:'Сипаттама KZ',phone:'Өтініш берушінің телефоны'}}};
+let CLF='pending';
+async function vClaims(box){
+ const L=CL_T[lang];const [set]=await SB.get('claim_settings?select=*');
+ const rows=await SB.get('spec_claims?select=*&order=created_at.desc&limit=200'+(CLF?'&status=eq.'+CLF:''));
+ const ids=[...new Set(rows.map(r=>r.specialist_id))];const sp=ids.length?await SB.get('specialists?select=id,name,phone,wa,sub_id,owner_name,business_name,instagram,gis_url,hours,descr_ru,descr_kz,photos,verified&id=in.('+ids.join(',')+')'):[];
+ const S=Object.fromEntries(sp.map(x=>[x.id,x]));const F=['owner_name','business_name','instagram','gis_url','hours','descr_ru','descr_kz'];
+ box.innerHTML=`<details class="row"><summary><b>⚙️ ${L.settings}</b></summary><form class="ed" id="clset">
+   <div class="full"><label class="ck"><input type="checkbox" name="photos_free" ${set.photos_free?'checked':''}> ${esc(L.photosFree)}</label></div>
+   <div class="full"><label class="ck"><input type="checkbox" name="paid_profiles" disabled ${set.paid_profiles?'checked':''}> ${esc(L.paid)}</label></div>
+   <div class="full acts"><button class="b pri">${t('save')}</button></div></form></details>
+  <div class="tabs">${['pending','approved','rejected',''].map(s=>`<button data-cls="${s}" class="${CLF===s?'on':''}">${s?L.st[s]:LT().all}</button>`).join('')}</div>`
+ +(rows.length?rows.map(r=>{const s=S[r.specialist_id]||{};return `<div class="row lrow1" data-id="${r.id}">
+   <h3>${s.verified?'<span class="pill approved">✔</span> ':''}${esc(s.name||'—')} · ${esc(s.phone||'')} · ${esc(subT(s.sub_id))}</h3>
+   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)} · ${t('device')}: ${esc(String(r.device_id||'').slice(0,8))}</div>
+   <p class="${r.phone_match?'okline':'warnline'}">${r.phone_match?L.match:L.nomatch} · 📞 ${esc(r.phone)}</p>
+   <table class="cmp"><tr><th></th><th>${L.claim}</th><th>${L.now}</th></tr>${F.filter(k=>r[k]).map(k=>`<tr><td>${L.f[k]}</td><td><b>${esc(r[k])}</b></td><td>${esc(s[k]||'—')}</td></tr>`).join('')}</table>
+   ${(r.photos||[]).length?`<div class="pgrid sm">${r.photos.map(p=>`<div class="ph"><img src="${esc(SB.publicUrl('profiles',p.path))}" alt=""></div>`).join('')}</div>`:''}
+   <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="apply">${L.apply}</button><button class="b no" data-a="reject">${L.reject}</button>`:''}
+    <button class="b sec" data-a="verify">${s.verified?L.unverify:L.verify}</button><button class="b no" data-a="del">${L.del}</button></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
+ box.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{CLF=b.dataset.cls;vClaims(box)});
+ $('#clset').onsubmit=async ev=>{ev.preventDefault();try{await SB.update('claim_settings','id=eq.1',{photos_free:ev.target.elements.photos_free.checked});toast(t('saved'))}catch(e){toast(e.message)}};
+ box.querySelectorAll('.lrow1').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id),s=S[r.specialist_id]||{};el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
+  try{if(a==='apply'){await SB.rpc('admin_apply_claim',{p_id:r.id});toast(L.applied)}
+   if(a==='reject')await SB.update('spec_claims','id=eq.'+r.id,{status:'rejected',moderated_at:new Date().toISOString()});
+   if(a==='verify')await SB.update('specialists','id=eq.'+r.specialist_id,{verified:!s.verified});
+   if(a==='del'){if(!confirm(t('confirmDel')))return;const used=JSON.stringify(s.photos||[]);for(const p of (r.photos||[]))if(p.path&&!used.includes(p.path))await SB.removeFile('profiles',p.path).catch(()=>{});await SB.remove('spec_claims','id=eq.'+r.id)}
+   if(a!=='apply')toast(t('saved'));render()}catch(e){toast(e.message)}}});
+}
 async function render(){
  const c=await counts().catch(()=>({}));
- adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}<button class="b" id="lo">${t('logout')}</button></div><div id="list">…</div>`;
+ adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}<button class="b" id="lo">${t('logout')}</button></div><div id="list">…</div>`;
  adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';render()});
  $('#lo').onclick=async()=>{await SB.signOut();boot()};
- try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,ann:vAnn,ads:vAds,news:vNews})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
+ try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
 }
 const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
 function bindSpecEditor(box,row,onDone){
@@ -279,6 +385,8 @@ async function vStats(box){
    <div class="row"><h3>↪️ ${S.referrers}</h3>${list(s.referrers,x=>`<li><span>${esc(x.referrer_domain)}</span><b>${x.cnt}</b></li>`)}</div>
    <div class="row"><h3>📄 ${S.pages}</h3>${list(s.top_pages,x=>`<li><span>${esc(x.path)}</span><b>${x.cnt}</b></li>`)}</div>
   </div>`;
+ SB.rpc('admin_install_stats',{p_days:30}).then(ins=>{const L=lang==='kz'?{t:'📲 Телефон экранына қосу (30 күн)',android:'Android: орнатылды',installed:'Браузер растады',ios:'iPhone: нұсқаулық ашылды',inapp:'WhatsApp/Instagram ішінен',guide:'Android: нұсқаулық'}:{t:'📲 Добавили на экран телефона (30 дней)',android:'Android: установили',installed:'Подтверждено браузером',ios:'iPhone: открыли инструкцию',inapp:'Из WhatsApp/Instagram (подсказка)',guide:'Android: инструкция'};
+  box.insertAdjacentHTML('beforeend',`<div class="row"><h3>${L.t}</h3>${Object.keys(ins||{}).length?`<ol class="tl">${Object.entries(ins).map(([k,v])=>`<li><span>${esc(L[k]||k)}</span><b>${v}</b></li>`).join('')}</ol>`:`<p class="meta">${S.none}</p>`}</div>`)}).catch(()=>{});
 }
 
 // ---------- login / boot ----------

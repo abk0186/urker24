@@ -58,3 +58,16 @@ p.pre{white-space:pre-wrap}
 .ed input,.ed select{min-height:44px}
 .ed .ck{min-height:44px}
 body.admin{padding-bottom:30px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+/* объявления жителей */
+.lrow{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start}
+.lrow .slot{grid-column:1/-1}
+.lthumb{width:72px;height:72px;border-radius:12px;object-fit:cover;background:#f6ece2;display:flex;align-items:center;justify-content:center;font-size:30px}
+.lmain h3{margin:0 0 4px;overflow-wrap:anywhere}.lmain .meta{overflow-wrap:anywhere}
+.ck{display:flex;gap:8px;align-items:center;min-height:44px}.ck input{width:22px;height:22px}
+details.row summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px}
+.pre{white-space:pre-wrap}
+.okline{color:#11804a;font-weight:600}.warnline{color:#a15c00;font-weight:600}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}table.cmp td,table.cmp th{border-bottom:1px solid #f0e2d3;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+table.cmp th{color:#7a6a5c;font-weight:600}
+body.admin h1,body.admin h2,.adm h1,.adm h2{overflow-wrap:anywhere;hyphens:auto}
+@media (max-width:380px){body.admin .langbar{gap:6px}body.admin .langbar .lb-l{font-size:13px}body.admin .langbar button{font-size:15px;padding-left:2px;padding-right:2px}}

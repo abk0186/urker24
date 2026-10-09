@@ -1,19 +1,24 @@
 (function(){
 'use strict';
+// «Это ваш бизнес?» — включается в config.js → features.claims после 08_claims.sql
+const CLAIMS_ON=!!(((window.URKER_CONFIG||{}).features||{}).claims);
+// Реклама (баннер на главной и место «Закрепиться наверху»): config.js → features.ads. Настоящие VIP из админки показываются всегда.
+const ADS_ON=!!(((window.URKER_CONFIG||{}).features||{}).ads);
 const D=window.URKER_DATA, SYN=window.URKER_SYNONYMS||{};
 const $=(s,r=document)=>r.querySelector(s);
 const app=$('#app');
-let lang=localStorage.getItem('urker_lang');if(lang!=='kz')lang='ru';
+const detectLang=()=>{const s=localStorage.getItem('urker_lang');if(s==='kz'||s==='ru')return s;try{const l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);return l.some(x=>/^(kk|kz)\b/i.test(String(x)))?'kz':'ru'}catch(e){return 'ru'}};
+let lang=detectLang();
 
 const T={
- ru:{draft:'Черновик-прототип · не для публикации',brand:'Уркер',tagline:'Мастера и услуги рядом',navHome:'Главная',navSearch:'Поиск',navAdd:'Добавить',navAnn:'Объявления',annTitle:'Важные объявления',annAll:'Все объявления →',annEmpty:'Сейчас важных объявлений нет',annEmptyS:'Если узнаете об отключении или ремонте — сообщите, мы проверим и опубликуем.',annActive:'актуально',annDone:'завершено',annUrgent:'срочно',annExample:'ПРИМЕР · демо',annSource:'Источник',annShare:'Поделиться в WhatsApp',annReport:'📣 Сообщить о важном',annTypes:{power:'Свет',water:'Вода',gas:'Газ',repair:'Ремонт',other:'Другое'},annFound:'Объявления',repTitle:'Сообщить о важном',repNote:'Демо-форма: пока ничего не отправляется. В рабочей версии сообщение пойдёт на модерацию и после проверки появится в «Важных объявлениях».',rType:'Что случилось?',rTitle:'Коротко, что происходит',rTitlePh:'Например: нет света с утра',rArea:'Улицы / дома',rWhen:'Когда (дата и время)',rSrc:'Откуда информация?',rSrcPh:'Например: сообщение Астана-РЭК, видел сам',rContact:'Ваш телефон (по желанию, для уточнения)',rSend:'Отправить на модерацию',rSent:'Спасибо! Это демо: в рабочей версии сообщение уйдёт на модерацию.',
-  searchPh:'Например: укол, газель',searchTitle:'Найти мастера или услугу',cats:'Все разделы',
-  promoT:'Здесь может быть ваша реклама',promoS:'Баннер для кафе, магазинов и акций Уркера',ad:'Реклама · демо',
+ ru:{draft:'Черновик-прототип · не для публикации',brand:'Уркер',tagline:'Мастера и услуги рядом',navHome:'Главная',navSearch:'Поиск',navAdd:'Добавить',navAnn:'Важно',annTitle:'Важно: отключения, ремонт, события',annAll:'Все →',annEmpty:'Сейчас важных объявлений нет',annEmptyS:'Если узнаете об отключении или ремонте — сообщите, мы проверим и опубликуем.',annActive:'актуально',annDone:'завершено',annUrgent:'срочно',annExample:'ПРИМЕР · демо',annSource:'Источник',annShare:'Поделиться в WhatsApp',annReport:'📣 Сообщить о важном',annTypes:{power:'Свет',water:'Вода',gas:'Газ',repair:'Ремонт',other:'Другое'},annFound:'Важно',repTitle:'Сообщить о важном',repNote:'Демо-форма: пока ничего не отправляется. В рабочей версии сообщение пойдёт на модерацию и после проверки появится в разделе «Важно».',rType:'Что случилось?',rTitle:'Коротко, что происходит',rTitlePh:'Например: нет света с утра',rArea:'Улицы / дома',rWhen:'Когда (дата и время)',rSrc:'Откуда информация?',rSrcPh:'Например: сообщение Астана-РЭК, видел сам',rContact:'Ваш телефон (по желанию, для уточнения)',rSend:'Отправить на модерацию',rSent:'Спасибо! Это демо: в рабочей версии сообщение уйдёт на модерацию.',
+  searchPh:'Например: укол, газель',searchTitle:'Найти мастера или услугу',cats:'Все разделы',catsHint:'Нажмите на раздел и выберите нужного специалиста/бизнес',
+  promoT:'Здесь может быть ваша реклама',promoS:'Нажмите, чтобы разместить рекламу',promoBtn:'Разместить рекламу',adMsg:'Здравствуйте! Хочу разместить рекламу на сайте https://urker24.kz ',ad:'Реклама',
   wa:'Написать в WhatsApp',call:'Позвонить',noName:'Номер из списка',noReviews:'пока нет отзывов',review:'Оценить',demo:'демо',
   sortList:'Как в списке',sortRating:'По рейтингу',all:'Все',found:n=>`Найдено: ${n}`,sections:'Подходящие разделы',
   nothing:'Пока никого нет по запросу',nothingS:'Знаете такого мастера или у вас свой бизнес? Добавьте его — после проверки он появится здесь.',addBiz:'➕ Добавить свой бизнес',
   starB:'⭐ Рекомендован чатом',newB:'🆕 Новый',dup:'Этот номер есть и в разделах: ',warn10:'⚠️ В номере 10 цифр — нужно уточнить',tollfree:'☎️ Бесплатная линия 8-800, только звонок',
-  vipT:'Здесь может быть ваша карточка',vipS:'Закреплённое место вверху раздела с подсветкой. Платная услуга — демо.',vip:'Закреплено · VIP · демо',
+  vipT:'Закрепиться наверху — нажмите',vipS:'Закреплённое место вверху раздела с подсветкой',vip:'Ваша карточка будет первой в разделе',vipMsg:'Здравствуйте! Хочу закрепить свою карточку наверху раздела «{s}» на сайте https://urker24.kz ',
   sortNote:'Рейтинг и отзывы — демо: сохраняются только на этом телефоне.',
   addTitle:'Добавить свой бизнес',addNote:'Демо-форма: пока ничего никуда не отправляется. В рабочей версии заявка пойдёт на модерацию и появится на сайте после проверки.',
   fName:'Имя или название',fCat:'Раздел',fWhat:'Чем занимаетесь?',fWhatPh:'Например: ремонт стиральных машин, выезд на дом',fPhone:'Телефон (WhatsApp)',fAddr:'Адрес или ориентир (по желанию)',
@@ -21,14 +26,14 @@ const T={
   sent:'Спасибо! Это демо: в рабочей версии заявка уйдёт на модерацию.',rvTitle:'Ваш отзыв',rvPh:'Что понравилось? (по желанию)',rvSave:'Сохранить отзыв',rvSaved:'Отзыв сохранён на этом телефоне (демо)',
   rvDemo:'Демо: отзыв сохранится только на этом устройстве.',close:'Закрыть',reviewsN:n=>`${n} отз.`,entries:n=>`${n} контакт${n%10==1&&n%100!=11?'':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'а':'ов')}`,
   foot:'Список составлен жителями Уркера в WhatsApp-чате. Прототип закрыт от поисковиков.',choose:'— выберите —'},
- kz:{draft:'Жоба-прототип · жариялауға емес',brand:'Үркер',tagline:'Жақын маман мен қызметтер',navHome:'Басты',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Ескертулер',annTitle:'Маңызды хабарландырулар',annAll:'Барлық хабарландырулар →',annEmpty:'Қазір маңызды хабарландыру жоқ',annEmptyS:'Өшіру немесе жөндеу туралы білсеңіз — хабарлаңыз, тексеріп жариялаймыз.',annActive:'өзекті',annDone:'аяқталды',annUrgent:'шұғыл',annExample:'МЫСАЛ · демо',annSource:'Дереккөз',annShare:'WhatsApp-та бөлісу',annReport:'📣 Маңызды жайт туралы хабарлау',annTypes:{power:'Жарық',water:'Су',gas:'Газ',repair:'Жөндеу',other:'Басқа'},annFound:'Хабарландырулар',repTitle:'Маңызды жайт туралы хабарлау',repNote:'Демо-форма: әзірге ештеңе жіберілмейді. Жұмыс нұсқасында хабарлама модерацияға түседі.',rType:'Не болды?',rTitle:'Қысқаша не болып жатыр',rTitlePh:'Мысалы: таңертеңнен жарық жоқ',rArea:'Көшелер / үйлер',rWhen:'Қашан (күні мен уақыты)',rSrc:'Ақпарат қайдан?',rSrcPh:'Мысалы: Астана-РЭК хабарламасы, өзім көрдім',rContact:'Телефоныңыз (міндетті емес)',rSend:'Модерацияға жіберу',rSent:'Рақмет! Бұл демо: жұмыс нұсқасында хабарлама модерацияға кетеді.',
-  searchPh:'Мысалы: укол, жүк',searchTitle:'Маман немесе қызмет табу',cats:'Барлық бөлімдер',
-  promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Үркердегі кафе, дүкен және акцияларға арналған баннер',ad:'Жарнама · демо',
+ kz:{draft:'Жоба-прототип · жариялауға емес',brand:'Үркер',tagline:'Жақын маман мен қызметтер',navHome:'Басты',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Маңызды',annTitle:'Маңызды: өшірулер, жөндеу, оқиғалар',annAll:'Барлығы →',annEmpty:'Қазір маңызды хабарландыру жоқ',annEmptyS:'Өшіру немесе жөндеу туралы білсеңіз — хабарлаңыз, тексеріп жариялаймыз.',annActive:'өзекті',annDone:'аяқталды',annUrgent:'шұғыл',annExample:'МЫСАЛ · демо',annSource:'Дереккөз',annShare:'WhatsApp-та бөлісу',annReport:'📣 Маңызды жайт туралы хабарлау',annTypes:{power:'Жарық',water:'Су',gas:'Газ',repair:'Жөндеу',other:'Басқа'},annFound:'Маңызды',repTitle:'Маңызды жайт туралы хабарлау',repNote:'Демо-форма: әзірге ештеңе жіберілмейді. Жұмыс нұсқасында хабарлама модерацияға түседі.',rType:'Не болды?',rTitle:'Қысқаша не болып жатыр',rTitlePh:'Мысалы: таңертеңнен жарық жоқ',rArea:'Көшелер / үйлер',rWhen:'Қашан (күні мен уақыты)',rSrc:'Ақпарат қайдан?',rSrcPh:'Мысалы: Астана-РЭК хабарламасы, өзім көрдім',rContact:'Телефоныңыз (міндетті емес)',rSend:'Модерацияға жіберу',rSent:'Рақмет! Бұл демо: жұмыс нұсқасында хабарлама модерацияға кетеді.',
+  searchPh:'Мысалы: укол, жүк',searchTitle:'Маман немесе қызмет табу',cats:'Барлық бөлімдер',catsHint:'Бөлімді басып, қажетті маманды/бизнесті таңдаңыз',
+  promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Жарнама орналастыру үшін басыңыз',promoBtn:'Жарнама орналастыру',adMsg:'Сәлеметсіз бе! https://urker24.kz сайтында жарнама орналастырғым келеді.',ad:'Жарнама',
   wa:'WhatsApp-қа жазу',call:'Қоңырау шалу',noName:'Тізімдегі нөмір',noReviews:'әзірге пікір жоқ',review:'Бағалау',demo:'демо',
   sortList:'Тізімдегідей',sortRating:'Рейтинг бойынша',all:'Барлығы',found:n=>`Табылды: ${n}`,sections:'Сәйкес бөлімдер',
   nothing:'Бұл сұрау бойынша әзірге ешкім жоқ',nothingS:'Осындай маманды білесіз бе, әлде өз бизнесіңіз бар ма? Қосыңыз — тексерістен кейін осында шығады.',addBiz:'➕ Бизнесіңізді қосу',
   starB:'⭐ Чат ұсынған',newB:'🆕 Жаңа',dup:'Бұл нөмір мына бөлімдерде де бар: ',warn10:'⚠️ Нөмірде 10 сан — нақтылау керек',tollfree:'☎️ 8-800 тегін желі, тек қоңырау',
-  vipT:'Мұнда сіздің карточкаңыз болуы мүмкін',vipS:'Бөлімнің жоғарғы жағындағы ерекшеленген орын. Ақылы қызмет — демо.',vip:'Бекітілген · VIP · демо',
+  vipT:'Жоғарыда бекіту — басыңыз',vipS:'Бөлімнің жоғарғы жағындағы ерекшеленген орын',vip:'Карточкаңыз бөлімде бірінші тұрады',vipMsg:'Сәлеметсіз бе! https://urker24.kz сайтындағы «{s}» бөлімінің жоғарғы жағына карточкамды бекіткім келеді.',
   sortNote:'Рейтинг пен пікірлер — демо: тек осы телефонда сақталады.',
   addTitle:'Бизнесіңізді қосу',addNote:'Демо-форма: әзірге ештеңе жіберілмейді. Жұмыс нұсқасында өтінім модерацияға түседі.',
   fName:'Аты немесе атауы',fCat:'Бөлім',fWhat:'Немен айналысасыз?',fWhatPh:'Мысалы: кір жуғыш машина жөндеу, үйге бару',fPhone:'Телефон (WhatsApp)',fAddr:'Мекенжай немесе бағдар (міндетті емес)',
@@ -50,17 +55,17 @@ Object.assign(T.ru,{waS:'WhatsApp',callS:'Позвонить',err_bad_photo:'Ф�
  sErr:'Напишите заголовок (не короче 3 символов)',sTooMany:'Можно добавить не больше 3 фото',sPhotoErr:'Не удалось обработать фото',newsNotFound:'Новость не найдена',
  offline:'Нет связи с сервером — показан сохранённый список. Отзывы и заявки временно недоступны.',
  liveAddNote:'Заявка уйдёт на проверку администратору и появится на сайте после одобрения.',
- liveRepNote:'Сообщение уйдёт на проверку и после подтверждения появится в «Важных объявлениях».',
+ liveRepNote:'Сообщение уйдёт на проверку и после подтверждения появится в разделе «Важно».',
  liveSent:'Спасибо! Заявка отправлена на проверку.',liveRepSent:'Спасибо! Сообщение отправлено на проверку.',
  rvLiveNote:'Отзыв появится после проверки. Один отзыв на мастера с одного телефона.',rvName:'Ваше имя (по желанию)',
  rvPhone:'Ваш телефон (по желанию, не публикуется)',rvSent:'Спасибо! Отзыв отправлен на проверку.',rvPick:'Выберите от 1 до 5 звёзд',
- loading:'Загрузка…',vipLive:'📌 VIP · закреплено',vipOffer:'Место для VIP',adLive:'Реклама',
- sortNoteLive:'Сначала VIP, затем по среднему рейтингу и числу отзывов. Отзывы проходят проверку.',
+ loading:'Загрузка…',vipLive:'📌 VIP · закреплено',vipOffer:'Ваша карточка будет первой в разделе',adLive:'Реклама',
+ sortNoteLive:'Сначала VIP, затем по рейтингу с учётом числа отзывов (одна пятёрка не обгонит десятки хороших оценок). Отзывы проходят проверку.',
  err_already_reviewed:'Вы уже оставляли отзыв этому мастеру.',err_rate_limited:'Слишком много отправок. Попробуйте позже.',
  err_invalid_phone:'Проверьте номер телефона.',err_no_consent:'Отметьте согласие на показ номера.',
  err_generic:'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.',offlineForm:'Сейчас нет связи с сервером. Попробуйте позже.',
  back:'Назад',hints:['сантехник','газель','укол','электрик','такси','уголь'],
- waGreet:'Здравствуйте! Нашёл(ла) ваш номер в списке специалистов Уркера.',
+ waGreet:'Здравствуйте! Нашёл ваш контакт на сайте https://urker24.kz в разделе «{s}».',
  nothing:q=>`Пока никого нет по запросу «${q}»`,
  addErr:'Заполните название, раздел, номер из 11 цифр и отметьте согласие',repErr:'Напишите, что случилось и где',
  docTitle:'Уркер 24 — мастера, услуги, объявления и новости района Уркер, Астана',demoForm:'демо-форма'});
@@ -75,28 +80,28 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
  sErr:'Тақырыпты жазыңыз (кемінде 3 таңба)',sTooMany:'3 фотодан артық қосуға болмайды',sPhotoErr:'Фотоны өңдеу мүмкін болмады',newsNotFound:'Жаңалық табылмады',
  offline:'Сервермен байланыс жоқ — сақталған тізім көрсетілді. Пікірлер мен өтінімдер уақытша қолжетімсіз.',
  liveAddNote:'Өтінім әкімшінің тексеруіне жіберіледі және мақұлданғаннан кейін сайтта пайда болады.',
- liveRepNote:'Хабарлама тексеруге жіберіледі және расталғаннан кейін «Маңызды хабарландыруларда» жарияланады.',
+ liveRepNote:'Хабарлама тексеруге жіберіледі және расталғаннан кейін «Маңызды» бөлімінде жарияланады.',
  liveSent:'Рақмет! Өтінім тексеруге жіберілді.',liveRepSent:'Рақмет! Хабарлама тексеруге жіберілді.',
  rvLiveNote:'Пікір тексерілгеннен кейін шығады. Бір шеберге бір телефоннан бір пікір қалдыруға болады.',rvName:'Атыңыз (міндетті емес)',
  rvPhone:'Телефоныңыз (міндетті емес, жарияланбайды)',rvSent:'Рақмет! Пікір тексеруге жіберілді.',rvPick:'1-ден 5-ке дейін жұлдыз таңдаңыз',
- loading:'Жүктелуде…',vipLive:'📌 VIP · бекітілген',vipOffer:'VIP орын',adLive:'Жарнама',
- sortNoteLive:'Алдымен VIP, содан кейін орташа рейтинг пен пікір саны бойынша. Пікірлер тексеруден өтеді.',
+ loading:'Жүктелуде…',vipLive:'📌 VIP · бекітілген',vipOffer:'Карточкаңыз бөлімде бірінші тұрады',adLive:'Жарнама',
+ sortNoteLive:'Алдымен VIP, содан кейін пікір санын ескеретін рейтинг бойынша (бір ғана бестік ондаған жақсы бағадан озбайды). Пікірлер тексеруден өтеді.',
  err_already_reviewed:'Сіз бұл шеберге пікір қалдырып қойғансыз.',err_rate_limited:'Тым көп жіберілді. Кейінірек қайталап көріңіз.',
  err_invalid_phone:'Телефон нөмірін тексеріңіз.',err_no_consent:'Нөмірді көрсетуге келісім белгісін қойыңыз.',
  err_generic:'Жіберу мүмкін болмады. Интернетті тексеріп, қайталап көріңіз.',offlineForm:'Қазір сервермен байланыс жоқ. Кейінірек қайталап көріңіз.',
  draft:'Жоба-прототип · жариялауға арналмаған',brand:'Үркер',tagline:'Жаныңыздағы шеберлер мен қызметтер',
- navHome:'Басты бет',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Ескертулер',back:'Артқа',
- searchPh:'Мысалы: көмір, жүк тасу',searchTitle:'Шебер немесе қызмет іздеу',cats:'Барлық бөлімдер',
+ navHome:'Басты бет',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Маңызды',back:'Артқа',
+ searchPh:'Мысалы: көмір, жүк тасу',searchTitle:'Шебер немесе қызмет іздеу',cats:'Барлық бөлімдер',catsHint:'Бөлімді басып, қажетті маманды/бизнесті таңдаңыз',
  hints:['сантехник','жүк тасу','ине салу','электрик','такси','көмір'],
- promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Үркердегі кафе, дүкендер мен акцияларға арналған баннер',ad:'Жарнама · демо',
+ promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Жарнама орналастыру үшін басыңыз',promoBtn:'Жарнама орналастыру',adMsg:'Сәлеметсіз бе! https://urker24.kz сайтында жарнама орналастырғым келеді.',ad:'Жарнама',
  wa:'WhatsApp-қа жазу',call:'Қоңырау шалу',noName:'Тізімдегі нөмір',noReviews:'әзірге пікір жоқ',review:'Баға беру',demo:'демо',
- waGreet:'Сәлеметсіз бе! Нөміріңізді Үркер мамандарының тізімінен таптым.',
+ waGreet:'Сәлеметсіз бе! Сіздің байланысыңызды https://urker24.kz сайтындағы «{s}» бөлімінен таптым.',
  sortList:'Тізімдегі ретпен',sortRating:'Рейтинг бойынша',all:'Барлығы',found:n=>`Табылғаны: ${n}`,sections:'Сәйкес бөлімдер',
  nothing:q=>`«${q}» сұрауы бойынша әзірге ешкім жоқ`,
  nothingS:'Осындай шеберді білесіз бе, әлде өз бизнесіңіз бар ма? Қосыңыз — тексеруден кейін осында пайда болады.',addBiz:'➕ Өз бизнесіңізді қосу',
  starB:'⭐ Чат ұсынған',newB:'🆕 Жаңа',dup:'Бұл нөмір мына бөлімдерде де бар: ',warn10:'⚠️ Нөмірде 10 сан ғана бар — нақтылау қажет',
  tollfree:'☎️ 8-800 тегін желісі, тек қоңырау шалуға болады',
- vipT:'Мұнда сіздің карточкаңыз болуы мүмкін',vipS:'Бөлімнің ең жоғарғы жағында ерекшеленіп тұратын орын. Ақылы қызмет — демо.',vip:'Бекітілген · VIP · демо',
+ vipT:'Жоғарыда бекіту — басыңыз',vipS:'Бөлімнің жоғарғы жағындағы ерекшеленген орын',vip:'Карточкаңыз бөлімде бірінші тұрады',vipMsg:'Сәлеметсіз бе! https://urker24.kz сайтындағы «{s}» бөлімінің жоғарғы жағына карточкамды бекіткім келеді.',
  sortNote:'Рейтинг пен пікірлер — демо: тек осы телефонда сақталады.',
  addTitle:'Өз бизнесіңізді қосу',addNote:'Демо-форма: әзірге ештеңе жіберілмейді. Жұмыс нұсқасында өтінім модерацияға түседі де, тексеруден кейін сайтта пайда болады.',
  fName:'Аты-жөні немесе атауы',fCat:'Бөлім',fWhat:'Немен айналысасыз?',fWhatPh:'Мысалы: кір жуғыш машина жөндеймін, үйге барамын',fPhone:'Телефон (WhatsApp)',
@@ -106,11 +111,11 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
  rvTitle:'Пікіріңіз',rvPh:'Не ұнады? (міндетті емес)',rvSave:'Пікірді сақтау',rvSaved:'Пікір осы телефонда сақталды (демо)',
  rvDemo:'Демо: пікір тек осы құрылғыда сақталады.',close:'Жабу',reviewsN:n=>`${n} пікір`,entries:n=>`${n} байланыс`,
  foot:'Тізімді Үркер тұрғындары WhatsApp-чатта құрастырған. Прототип іздеу жүйелерінен жасырылған.',choose:'— таңдаңыз —',
- annTitle:'Маңызды хабарландырулар',annAll:'Барлығы →',annEmpty:'Қазір маңызды хабарландыру жоқ',
+ annTitle:'Маңызды: өшірулер, жөндеу, оқиғалар',annAll:'Барлығы →',annEmpty:'Қазір маңызды хабарландыру жоқ',
  annEmptyS:'Жарықтың, судың не газдың өшірілуі немесе жөндеу жұмыстары туралы білсеңіз, хабарлаңыз — тексеріп, жариялаймыз.',
  annActive:'өзекті',annDone:'аяқталды',annUrgent:'шұғыл',annExample:'МЫСАЛ · демо',annSource:'Дереккөз',annShare:'WhatsApp арқылы бөлісу',
- annReport:'📣 Маңызды жайт туралы хабарлау',annTypes:{power:'Жарық',water:'Су',gas:'Газ',repair:'Жөндеу',other:'Басқа'},annFound:'Хабарландырулар',
- repTitle:'Маңызды жайт туралы хабарлау',repNote:'Демо-форма: әзірге ештеңе жіберілмейді. Жұмыс нұсқасында хабарлама модерацияға түседі де, тексеруден кейін «Маңызды хабарландыруларда» жарияланады.',
+ annReport:'📣 Маңызды жайт туралы хабарлау',annTypes:{power:'Жарық',water:'Су',gas:'Газ',repair:'Жөндеу',other:'Басқа'},annFound:'Маңызды',
+ repTitle:'Маңызды жайт туралы хабарлау',repNote:'Демо-форма: әзірге ештеңе жіберілмейді. Жұмыс нұсқасында хабарлама модерацияға түседі де, тексеруден кейін «Маңызды» бөлімінде жарияланады.',
  rType:'Не болды?',rTitle:'Не болып жатқанын қысқаша жазыңыз',rTitlePh:'Мысалы: таңертеңнен бері жарық жоқ',rArea:'Көшелер / үйлер',
  rWhen:'Қашан (күні мен уақыты)',rSrc:'Ақпарат қайдан алынды?',rSrcPh:'Мысалы: Астана-РЭК хабарламасы, өзім көрдім',
  rContact:'Телефоныңыз (міндетті емес, нақтылау үшін)',rSend:'Модерацияға жіберу',rSent:'Рақмет! Бұл — демо: жұмыс нұсқасында хабарлама модерацияға жіберіледі.',
@@ -121,7 +126,7 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
 const SB=window.SBCreate?window.SBCreate({auth:false}):{enabled:false};
 let LIVE=false, OFFLINE=false, ADS=[];
 function deviceId(){let d=localStorage.getItem('urker_device');if(!d||!/^[A-Za-z0-9-]{8,64}$/.test(d)){d=(crypto.randomUUID?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join(''));localStorage.setItem('urker_device',d)}return d}
-const errMsg=e=>{const c=String(e&&e.code||'');for(const k of ['already_reviewed','rate_limited','invalid_phone','no_consent','bad_photo','too_many_photos'])if(c.includes(k))return t('err_'+k);return t('err_generic')};
+const errMsg=e=>{const c=String(e&&e.code||'');for(const k of ['already_reviewed','rate_limited','invalid_phone','no_consent','bad_photo','too_many_photos','bad_instagram','bad_2gis','too_long','empty','not_found'])if(c.includes(k))return t('err_'+k);return t('err_generic')};
 const hp=()=>`<div style="position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden" aria-hidden="true"><label>Website<input id="hpf" name="website" tabindex="-1" autocomplete="off"></label></div>`;
 
 // ---------- статистика (анонимно, без cookies) ----------
@@ -158,6 +163,10 @@ function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;let p=Arra
 // ---------- reviews (demo, localStorage) ----------
 const RK='urker_reviews_demo_v1';
 const getRevs=()=>{try{return JSON.parse(localStorage.getItem(RK))||{}}catch(e){return{}}};
+const BAYES_C=5;
+function demoMean(){const all=Object.values(getRevs()).flat();return all.length?all.reduce((a,b)=>a+b.stars,0)/all.length:4.0}
+function bayes(id,m){if(LIVE){const e=D.entries.find(x=>x.id==id)||{};return e.cnt?(e.bayes!=null?e.bayes:(BAYES_C*4+e.avg*e.cnt)/(BAYES_C+e.cnt)):null}const r=getRevs()[id]||[];if(!r.length)return null;return (BAYES_C*m+r.reduce((a,b)=>a+b.stars,0))/(BAYES_C+r.length)}
+const fmtAvg=v=>(Math.round(v*10)/10).toFixed(1).replace('.',',');
 function rating(id){if(LIVE){const e=D.entries.find(x=>x.id==id)||{};return{n:e.cnt||0,avg:e.avg||0,list:[]}}const r=getRevs()[id]||[];return{n:r.length,avg:r.length?r.reduce((a,b)=>a+b.stars,0)/r.length:0,list:r}}
 
 // ---------- search index ----------
@@ -201,15 +210,19 @@ function search(query){
 // ---------- UI pieces ----------
 const WA_SVG='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>';
 function stars(avg){let h='';for(let i=1;i<=5;i++)h+=i<=Math.round(avg)?'★':'<span class="off">★</span>';return `<span class="stars">${h}</span>`}
+// WhatsApp: приветствие со ссылкой на сайт и названием подкатегории (короткие названия для длинных)
+const WA_SHORT={'med-1':['Справки и анализы','Анықтамалар мен талдаулар']};
+function waText(e){const x=subById[e.sub]||{},sh=WA_SHORT[e.sub];return t('waGreet').replace('{s}',sh?sh[lang==='kz'?1:0]:subTitle(x))}
 function card(e,showSection){
  const x=subById[e.sub],s=secById[e.section],r=rating(e.id);
  const others=e.dup_count?D.entries.filter(o=>o.raw_phone===e.raw_phone&&o.id!==e.id).map(o=>subTitle(subById[o.sub])):[];
  const bad=e.flags.includes('malformed'),toll=e.flags.includes('tollfree');
- const waMsg=encodeURIComponent(t('waGreet'));
+ const waMsg=encodeURIComponent(waText(e));
  return `<article class="card ${e.vip?'vip':''}" id="e${e.id}">${e.vip?`<span class="tag">${t('vipLive')}</span>`:''}
   <div class="sub">${esc(x.emoji||s.emoji)} ${showSection?esc(secTitle(s))+' · ':''}${esc(subTitle(x))}</div>
-  <div class="idl"><span class="nm">${esc(e.name||fmtPhone(e))}</span>${e.name?`<span class="ph">${esc(fmtPhone(e))}</span>`:''}</div>
-  ${e.note?`<p class="note">${esc(e.note)}</p>`:''}${e.address?`<p class="note">📍 ${esc(e.address)}</p>`:''}
+  ${e.biz||e.verified?`<div class="biz">${e.biz?esc(e.biz):''}${e.verified?`<span class="vf">✔ ${t('verified')}</span>`:''}</div>`:''}
+  <div class="idl"><span class="nm">${esc(e.name||e.owner||fmtPhone(e))}</span>${e.name||e.owner?`<span class="ph">${esc(fmtPhone(e))}</span>`:''}</div>
+  ${e.note?`<p class="note">${esc(e.note)}</p>`:''}${e.address?`<p class="note">📍 ${esc(e.address)}</p>`:''}${profileHtml(e)}
   ${e.star||e.new||bad||toll||others.length?`<div class="badges">${e.star?`<span class="badge star">${t('starB')}</span>`:''}${e.new?`<span class="badge new">${t('newB')}</span>`:''}
    ${bad?`<span class="badge warn">${t('warn10')}</span>`:''}${toll?`<span class="badge">${t('tollfree')}</span>`:''}
    ${others.length?`<span class="badge">${t('dup')}${esc(others.join(', '))}</span>`:''}</div>`:''}
@@ -217,11 +230,14 @@ function card(e,showSection){
    <a class="btn wa ${e.wa?'':'off'}" aria-label="${esc(t('wa'))}: ${esc(e.name||fmtPhone(e))}" ${e.wa?`href="https://api.whatsapp.com/send?phone=${e.wa}&text=${waMsg}" target="_blank" rel="noopener"`:'aria-disabled="true"'}>${WA_SVG}<span>${t('waS')}</span></a>
    <a class="btn call ${bad?'off':''}" aria-label="${esc(t('call'))}: ${esc(fmtPhone(e))}" ${bad?'aria-disabled="true"':`href="tel:${esc(e.tel)}"`}>📞 <span>${t('callS')}</span></a>
   </div>
-  <div class="rate">${stars(r.avg)}<span class="rc">${r.n?`${r.avg.toFixed(1)} · ${t('reviewsN')(r.n)}`:t('noReviews')}</span>
+  <div class="rate">${stars(r.avg)}<span class="rc">${r.n?`<b>★ ${fmtAvg(r.avg)}</b> (${r.n})`:t('noReviews')}</span>
    <button data-review="${e.id}">✍️ ${t('review')}${LIVE?'':` <small>(${t('demo')})</small>`}</button></div>
+  ${CLAIMS_ON?`<button class="claim-l" data-claim="${e.id}">${t('claimL')}</button>`:''}
  </article>`}
-const vipCard=()=>`<a class="card vip vip-mini" href="#/add" title="${esc(t('vipS'))}"><span class="vm-i">📌</span><span class="vm-b"><b>${t('vipT')}</b><small>${LIVE?t('vipOffer'):t('vip')}</small></span><span class="vm-a">›</span></a>`;
-const promo=()=>ADS.length?ADS.slice(0,2).map(a=>{const href=a.link_url||(a.wa?`https://wa.me/${a.wa}`:'#/add');return `<a class="promo live" href="${esc(href)}" ${href.startsWith('http')?'target="_blank" rel="noopener sponsored"':''}><span class="pi">${esc(a.emoji||'☕')}</span><span class="tag">${t('adLive')}</span><b>${esc(L({ru:a.title_ru,kz:a.title_kz}))}</b><span>${esc(L({ru:a.text_ru,kz:a.text_kz}))}</span></a>`}).join(''):`<a class="promo" href="#/add"><span class="pi">☕</span><span class="tag">${t('ad')}</span><b>${t('promoT')}</b><span>${t('promoS')}</span></a>`;
+const adWa=()=>{const d=String((window.URKER_CONFIG||{}).adContactWa||'').replace(/\D/g,'');return /^7\d{10}$/.test(d)?d:(/^87\d{9}$/.test(d)?'7'+d.slice(1):'')};
+const adLink=msg=>{const w=adWa();return w?`href="https://api.whatsapp.com/send?phone=${w}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener"`:'href="#/add"'};
+const vipCard=(sec)=>!ADS_ON?'':`<a class="card vip vip-mini" ${adLink(t('vipMsg').replace('{s}',sec?secTitle(sec):''))} title="${esc(t('vipS'))}"><span class="vm-i">📌</span><span class="vm-b"><b>${t('vipT')}</b><small>${t('vip')}</small></span><span class="vm-a">›</span></a>`;
+const promo=()=>!ADS_ON?'':ADS.length?ADS.slice(0,2).map(a=>{const href=a.link_url||(a.wa?`https://wa.me/${a.wa}`:'#/add');return `<a class="promo live" href="${esc(href)}" ${href.startsWith('http')?'target="_blank" rel="noopener sponsored"':''}><span class="pi">${esc(a.emoji||'☕')}</span><span class="tag">${t('adLive')}</span><b>${esc(L({ru:a.title_ru,kz:a.title_kz}))}</b><span>${esc(L({ru:a.text_ru,kz:a.text_kz}))}</span></a>`}).join(''):`<a class="promo" ${adLink(t('adMsg'))}><span class="pi">📣</span><b>${t('promoT')}</b><span>${t('promoS')}</span><span class="promo-btn">${t('promoBtn')}</span></a>`;
 const nothing=q=>`<div class="empty"><div style="font-size:52px">🤷</div><h2>${t('nothing')(esc(q))}</h2><p>${t('nothingS')}</p><a class="btn primary" href="#/add">${t('addBiz')}</a></div>`;
 const searchBox=(q='')=>`<section class="hero"><h2>${t('searchTitle')}</h2><div class="search"><span class="ic">🔍</span><input id="q" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="${t('searchPh')}" value="${esc(q)}"></div>
  <div class="hints">${t('hints').map(h=>`<button data-hint="${h}">${h}</button>`).join('')}</div></section>`;
@@ -229,11 +245,12 @@ const searchBox=(q='')=>`<section class="hero"><h2>${t('searchTitle')}</h2><div 
 function renderResults(q){
  const box=$('#results'),home=$('#homeBody');const r=search(q);
  if(!r){clearTimeout(searchTimer);box.innerHTML='';if(home)home.hidden=false;return}
- trackSearch(q,r.list.length+annSearch(q).length+newsSearch(q).length);
+ const ls=window.URKER_L?URKER_L.searchHtml(q):{n:0,html:''};
+ trackSearch(q,r.list.length+annSearch(q).length+newsSearch(q).length+ls.n);
  if(home)home.hidden=true;
  const nw=newsSearch(q);const newsHtml=nw.length?`<div class="sugg-l">📰 ${t('newsFound')}: ${nw.length}</div>${nw.slice(0,3).map(n=>newsCard(n,true)).join('')}`:'';
- const an=annSearch(q);const annHtml=newsHtml+(an.length?`<div class="sugg-l">📣 ${t('annFound')}: ${an.length}</div>${an.map(a=>`<a href="#/ann/${a.id}" class="ann-link">${annCard(a,true)}</a>`).join('')}`:'');
- if(!r.list.length){box.innerHTML=annHtml+(an.length||nw.length?'':nothing(q));return}
+ const an=annSearch(q);const annHtml=ls.html+newsHtml+(an.length?`<div class="sugg-l">📣 ${t('annFound')}: ${an.length}</div>${an.map(a=>`<a href="#/ann/${a.id}" class="ann-link">${annCard(a,true)}</a>`).join('')}`:'');
+ if(!r.list.length){box.innerHTML=annHtml+(an.length||nw.length||ls.n?'':nothing(q));return}
  box.innerHTML=annHtml+`<div class="sortbar"><span>${t('found')(r.list.length)}</span></div>
   ${r.subs.length?`<div class="sugg-l">${t('sections')}:</div><div class="chips">${r.subs.map(([id,n])=>{const x=subById[id];return `<button data-goto="${x.section}|${id}">${esc(x.emoji)} ${esc(subTitle(x))} · ${n}</button>`}).join('')}</div>`:''}
   <div class="cards">${r.list.map(e=>card(e,true)).join('')}</div>`;
@@ -392,7 +409,7 @@ function viewSuggest(){
 // ---------- views ----------
 function viewHome(q=''){
  app.innerHTML=`${searchBox(q)}<div id="results"></div>
- <div id="homeBody">${annBlock()}${newsBlock()}${promo()}<h2>${t('cats')}</h2><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
+ <div id="homeBody">${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${annBlock()}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
   return `<a class="tile" href="#/c/${s.id}"><span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}</div></div>`;
  bindSearch();
 }
@@ -402,13 +419,14 @@ function viewCat(id,subId){
  const vs=visibleSubs(s);const showChips=!(vs.length<=1&&(vs[0]||{}).implicit);
  let list=D.entries.filter(e=>e.section===id&&(!subId||e.sub===subId));
  const bad=e=>e.flags.includes('malformed')?1:0;list.sort((a,b)=>bad(a)-bad(b)||a.id-b.id);
- if(sortMode==='rating')list=list.slice().sort((a,b)=>{const ra=rating(a.id),rb=rating(b.id);return bad(a)-bad(b)||rb.avg-ra.avg||rb.n-ra.n||(a.sort||a.id)-(b.sort||b.id)});
+ if(sortMode==='rating'){const m=LIVE?0:demoMean(),sc={},nn={};list.forEach(e=>{sc[e.id]=bayes(e.id,m);nn[e.id]=rating(e.id).n});
+  list=list.slice().sort((a,b)=>{const sa=sc[a.id],sb=sc[b.id];return bad(a)-bad(b)||(sa==null)-(sb==null)||(sb||0)-(sa||0)||nn[b.id]-nn[a.id]||(a.sort||a.id)-(b.sort||b.id)})}
  list=list.filter(e=>e.vip).concat(list.filter(e=>!e.vip));
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${s.emoji} ${esc(secTitle(s))}</h1></div>
   ${showChips?`<div class="chips"><button class="${subId?'':'on'}" data-sub="">${t('all')}</button>${vs.map(x=>`<button class="${x.id===subId?'on':''}" data-sub="${x.id}">${esc(x.emoji)} ${esc(subTitle(x))}</button>`).join('')}</div>`:''}
   <div class="sortbar"><span>${t('found')(list.length)}</span><select id="sort"><option value="list">${t('sortList')}</option><option value="rating" ${sortMode==='rating'?'selected':''}>${t('sortRating')}</option></select></div>
   <p class="demo-note mini">${LIVE?'ℹ️ '+t('sortNoteLive'):'🧪 '+t('sortNote')}</p>
-  ${list.some(e=>e.vip)?'':vipCard()}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
+  ${list.some(e=>e.vip)?'':vipCard(s)}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
  $('#sort').onchange=ev=>{sortMode=ev.target.value;viewCat(id,subId)};
 }
@@ -450,8 +468,8 @@ function openReview(id){
  m.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{pick=+b.dataset.s;m.querySelectorAll('[data-s]').forEach(c=>c.classList.toggle('on',+c.dataset.s<=pick))});
  $('#rvc').onclick=()=>{m.hidden=true};m.onclick=ev=>{if(ev.target===m)m.hidden=true};
  if(LIVE)SB.get(`reviews_public?select=stars,text,author_name,created_at&specialist_id=eq.${+id}&order=created_at.desc&limit=30`).then(rows=>{
-   $('#rvlist').innerHTML=rows.length?rows.map(v=>`<div class="rev">${stars(v.stars)} <b>${esc(v.author_name||'')}</b> ${esc(v.text||'')}</div>`).join(''):`<div class="rev">${t('noReviews')}</div>`})
-  .catch(()=>{$('#rvlist').innerHTML=''});
+   const rl=$('#rvlist');if(!rl)return;rl.innerHTML=rows.length?rows.map(v=>`<div class="rev">${stars(v.stars)} <b>${esc(v.author_name||'')}</b> ${esc(v.text||'')}</div>`).join(''):`<div class="rev">${t('noReviews')}</div>`})
+  .catch(()=>{const rl=$('#rvlist');if(rl)rl.innerHTML=''});
  $('#rvf').onsubmit=ev=>{ev.preventDefault();if(!pick){toast(t('rvPick'));return}
   if(OFFLINE){toast(t('offlineForm'));return}
   if(!LIVE){const all=getRevs();(all[id]=all[id]||[]).push({stars:pick,text:$('#rvt').value.trim().slice(0,500),date:new Date().toISOString()});
@@ -460,19 +478,77 @@ function openReview(id){
    try{await SB.rpc('submit_review',{p_specialist_id:+id,p_stars:pick,p_text:$('#rvt').value,p_device_id:deviceId(),p_phone:$('#rvp').value||null,p_name:$('#rvn').value||null,p_hp:$('#hpf').value});
     m.hidden=true;toast(t('rvSent'))}catch(e){toast(errMsg(e))}})};
 }
+// ---------- «Это ваш бизнес? Дополните карточку» ----------
+Object.assign(T.ru,{claimL:'Это ваш бизнес? Дополните карточку',clTitle:'Дополнить карточку',clNote:'Заполните то, что хотите показать клиентам. После проверки данные появятся на карточке. Если ваш телефон совпадает с номером на карточке — проверим быстрее.',
+ clOwner:'Ваше имя',clBiz:'Название бизнеса (если есть)',clIg:'Instagram (@имя или ссылка)',clGis:'Ссылка на 2ГИС',clHours:'Часы работы (например: Пн–Сб 9:00–19:00)',clDescrRu:'Коротко о себе / услугах (по-русски, до 300 знаков)',clDescrKz:'Қысқаша (қазақша, 300 таңбаға дейін) — по желанию',
+ clPhotos:'Фото ваших работ (до 3)',clPhone:'Ваш телефон (обязательно)',clSend:'Отправить на проверку',clSent:'Спасибо! Данные отправлены на проверку.',clBadIg:'Instagram: укажите @имя или ссылку instagram.com/имя',clBadGis:'2ГИС: вставьте ссылку вида https://2gis.kz/…',
+ clEmpty:'Заполните хотя бы одно поле',clDemo:'Демо-режим: форма заработает после подключения базы.',verified:'Проверено',hoursL:'Часы',err_bad_instagram:'Instagram: укажите @имя или ссылку instagram.com/имя',err_bad_2gis:'2ГИС: вставьте ссылку вида https://2gis.kz/…',err_too_long:'Описание — не больше 300 знаков',err_empty:'Заполните хотя бы одно поле',err_not_found:'Карточка не найдена'});
+Object.assign(T.kz,{claimL:'Бұл сіздің бизнесіңіз бе? Карточканы толықтырыңыз',clTitle:'Карточканы толықтыру',clNote:'Клиенттерге көрсеткіңіз келетінді толтырыңыз. Тексерістен кейін деректер карточкада пайда болады. Телефоныңыз карточкадағы нөмірмен сәйкес келсе — тезірек тексереміз.',
+ clOwner:'Атыңыз',clBiz:'Бизнес атауы (бар болса)',clIg:'Instagram (@атау немесе сілтеме)',clGis:'2ГИС сілтемесі',clHours:'Жұмыс уақыты (мысалы: Дс–Сб 9:00–19:00)',clDescrRu:'Қысқаша орысша (300 таңбаға дейін) — қаласаңыз',clDescrKz:'Өзіңіз / қызметтер туралы қысқаша (қазақша, 300 таңбаға дейін)',
+ clPhotos:'Жұмыстарыңыздың фотосы (3-ке дейін)',clPhone:'Телефоныңыз (міндетті)',clSend:'Тексеруге жіберу',clSent:'Рақмет! Деректер тексеруге жіберілді.',clBadIg:'Instagram: @атау немесе instagram.com/атау сілтемесін жазыңыз',clBadGis:'2ГИС: https://2gis.kz/… түріндегі сілтемені қойыңыз',
+ clEmpty:'Кемінде бір өрісті толтырыңыз',clDemo:'Демо режим: база қосылғанда форма жұмыс істейді.',verified:'Тексерілген',hoursL:'Уақыты',err_bad_instagram:'Instagram: @атау немесе instagram.com/атау сілтемесін жазыңыз',err_bad_2gis:'2ГИС: https://2gis.kz/… түріндегі сілтемені қойыңыз',err_too_long:'Сипаттама — 300 таңбадан аспауы керек',err_empty:'Кемінде бір өрісті толтырыңыз',err_not_found:'Карточка табылмады'});
+const IG_RE=/^(@?[A-Za-z0-9._]{1,30}|(https?:\/\/)?(www\.)?instagram\.com\/[A-Za-z0-9._]{1,30}\/?(\?.*)?)$/;
+const GIS_RE=/^https?:\/\/([a-z0-9-]+\.)*2gis\.(kz|ru|com)(\/|$)/i;
+const igHandle=v=>String(v||'').trim().replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i,'').replace(/^@/,'').replace(/[/?#].*$/,'').toLowerCase();
+const IG_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></svg>';
+function profileHtml(e){const d=lang==='kz'?(e.descr_kz||e.descr_ru):(e.descr_ru||e.descr_kz);const ph=(e.photos||[]).filter(p=>p&&p.path).slice(0,3);
+ return `${d?`<p class="pdesc">${esc(d)}</p>`:''}${e.hours?`<p class="note">🕒 ${esc(e.hours)}</p>`:''}
+ ${e.ig||e.gis?`<div class="plinks">${e.ig?`<a class="ig" href="https://instagram.com/${encodeURIComponent(e.ig)}" target="_blank" rel="noopener">${IG_SVG}<span>@${esc(e.ig)}</span></a>`:''}${e.gis?`<a class="gis" href="${esc(e.gis)}" target="_blank" rel="noopener"><b>2ГИС</b></a>`:''}</div>`:''}
+ ${ph.length?`<div class="pphotos">${ph.map(p=>`<a href="${esc(SB.publicUrl('profiles',p.path))}" target="_blank" rel="noopener"><img loading="lazy" src="${esc(SB.publicUrl('profiles',p.path))}" alt=""></a>`).join('')}</div>`:''}`}
+const dataUrlBlob=u=>fetch(u).then(r=>r.blob());
+function openClaim(id){
+ const e=D.entries.find(x=>x.id==id);if(!e)return;const m=$('#modal');let files=[];
+ m.innerHTML=`<div class="sheet claim"><h2 style="margin:6px 0">✏️ ${t('clTitle')}</h2><div class="sub">${esc(subTitle(subById[e.sub]||{}))} · ${esc(e.name||'')} ${esc(fmtPhone(e))}</div>
+  <p class="demo-note ${LIVE?'live':''}">${LIVE?'ℹ️ '+t('clNote'):'🧪 '+t('clDemo')}</p>
+  <form id="clf" style="position:relative">${hp()}
+   <label for="cl1">${t('clOwner')}</label><input id="cl1" class="rv-in" maxlength="80" autocomplete="name">
+   <label for="cl2">${t('clBiz')}</label><input id="cl2" class="rv-in" maxlength="80" autocomplete="organization">
+   <label for="cl3">${t('clIg')}</label><input id="cl3" class="rv-in" maxlength="120" autocapitalize="off" autocomplete="off" placeholder="@urker_master">
+   <label for="cl4">${t('clGis')}</label><input id="cl4" class="rv-in" maxlength="300" inputmode="url" autocapitalize="off" placeholder="https://2gis.kz/astana/firm/…">
+   <label for="cl5">${t('clHours')}</label><input id="cl5" class="rv-in" maxlength="120">
+   <label for="cl6">${t(lang==='kz'?'clDescrKz':'clDescrRu')} <small id="cl6n">0/300</small></label><textarea id="cl6" class="rv-in" maxlength="300" style="min-height:70px"></textarea>
+   <label for="cl7">${t(lang==='kz'?'clDescrRu':'clDescrKz')} <small id="cl7n">0/300</small></label><textarea id="cl7" class="rv-in" maxlength="300" style="min-height:60px"></textarea>
+   <label for="cl8">${t('clPhotos')}</label><input id="cl8" type="file" accept="image/*" multiple><div class="thumbs" id="clth"></div>
+   <label for="cl9">${t('clPhone')}</label><input id="cl9" class="rv-in" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="8 7XX XXX XX XX">
+   <button class="btn primary" style="margin-top:12px">${t('clSend')}</button></form>
+  <button class="btn" style="background:#eee;color:#333;width:100%;margin-top:8px" id="clc">${t('close')}</button></div>`;
+ m.hidden=false;m.scrollTop=0;
+ const ru=lang==='kz'?'#cl7':'#cl6',kz=lang==='kz'?'#cl6':'#cl7';
+ ['cl6','cl7'].forEach(i=>$('#'+i).oninput=()=>{$('#'+i+'n').textContent=$('#'+i).value.length+'/300'});
+ const draw=()=>{$('#clth').innerHTML=files.map((f,i)=>`<div class="th"><img src="${f.url}" alt=""><button type="button" data-rm="${i}" aria-label="✕">✕</button></div>`).join('')};
+ $('#clth').onclick=ev=>{const b=ev.target.closest('[data-rm]');if(!b)return;URL.revokeObjectURL(files[+b.dataset.rm].url);files.splice(+b.dataset.rm,1);draw()};
+ $('#cl8').onchange=ev=>{const fs=[...ev.target.files];ev.target.value='';fs.slice(0,3-files.length).forEach(f=>files.push({file:f,url:URL.createObjectURL(f)}));if(fs.length>3)toast(t('err_too_many_photos'));draw()};
+ $('#clc').onclick=()=>{m.hidden=true};m.onclick=ev=>{if(ev.target===m)m.hidden=true};
+ $('#clf').onsubmit=ev=>{ev.preventDefault();
+  const p={specialist_id:+id,owner_name:$('#cl1').value.trim(),business_name:$('#cl2').value.trim(),instagram:$('#cl3').value.trim(),gis_url:$('#cl4').value.trim(),hours:$('#cl5').value.trim(),
+   descr_ru:$(ru).value.trim(),descr_kz:$(kz).value.trim(),phone:$('#cl9').value,has_photos:files.length>0};
+  if(p.instagram&&!IG_RE.test(p.instagram)){toast(t('clBadIg'));$('#cl3').focus();return}
+  if(p.gis_url&&!GIS_RE.test(p.gis_url)){toast(t('clBadGis'));$('#cl4').focus();return}
+  if(!['owner_name','business_name','instagram','gis_url','hours','descr_ru','descr_kz'].some(k=>p[k])&&!files.length){toast(t('clEmpty'));return}
+  if(!/^(8|7)?7\d{9}$/.test(p.phone.replace(/\D/g,''))){toast(t('err_invalid_phone'));$('#cl9').focus();return}
+  if(OFFLINE){toast(t('offlineForm'));return}
+  if(!LIVE){toast(t('clDemo'));return}
+  sending(ev.target.querySelector('.btn'),async()=>{try{
+   const r=await SB.rpc('submit_claim',{p,p_device_id:deviceId(),p_hp:$('#hpf').value},15000);
+   if(r&&r.id&&files.length){const paths=[];for(const f of files){const b=await dataUrlBlob(await compressImage(f.file,1280,0.8));
+     const u=await SB.upload('profiles',`claims/${r.id}/${r.ticket}/${Math.random().toString(36).slice(2,12)}.jpg`,b,'image/jpeg');paths.push(u.path)}
+    await SB.rpc('claim_set_photos',{p_id:r.id,p_ticket:r.ticket,p_paths:paths},15000)}
+   m.hidden=true;toast(t('clSent'))}catch(err){toast(errMsg(err))}})};
+}
 let tt;function toast(msg){const el=$('#toast');el.textContent=msg;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,3500)}
 
 // ---------- router ----------
-function route(){setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trackView()},0);
+function route(){setMeta();setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trackView()},0);
  const h=location.hash||'#/';let nav='home';
  app.dataset.view=(h.match(/^#\/(news\/suggest|news\/[^/?]+|[a-z]+)/)||[,'home'])[1].replace(/^news\/(?!suggest).+/,'article').replace('news/suggest','suggest');
  if(h.startsWith('#/c/')){const [id,sub]=h.slice(4).split('/');viewCat(id,sub)}
- else if(h.startsWith('#/add')){viewAdd();nav='add'}
- else if(h.startsWith('#/ann')){viewAnn(h.split('/')[2]);nav='ann'}
+ else if(h.startsWith('#/add')){viewAdd();nav=document.querySelector('[data-nav=post]')?'post':'add'}
+ else if(h.startsWith('#/ann')){viewAnn(h.split('/')[2]);nav=document.querySelector('[data-nav=ann]')?'ann':'menu'}
  else if(h.startsWith('#/news')){const id=h.split('/')[2];if(id)viewArticle(decodeURIComponent(id));else viewNews();nav='news'}
- else if(h.startsWith('#/report')){viewReport();nav='ann'}
- else if(h.startsWith('#/search')){const q=decodeURIComponent((h.split('q=')[1]||''));viewHome(q);nav='search';const i=$('#q');if(i&&!q)i.focus()}
- else viewHome();
+ else if(h.startsWith('#/report')){viewReport();nav='menu'}
+ else if(h.startsWith('#/search')){const q=decodeURIComponent((h.split('q=')[1]||''));viewHome(q);nav='home';const i=$('#q');if(i&&!q)i.focus()}
+ else if(h.startsWith('#/install')&&window.URKER_PWA){URKER_PWA.view();nav='menu'}
+ else{const ln=window.URKER_L&&URKER_L.route(h);if(ln)nav=ln;else viewHome()}
  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav));
  if(!h.startsWith('#/search'))window.scrollTo(0,0);
 }
@@ -480,6 +556,7 @@ document.addEventListener('click',ev=>{
  const ct=ev.target.closest('a.btn.wa[href],a.btn.call[href]');const art=ct&&ct.closest('article.card[id^="e"]');
  if(art)track('contact',{p_specialist_id:+art.id.slice(1),p_channel:ct.classList.contains('wa')?'wa':'call'});
  const rv=ev.target.closest('[data-review]');if(rv){openReview(rv.dataset.review);return}
+ const cl=CLAIMS_ON&&ev.target.closest('[data-claim]');if(cl){openClaim(cl.dataset.claim);return}
  const hint=ev.target.closest('[data-hint]');if(hint){const i=$('#q');i.value=hint.dataset.hint;i.dispatchEvent(new Event('input'));return}
  const g=ev.target.closest('[data-goto]');if(g){const [s,sub]=g.dataset.goto.split('|');location.hash='#/c/'+s+'/'+sub}
 });
@@ -491,7 +568,7 @@ window.addEventListener('hashchange',route);
 const toAlmaty=iso=>iso?new Date(new Date(iso).getTime()+5*3600e3).toISOString().slice(0,16):null;
 function mapSpec(r){const flags=r.phone.startsWith('8800')?['tollfree']:(r.phone.length!==11?['malformed']:[]);
  return{id:r.id,section:r.section_id,sub:r.sub_id,raw_phone:r.phone,wa:r.wa,tel:r.wa?'+'+r.wa:r.phone,name:r.name||'',note:r.note||'',address:r.address||'',
-  star:!!r.recommended,new:!!r.is_new,flags,vip:!!r.vip,avg:+r.avg_stars||0,cnt:+r.review_count||0,sort:r.sort_order}}
+  star:!!r.recommended,new:!!r.is_new,flags,vip:!!r.vip,avg:+r.avg_stars||0,cnt:+r.review_count||0,bayes:r.bayes_score==null?null:+r.bayes_score,owner:r.owner_name||'',biz:r.business_name||'',ig:r.instagram||'',gis:r.gis_url||'',hours:r.hours||'',descr_ru:r.descr_ru||'',descr_kz:r.descr_kz||'',photos:Array.isArray(r.photos)?r.photos:[],verified:!!r.verified,sort:r.sort_order}}
 function mapAnn(r){return{id:r.id,type:r.type,urgent:r.urgent,demo:r.is_demo,title:{ru:r.title_ru,kz:r.title_kz||r.title_ru},area:{ru:r.area_ru,kz:r.area_kz||r.area_ru},
  source:{ru:r.source_ru,kz:r.source_kz||r.source_ru},start:toAlmaty(r.start_at)||toAlmaty(r.created_at),end:toAlmaty(r.end_at)}}
 function mapNews(r){const ph=(Array.isArray(r.photos)?r.photos:[]).map(p=>typeof p==='string'?p:p&&p.url).filter(Boolean);
@@ -505,12 +582,17 @@ async function loadBackend(){
    SB.get('announcements?select=*&order=start_at.desc.nullslast',6000),
    SB.get('ads?select=*&order=sort_order.asc',6000)]);
   const nw=await SB.get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',6000).catch(()=>null);
+  if(window.URKER_L)await URKER_L.load().catch(e=>console.warn('listings',e&&e.message));
   if(!Array.isArray(sp)||!sp.length)throw new Error('empty');
   D.entries=sp.filter(r=>subById[r.sub_id]).map(mapSpec);ANN=an.map(mapAnn);ADS=ad;NEWS=Array.isArray(nw)?nw.map(mapNews):[];LIVE=true;OFFLINE=false;sortMode='rating';buildIndex();
  }catch(e){OFFLINE=true;LIVE=false;console.warn('Urker backend unreachable, using built-in list',e&&e.message)}
  const n=$('#netnote');if(n){n.hidden=!OFFLINE;n.textContent=t('offline')}
  const q=$('#q');if(q&&document.activeElement===q)renderResults(q.value);else route();
 }
-applyLang();route();loadBackend().then(()=>{if(LIVE)trackView()});loadMetrika();
+function setMeta(title,desc){document.title=title||t('docTitle');const d=document.querySelector('meta[name="description"]');if(d){if(!d.dataset.def)d.dataset.def=d.content;d.content=desc||(lang==='ru'?d.dataset.def:t('docTitle'))}}
+window.URKER_APP={t,esc,$,app,SB,isLive:()=>LIVE,isOffline:()=>OFFLINE,toast,deviceId,hp,formNote,sending,errMsg,norm,tokScore,WA_SVG,MONTHS,lang:()=>lang,setMeta,track,
+ addDict(ru,kz){Object.assign(T.ru,ru||{});Object.assign(T.kz,kz||{})}};
+const start=()=>{applyLang();route();loadBackend().then(()=>{if(LIVE)trackView()});loadMetrika()};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 window.addEventListener('urker-lang',()=>{const n=$('#netnote');if(n)n.textContent=t('offline')});
 })();

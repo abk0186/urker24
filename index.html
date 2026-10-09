@@ -25,31 +25,39 @@
 <meta name="twitter:title" content="Уркер 24 — мастера, услуги и новости района Уркер">
 <meta name="twitter:description" content="Мастера и услуги рядом: сантехники, электрики, уборка, медицина, авто и другое. Важные объявления и новости района Уркер (Астана). Пишите мастерам в WhatsApp в один клик.">
 <meta name="twitter:image" content="https://urker24.kz/og-image.jpg">
-<link rel="icon" href="data:,">
-<link rel="stylesheet" href="styles.css?v=11">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Уркер 24">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
 <header class="top">
   <a href="#/" class="brand"><span class="logo">🏡</span><span><b data-i18n="brand">Уркер</b><small data-i18n="tagline">Мастера и услуги рядом</small></span></a>
 </header>
-<div class="langbar" role="group" aria-label="Язык / Тіл"><span class="lb-l">🌐 Язык · Тіл</span><button data-lang="ru" class="on">Русский</button><button data-lang="kz">Қазақша</button></div>
+<div class="langbar" role="group" aria-label="Язык / Тіл"><span class="lb-l">🌐 Язык · Тіл</span><button data-lang="kz">Қазақша</button><button data-lang="ru" class="on">Русский</button></div>
 <div id="netnote" class="netnote" hidden></div>
 <main id="app"></main>
 <nav class="bottom">
   <a href="#/" data-nav="home"><span>🏠</span><b data-i18n="navHome">Главная</b></a>
   <a href="#/news" data-nav="news"><span>📰</span><b data-i18n="navNews">Новости</b></a>
-  <a href="#/ann" data-nav="ann"><span>📣</span><b data-i18n="navAnn">Объявления</b></a>
-  <a href="#/search" data-nav="search"><span>🔍</span><b data-i18n="navSearch">Поиск</b></a>
+  <a href="#/ann" data-nav="ann"><span>⚠️</span><b data-i18n="navAnn">Важно</b></a>
   <a href="#/add" data-nav="add"><span>➕</span><b data-i18n="navAdd">Добавить</b></a>
+  <a href="#/menu" data-nav="menu"><span>☰</span><b data-i18n="navMenu">Меню</b></a>
 </nav>
 <div id="modal" class="modal" hidden></div>
 <div id="toast" class="toast" hidden></div>
-<script src="config.js?v=9"></script>
+<script src="config.js?v=12"></script>
 <script src="sb.js?v=10"></script>
 <script src="data.js?v=7"></script>
 <script src="synonyms.js?v=7"></script>
 <script src="announcements.js?v=7"></script>
 <script src="news.js?v=1"></script>
-<script src="app.js?v=12"></script>
+<script src="app.js?v=14"></script>
+<script src="listings.js?v=1"></script>
+<script src="pwa.js?v=1"></script>
 </body>
 </html>
