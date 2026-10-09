@@ -63,7 +63,7 @@ Object.assign(T.ru,{waS:'WhatsApp',callS:'Позвонить',err_bad_photo:'Ф�
  sortNoteLive:'Сначала VIP, затем по рейтингу с учётом числа отзывов (одна пятёрка не обгонит десятки хороших оценок). Отзывы проходят проверку.',
  err_already_reviewed:'Вы уже оставляли отзыв этому мастеру.',err_rate_limited:'Слишком много отправок. Попробуйте позже.',
  err_invalid_phone:'Проверьте номер телефона.',err_no_consent:'Отметьте согласие на показ номера.',
- err_generic:'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.',offlineForm:'Сейчас нет связи с сервером. Попробуйте позже.',
+ err_generic:'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.',stillLoading:'Подождите пару секунд — данные ещё загружаются, затем отправьте снова.',offlineForm:'Сейчас нет связи с сервером. Попробуйте позже.',
  back:'Назад',hints:['сантехник','газель','укол','электрик','такси','уголь'],
  waGreet:'Здравствуйте! Нашёл ваш контакт на сайте https://urker24.kz в разделе «{s}».',
  nothing:q=>`Пока никого нет по запросу «${q}»`,
@@ -88,7 +88,7 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
  sortNoteLive:'Алдымен VIP, содан кейін пікір санын ескеретін рейтинг бойынша (бір ғана бестік ондаған жақсы бағадан озбайды). Пікірлер тексеруден өтеді.',
  err_already_reviewed:'Сіз бұл шеберге пікір қалдырып қойғансыз.',err_rate_limited:'Тым көп жіберілді. Кейінірек қайталап көріңіз.',
  err_invalid_phone:'Телефон нөмірін тексеріңіз.',err_no_consent:'Нөмірді көрсетуге келісім белгісін қойыңыз.',
- err_generic:'Жіберу мүмкін болмады. Интернетті тексеріп, қайталап көріңіз.',offlineForm:'Қазір сервермен байланыс жоқ. Кейінірек қайталап көріңіз.',
+ err_generic:'Жіберу мүмкін болмады. Интернетті тексеріп, қайталап көріңіз.',stillLoading:'Бірнеше секунд күтіңіз — деректер әлі жүктелуде, содан кейін қайта жіберіңіз.',offlineForm:'Қазір сервермен байланыс жоқ. Кейінірек қайталап көріңіз.',
  draft:'Жоба-прототип · жариялауға арналмаған',brand:'Үркер',tagline:'Жаныңыздағы шеберлер мен қызметтер',
  navHome:'Басты бет',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Маңызды',back:'Артқа',
  searchPh:'Мысалы: көмір, жүк тасу',searchTitle:'Шебер немесе қызмет іздеу',cats:'Барлық бөлімдер',catsHint:'Бөлімді басып, қажетті маманды/бизнесті таңдаңыз',
@@ -125,6 +125,7 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
 // ---------- backend ----------
 const SB=window.SBCreate?window.SBCreate({auth:false}):{enabled:false};
 let LIVE=false, OFFLINE=false, ADS=[];
+let LOADING=!!SB.enabled;   // пока база не ответила — «Загрузка…», никаких демо-данных
 function deviceId(){let d=localStorage.getItem('urker_device');if(!d||!/^[A-Za-z0-9-]{8,64}$/.test(d)){d=(crypto.randomUUID?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join(''));localStorage.setItem('urker_device',d)}return d}
 const errMsg=e=>{const c=String(e&&e.code||'');for(const k of ['already_reviewed','rate_limited','invalid_phone','no_consent','bad_photo','too_many_photos','bad_instagram','bad_2gis','too_long','empty','not_found'])if(c.includes(k))return t('err_'+k);return t('err_generic')};
 const hp=()=>`<div style="position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden" aria-hidden="true"><label>Website<input id="hpf" name="website" tabindex="-1" autocomplete="off"></label></div>`;
@@ -165,9 +166,9 @@ const RK='urker_reviews_demo_v1';
 const getRevs=()=>{try{return JSON.parse(localStorage.getItem(RK))||{}}catch(e){return{}}};
 const BAYES_C=5;
 function demoMean(){const all=Object.values(getRevs()).flat();return all.length?all.reduce((a,b)=>a+b.stars,0)/all.length:4.0}
-function bayes(id,m){if(LIVE){const e=D.entries.find(x=>x.id==id)||{};return e.cnt?(e.bayes!=null?e.bayes:(BAYES_C*4+e.avg*e.cnt)/(BAYES_C+e.cnt)):null}const r=getRevs()[id]||[];if(!r.length)return null;return (BAYES_C*m+r.reduce((a,b)=>a+b.stars,0))/(BAYES_C+r.length)}
+function bayes(id,m){if(LIVE){const e=D.entries.find(x=>x.id==id)||{};return e.cnt?(e.bayes!=null?e.bayes:(BAYES_C*4+e.avg*e.cnt)/(BAYES_C+e.cnt)):null}return null}  // без базы рейтингов нет (локальные «демо»-отзывы не используются)
 const fmtAvg=v=>(Math.round(v*10)/10).toFixed(1).replace('.',',');
-function rating(id){if(LIVE){const e=D.entries.find(x=>x.id==id)||{};return{n:e.cnt||0,avg:e.avg||0,list:[]}}const r=getRevs()[id]||[];return{n:r.length,avg:r.length?r.reduce((a,b)=>a+b.stars,0)/r.length:0,list:r}}
+function rating(id){if(LIVE){const e=D.entries.find(x=>x.id==id)||{};return{n:e.cnt||0,avg:e.avg||0,list:[]}}return{n:0,avg:0,list:[]}}
 
 // ---------- search index ----------
 const subTokens={};
@@ -231,7 +232,7 @@ function card(e,showSection){
    <a class="btn call ${bad?'off':''}" aria-label="${esc(t('call'))}: ${esc(fmtPhone(e))}" ${bad?'aria-disabled="true"':`href="tel:${esc(e.tel)}"`}>📞 <span>${t('callS')}</span></a>
   </div>
   <div class="rate">${stars(r.avg)}<span class="rc">${r.n?`<b>★ ${fmtAvg(r.avg)}</b> (${r.n})`:t('noReviews')}</span>
-   <button data-review="${e.id}">✍️ ${t('review')}${LIVE?'':` <small>(${t('demo')})</small>`}</button></div>
+   <button data-review="${e.id}">✍️ ${t('review')}</button></div>
   ${CLAIMS_ON?`<button class="claim-l" data-claim="${e.id}">${t('claimL')}</button>`:''}
  </article>`}
 const adWa=()=>{const d=String((window.URKER_CONFIG||{}).adContactWa||'').replace(/\D/g,'');return /^7\d{10}$/.test(d)?d:(/^87\d{9}$/.test(d)?'7'+d.slice(1):'')};
@@ -262,7 +263,7 @@ function bindSearch(){
 }
 
 // ---------- announcements ----------
-let ANN=(window.URKER_ANN||[]).slice();
+let ANN=[];   // только из базы; демо-объявлений нет
 const ANN_TYPES={power:{ic:'⚡',c:'#f2a100',kw:'свет света светом электричество электроэнергия электроэнергии электр энергия отключение света нет света жарық жарык электр'},
  water:{ic:'💧',c:'#2f8fdb',kw:'вода воды водой водоснабжение холодная горячая отключение воды нет воды су суык ыстык'},
  gas:{ic:'🔥',c:'#e8503c',kw:'газ газа газоснабжение отключение газа утечка газ'},
@@ -283,16 +284,16 @@ const annTokens=a=>norm([L(a.title),L(a.area),L(a.source),ANN_TYPES[a.type]?.kw|
 function annSearch(query){const qs=norm(query).split(' ').filter(w=>w.length>=2);if(!qs.length)return[];
  return annSorted().filter(a=>{const tk=annTokens(a);return qs.every(q=>tokScore(q,tk)>0)})}
 function annCard(a,compact){const ty=ANN_TYPES[a.type]||ANN_TYPES.other,act=annActive(a);
- const msg=`${ty.ic} ${L(a.title)}\n📍 ${L(a.area)}\n🕒 ${annWhen(a)}${a.source?'\n'+t('annSource')+': '+L(a.source):''}${a.demo?'\n('+t('annExample')+')':''}`;
+ const msg=`${ty.ic} ${L(a.title)}\n📍 ${L(a.area)}\n🕒 ${annWhen(a)}${a.source?'\n'+t('annSource')+': '+L(a.source):''}`;
  return `<article class="ann ${a.urgent&&act?'urgent':''} ${act?'':'done'}" style="--tc:${ty.c}">
   <div class="ann-ic">${ty.ic}</div><div class="ann-b">
-  <div class="ann-tags">${a.demo?`<span class="tag demo">${t('annExample')}</span>`:''}${a.urgent&&act?`<span class="tag urg">❗ ${t('annUrgent')}</span>`:''}<span class="st ${act?'on':''}">${act?'● '+t('annActive'):'✓ '+t('annDone')}</span></div>
+  <div class="ann-tags">${a.urgent&&act?`<span class="tag urg">❗ ${t('annUrgent')}</span>`:''}<span class="st ${act?'on':''}">${act?'● '+t('annActive'):'✓ '+t('annDone')}</span></div>
   <h3>${esc(L(a.title))}</h3>
   <div class="ann-l">📍 ${esc(L(a.area))}</div><div class="ann-l">🕒 ${esc(annWhen(a))}</div>
   ${!compact&&a.source?`<div class="ann-l src">${t('annSource')}: ${esc(L(a.source))}</div>`:''}
   ${compact?'':`<a class="btn wa sm" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${WA_SVG}${t('annShare')}</a>`}
  </div></article>`}
-const annEmpty=()=>`<div class="ann-empty">✅ <b>${t('annEmpty')}</b><span>${t('annEmptyS')}</span></div>`;
+const annEmpty=()=>LOADING?`<div class="ann-empty">⏳ <b>${t('loading')}</b></div>`:`<div class="ann-empty">✅ <b>${t('annEmpty')}</b><span>${t('annEmptyS')}</span></div>`;
 function annBlock(){const act=annSorted().filter(annActive).slice(0,3);
  return `<section class="ann-block"><div class="ann-h"><h2>📣 ${t('annTitle')}</h2><a href="#/ann">${t('annAll')}</a></div>
   ${act.length?act.map(a=>`<a href="#/ann/${a.id}" class="ann-link">${annCard(a,true)}</a>`).join(''):annEmpty()}</section>`}
@@ -319,7 +320,7 @@ function viewReport(){
   <button class="btn primary" type="submit">${t('rSend')}</button></form>`;
  $('#repf').onsubmit=ev=>{ev.preventDefault();const f=ev.target;if(!$('#r1').value.trim()||!$('#r2').value.trim()){toast(t('repErr'));return}
   if(OFFLINE){toast(t('offlineForm'));return}
-  if(!LIVE){toast(t('rSent'));f.reset();return}
+  if(!LIVE){toast(t(LOADING?'stillLoading':'offlineForm'));return}
   sending(f.querySelector('[type=submit]'),async()=>{
    try{await SB.rpc('submit_report',{p_type:(f.querySelector('[name=rt]:checked')||{}).value||'other',p_title:$('#r1').value,p_area:$('#r2').value,p_when:$('#r3').value,
      p_source:$('#r4').value,p_contact:$('#r5').value,p_device_id:deviceId(),p_hp:$('#hpf').value});toast(t('liveRepSent'));f.reset()}
@@ -327,7 +328,7 @@ function viewReport(){
 }
 
 // ---------- новости района ----------
-let NEWS=(window.URKER_NEWS||[]).slice();
+let NEWS=[];  // только из базы; демо-новостей нет
 const NEWS_KW={event:'событие мероприятие праздник концерт иc-шара мереке',opening:'открытие открылся открылась новый магазин кафе ашылу ашылды',achievement:'достижение победа награда спорт олимпиада жетистик жениc',
  improvement:'благоустройство двор площадка дорога асфальт освещение парк деревья абаттандыру аула',akimat:'акимат аким встреча собрание жители акимдик кездесу',other:'новость новости жаналык'};
 const LT=o=>{o=o||{};const want=o[lang]||'',other=o[lang==='kz'?'ru':'kz']||'';return want?{text:want,fb:false}:{text:other,fb:!!other}};
@@ -337,9 +338,9 @@ function newsCover(n,cls){const c=(t('newsCats')[n.category]||'📰').split(' ')
  return n.cover?`<div class="${cls}" style="background-image:url('${esc(n.cover)}')"></div>`:`<div class="${cls} ph"><span>${c}</span></div>`}
 function newsCard(n,compact){const ti=LT(n.title),le=LT(n.lead);
  return `<a class="news-card ${compact?'compact':''}" href="#/news/${n.id}">${newsCover(n,'nc-img')}<div class="nc-b">
-  <div class="nc-tags">${n.demo?`<span class="tag demo">${t('annExample')}</span>`:''}${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span></div>
+  <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span></div>
   <h3>${esc(ti.text)}</h3>${compact?'':`<p>${esc(le.text)}</p>`}<small>${esc(newsDate(n))}${n.photos&&n.photos.length>1?' · 🖼 '+t('photosN')(n.photos.length):''}${n.video?' · ▶️ '+t('video'):''}</small></div></a>`}
-const newsEmpty=()=>`<div class="ann-empty">📰 <b>${t('newsEmpty')}</b><span>${t('newsEmptyS')}</span><a href="#/news/suggest" class="lnk">${t('newsSuggest')}</a></div>`;
+const newsEmpty=()=>LOADING?`<div class="ann-empty">⏳ <b>${t('loading')}</b></div>`:`<div class="ann-empty">📰 <b>${t('newsEmpty')}</b><span>${t('newsEmptyS')}</span><a href="#/news/suggest" class="lnk">${t('newsSuggest')}</a></div>`;
 function newsBlock(){const l=newsSorted().slice(0,3);
  return `<section class="ann-block"><div class="ann-h"><h2>📰 ${t('newsTitle')}</h2><a href="#/news">${t('newsAll')}</a></div>${l.length?l.map(n=>newsCard(n,true)).join(''):newsEmpty()}</section>`}
 const newsTokens=n=>norm([n.title&&n.title.ru,n.title&&n.title.kz,n.lead&&n.lead.ru,n.lead&&n.lead.kz,n.body&&n.body.ru,n.body&&n.body.kz,NEWS_KW[n.category]||'',T.ru.newsCats[n.category],T.kz.newsCats[n.category]].join(' ')).split(' ').filter(Boolean);
@@ -371,7 +372,7 @@ function viewArticle(id){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/news'" aria-label="${t('back')}">←</button><h1 class="sm">📰 ${t('newsTitle')}</h1></div>
  <article class="article">
   ${photos.length>1?`<div class="gallery" id="gal">${photos.map((u,i)=>`<img src="${esc(u)}" alt="" loading="${i?'lazy':'eager'}">`).join('')}</div><div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:newsCover(n,'art-cover')}
-  <div class="nc-tags">${n.demo?`<span class="tag demo">${t('annExample')}</span>`:''}${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span><small>${esc(newsDate(n))}</small></div>
+  <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span><small>${esc(newsDate(n))}</small></div>
   <h1>${esc(ti.text)}</h1>
   ${fb?`<p class="fb-note">🌐 ${t('fallbackNote')}</p>`:''}
   ${le.text?`<p class="lead">${esc(le.text)}</p>`:''}
@@ -401,7 +402,7 @@ function viewSuggest(){
   for(const f of files.slice(0,3-photos.length)){try{let d=await compressImage(f,1280,0.8);if(d.length>580000)d=await compressImage(f,960,0.7);photos.push(d)}catch(e){toast(t('sPhotoErr'))}}draw()};
  $('#sugf').onsubmit=ev=>{ev.preventDefault();const f=ev.target;if($('#s1').value.trim().length<3){toast(t('sErr'));return}
   if(OFFLINE){toast(t('offlineForm'));return}
-  if(!LIVE){toast(t('sSentDemo'));f.reset();photos=[];draw();return}
+  if(!LIVE){toast(t(LOADING?'stillLoading':'offlineForm'));return}
   sending(f.querySelector('[type=submit]'),async()=>{try{await SB.rpc('submit_news',{p_title:$('#s1').value,p_text:$('#s2').value,p_contact:$('#s4').value,p_photos:photos,p_device_id:deviceId(),p_hp:$('#hpf').value},30000);
    toast(t('sSent'));f.reset();photos=[];draw()}catch(e){toast(errMsg(e))}})};
 }
@@ -425,12 +426,12 @@ function viewCat(id,subId){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${s.emoji} ${esc(secTitle(s))}</h1></div>
   ${showChips?`<div class="chips"><button class="${subId?'':'on'}" data-sub="">${t('all')}</button>${vs.map(x=>`<button class="${x.id===subId?'on':''}" data-sub="${x.id}">${esc(x.emoji)} ${esc(subTitle(x))}</button>`).join('')}</div>`:''}
   <div class="sortbar"><span>${t('found')(list.length)}</span><select id="sort"><option value="list">${t('sortList')}</option><option value="rating" ${sortMode==='rating'?'selected':''}>${t('sortRating')}</option></select></div>
-  <p class="demo-note mini">${LIVE?'ℹ️ '+t('sortNoteLive'):'🧪 '+t('sortNote')}</p>
+  <p class="demo-note mini">ℹ️ ${t('sortNoteLive')}</p>
   ${list.some(e=>e.vip)?'':vipCard(s)}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
  $('#sort').onchange=ev=>{sortMode=ev.target.value;viewCat(id,subId)};
 }
-function formNote(liveKey,demoKey){return LIVE?`<p class="demo-note live">ℹ️ ${t(liveKey)}</p>`:(OFFLINE?`<p class="demo-note warn">⚠️ ${t('offlineForm')}</p>`:`<p class="demo-note">🧪 ${t(demoKey)}</p>`)}
+function formNote(liveKey){return OFFLINE?`<p class="demo-note warn">⚠️ ${t('offlineForm')}</p>`:`<p class="demo-note live">ℹ️ ${t(liveKey)}</p>`}
 async function sending(btn,fn){btn.disabled=true;try{await fn()}finally{btn.disabled=false}}
 function viewAdd(){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="history.length>1?history.back():location.hash='#/'" aria-label="${t('back')}">←</button><h1>➕ ${t('addTitle')}</h1></div>
@@ -448,7 +449,7 @@ function viewAdd(){
  $('#addf').onsubmit=ev=>{ev.preventDefault();const f=ev.target,ph=$('#f4').value.replace(/\D/g,'');
   if(!$('#f1').value.trim()||!$('#f2').value||ph.length!==11||!$('#f6').checked){toast(t('addErr'));return}
   if(OFFLINE){toast(t('offlineForm'));return}
-  if(!LIVE){toast(t('sent'));f.reset();return}
+  if(!LIVE){toast(t(LOADING?'stillLoading':'offlineForm'));return}
   sending(f.querySelector('[type=submit]'),async()=>{
    try{await SB.rpc('submit_business',{p_name:$('#f1').value,p_section_id:$('#f2').value,p_description:$('#f3').value,p_phone:ph,p_address:$('#f5').value,
      p_consent:$('#f6').checked,p_wants_vip:$('#f7').checked,p_device_id:deviceId(),p_hp:$('#hpf').value});toast(t('liveSent'));f.reset()}
@@ -456,8 +457,8 @@ function viewAdd(){
 }
 function openReview(id){
  const e=D.entries.find(x=>x.id==id),r=rating(id);let pick=0;const m=$('#modal');
- m.innerHTML=`<div class="sheet">${LIVE?'':`<span class="tag demo">${t('demo')}</span>`}<h2 style="margin:6px 0">${t('rvTitle')}: ${esc(e.name||fmtPhone(e))}</h2>
-  ${LIVE?`<p class="demo-note live">ℹ️ ${t('rvLiveNote')}</p>`:(OFFLINE?`<p class="demo-note warn">⚠️ ${t('offlineForm')}</p>`:`<p class="demo-note">🧪 ${t('rvDemo')}</p>`)}
+ m.innerHTML=`<div class="sheet"><h2 style="margin:6px 0">${t('rvTitle')}: ${esc(e.name||fmtPhone(e))}</h2>
+  ${LIVE?`<p class="demo-note live">ℹ️ ${t('rvLiveNote')}</p>`:(OFFLINE?`<p class="demo-note warn">⚠️ ${t('offlineForm')}</p>`:'')}
   <div class="pick" role="radiogroup">${[1,2,3,4,5].map(i=>`<button type="button" data-s="${i}" aria-label="${i}">★</button>`).join('')}</div>
   <form id="rvf" style="position:relative">${hp()}<textarea id="rvt" maxlength="1000" placeholder="${t('rvPh')}" class="rv-in" style="min-height:80px"></textarea>
   ${LIVE?`<input id="rvn" class="rv-in" maxlength="60" placeholder="${t('rvName')}"><input id="rvp" class="rv-in" type="tel" inputmode="tel" placeholder="${t('rvPhone')}">`:''}
@@ -472,8 +473,7 @@ function openReview(id){
   .catch(()=>{const rl=$('#rvlist');if(rl)rl.innerHTML=''});
  $('#rvf').onsubmit=ev=>{ev.preventDefault();if(!pick){toast(t('rvPick'));return}
   if(OFFLINE){toast(t('offlineForm'));return}
-  if(!LIVE){const all=getRevs();(all[id]=all[id]||[]).push({stars:pick,text:$('#rvt').value.trim().slice(0,500),date:new Date().toISOString()});
-   localStorage.setItem(RK,JSON.stringify(all));m.hidden=true;toast(t('rvSaved'));route();return}
+  if(!LIVE){toast(t(LOADING?'stillLoading':'offlineForm'));return}
   sending(ev.target.querySelector('.btn'),async()=>{
    try{await SB.rpc('submit_review',{p_specialist_id:+id,p_stars:pick,p_text:$('#rvt').value,p_device_id:deviceId(),p_phone:$('#rvp').value||null,p_name:$('#rvn').value||null,p_hp:$('#hpf').value});
     m.hidden=true;toast(t('rvSent'))}catch(e){toast(errMsg(e))}})};
@@ -482,11 +482,11 @@ function openReview(id){
 Object.assign(T.ru,{claimL:'Это ваш бизнес? Дополните карточку',clTitle:'Дополнить карточку',clNote:'Заполните то, что хотите показать клиентам. После проверки данные появятся на карточке. Если ваш телефон совпадает с номером на карточке — проверим быстрее.',
  clOwner:'Ваше имя',clBiz:'Название бизнеса (если есть)',clIg:'Instagram (@имя или ссылка)',clGis:'Ссылка на 2ГИС',clHours:'Часы работы (например: Пн–Сб 9:00–19:00)',clDescrRu:'Коротко о себе / услугах (по-русски, до 300 знаков)',clDescrKz:'Қысқаша (қазақша, 300 таңбаға дейін) — по желанию',
  clPhotos:'Фото ваших работ (до 3)',clPhone:'Ваш телефон (обязательно)',clSend:'Отправить на проверку',clSent:'Спасибо! Данные отправлены на проверку.',clBadIg:'Instagram: укажите @имя или ссылку instagram.com/имя',clBadGis:'2ГИС: вставьте ссылку вида https://2gis.kz/…',
- clEmpty:'Заполните хотя бы одно поле',clDemo:'Демо-режим: форма заработает после подключения базы.',verified:'Проверено',hoursL:'Часы',err_bad_instagram:'Instagram: укажите @имя или ссылку instagram.com/имя',err_bad_2gis:'2ГИС: вставьте ссылку вида https://2gis.kz/…',err_too_long:'Описание — не больше 300 знаков',err_empty:'Заполните хотя бы одно поле',err_not_found:'Карточка не найдена'});
+ clEmpty:'Заполните хотя бы одно поле',clDemo:'Сейчас нет связи с сервером. Попробуйте позже.',verified:'Проверено',hoursL:'Часы',err_bad_instagram:'Instagram: укажите @имя или ссылку instagram.com/имя',err_bad_2gis:'2ГИС: вставьте ссылку вида https://2gis.kz/…',err_too_long:'Описание — не больше 300 знаков',err_empty:'Заполните хотя бы одно поле',err_not_found:'Карточка не найдена'});
 Object.assign(T.kz,{claimL:'Бұл сіздің бизнесіңіз бе? Карточканы толықтырыңыз',clTitle:'Карточканы толықтыру',clNote:'Клиенттерге көрсеткіңіз келетінді толтырыңыз. Тексерістен кейін деректер карточкада пайда болады. Телефоныңыз карточкадағы нөмірмен сәйкес келсе — тезірек тексереміз.',
  clOwner:'Атыңыз',clBiz:'Бизнес атауы (бар болса)',clIg:'Instagram (@атау немесе сілтеме)',clGis:'2ГИС сілтемесі',clHours:'Жұмыс уақыты (мысалы: Дс–Сб 9:00–19:00)',clDescrRu:'Қысқаша орысша (300 таңбаға дейін) — қаласаңыз',clDescrKz:'Өзіңіз / қызметтер туралы қысқаша (қазақша, 300 таңбаға дейін)',
  clPhotos:'Жұмыстарыңыздың фотосы (3-ке дейін)',clPhone:'Телефоныңыз (міндетті)',clSend:'Тексеруге жіберу',clSent:'Рақмет! Деректер тексеруге жіберілді.',clBadIg:'Instagram: @атау немесе instagram.com/атау сілтемесін жазыңыз',clBadGis:'2ГИС: https://2gis.kz/… түріндегі сілтемені қойыңыз',
- clEmpty:'Кемінде бір өрісті толтырыңыз',clDemo:'Демо режим: база қосылғанда форма жұмыс істейді.',verified:'Тексерілген',hoursL:'Уақыты',err_bad_instagram:'Instagram: @атау немесе instagram.com/атау сілтемесін жазыңыз',err_bad_2gis:'2ГИС: https://2gis.kz/… түріндегі сілтемені қойыңыз',err_too_long:'Сипаттама — 300 таңбадан аспауы керек',err_empty:'Кемінде бір өрісті толтырыңыз',err_not_found:'Карточка табылмады'});
+ clEmpty:'Кемінде бір өрісті толтырыңыз',clDemo:'Қазір сервермен байланыс жоқ. Кейінірек көріңіз.',verified:'Тексерілген',hoursL:'Уақыты',err_bad_instagram:'Instagram: @атау немесе instagram.com/атау сілтемесін жазыңыз',err_bad_2gis:'2ГИС: https://2gis.kz/… түріндегі сілтемені қойыңыз',err_too_long:'Сипаттама — 300 таңбадан аспауы керек',err_empty:'Кемінде бір өрісті толтырыңыз',err_not_found:'Карточка табылмады'});
 const IG_RE=/^(@?[A-Za-z0-9._]{1,30}|(https?:\/\/)?(www\.)?instagram\.com\/[A-Za-z0-9._]{1,30}\/?(\?.*)?)$/;
 const GIS_RE=/^https?:\/\/([a-z0-9-]+\.)*2gis\.(kz|ru|com)(\/|$)/i;
 const igHandle=v=>String(v||'').trim().replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i,'').replace(/^@/,'').replace(/[/?#].*$/,'').toLowerCase();
@@ -499,7 +499,7 @@ const dataUrlBlob=u=>fetch(u).then(r=>r.blob());
 function openClaim(id){
  const e=D.entries.find(x=>x.id==id);if(!e)return;const m=$('#modal');let files=[];
  m.innerHTML=`<div class="sheet claim"><h2 style="margin:6px 0">✏️ ${t('clTitle')}</h2><div class="sub">${esc(subTitle(subById[e.sub]||{}))} · ${esc(e.name||'')} ${esc(fmtPhone(e))}</div>
-  <p class="demo-note ${LIVE?'live':''}">${LIVE?'ℹ️ '+t('clNote'):'🧪 '+t('clDemo')}</p>
+  <p class="demo-note ${LIVE?'live':''}">${LIVE?'ℹ️ '+t('clNote'):'⚠️ '+t('clDemo')}</p>
   <form id="clf" style="position:relative">${hp()}
    <label for="cl1">${t('clOwner')}</label><input id="cl1" class="rv-in" maxlength="80" autocomplete="name">
    <label for="cl2">${t('clBiz')}</label><input id="cl2" class="rv-in" maxlength="80" autocomplete="organization">
@@ -575,17 +575,21 @@ function mapNews(r){const ph=(Array.isArray(r.photos)?r.photos:[]).map(p=>typeof
  return{id:r.id,category:r.category,pinned:r.pinned,demo:r.is_demo,date:toAlmaty(r.publish_at),title:{ru:r.title_ru,kz:r.title_kz},lead:{ru:r.lead_ru,kz:r.lead_kz},body:{ru:r.body_ru,kz:r.body_kz},
   cover:r.cover_url||ph[0]||'',photos:r.cover_url&&ph.includes(r.cover_url)?[r.cover_url].concat(ph.filter(u=>u!==r.cover_url)):ph,video:r.video_url||''}}
 async function loadBackend(){
- if(!SB.enabled)return;
+ if(!SB.enabled){LOADING=false;return}
+ const get=async(q,ms)=>{try{return await SB.get(q,ms)}catch(e){await new Promise(r=>setTimeout(r,1500));return SB.get(q,ms)}};  // одна повторная попытка
  try{
-  const [sp,an,ad]=await Promise.all([
-   SB.get('specialists_public?select=*&order=sort_order.asc,id.asc',6000),
-   SB.get('announcements?select=*&order=start_at.desc.nullslast',6000),
-   SB.get('ads?select=*&order=sort_order.asc',6000)]);
-  const nw=await SB.get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',6000).catch(()=>null);
+  const [sp,an,ad,nw]=await Promise.all([
+   get('specialists_public?select=*&order=sort_order.asc,id.asc',15000),
+   get('announcements?select=*&order=start_at.desc.nullslast',15000).catch(()=>null),
+   get('ads?select=*&order=sort_order.asc',15000).catch(()=>null),
+   get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',15000).catch(()=>null)]);
   if(window.URKER_L)await URKER_L.load().catch(e=>console.warn('listings',e&&e.message));
   if(!Array.isArray(sp)||!sp.length)throw new Error('empty');
-  D.entries=sp.filter(r=>subById[r.sub_id]).map(mapSpec);ANN=an.map(mapAnn);ADS=ad;NEWS=Array.isArray(nw)?nw.map(mapNews):[];LIVE=true;OFFLINE=false;sortMode='rating';buildIndex();
+  D.entries=sp.filter(r=>subById[r.sub_id]).map(mapSpec);
+  ANN=Array.isArray(an)?an.filter(r=>!r.is_demo).map(mapAnn):[];ADS=Array.isArray(ad)?ad:[];NEWS=Array.isArray(nw)?nw.filter(r=>!r.is_demo).map(mapNews):[];
+  LIVE=true;OFFLINE=false;sortMode='rating';buildIndex();
  }catch(e){OFFLINE=true;LIVE=false;console.warn('Urker backend unreachable, using built-in list',e&&e.message)}
+ LOADING=false;
  const n=$('#netnote');if(n){n.hidden=!OFFLINE;n.textContent=t('offline')}
  const q=$('#q');if(q&&document.activeElement===q)renderResults(q.value);else route();
 }

@@ -82,7 +82,7 @@ function collect(form,spec){const o={};for(const [n,k] of spec){const el=form.el
 const SPEC_SPEC=()=>[['name'],['phone'],['section_id','select',D.sections.map(s=>[s.id,s.emoji+' '+secT(s)])],['sub_id','select'],['note','text'],['address',null,{full:true}],['wa'],
  ['sort_order','num'],['recommended','bool'],['is_new','bool'],['vip','bool'],['vip_until','dt'],...(F_CLAIM?[['verified','bool'],['business_name'],['owner_name'],['instagram'],['gis_url',null,{full:true}],['hours'],['descr_ru','text'],['descr_kz','text']]:[]),['status','select',['pending','approved','rejected','hidden'].map(s=>[s,t('st')[s]])],['admin_note','text']];
 const ANN_SPEC=()=>[['type','select',Object.keys(T.ru.types).map(k=>[k,t('types')[k]])],['status','select',['draft','published','archived'].map(s=>[s,t('st')[s]])],
- ['title_ru',null,{full:true}],['title_kz',null,{full:true}],['area_ru'],['area_kz'],['source_ru'],['source_kz'],['start_at','dt'],['end_at','dt'],['urgent','bool'],['is_demo','bool']];
+ ['title_ru',null,{full:true}],['title_kz',null,{full:true}],['area_ru'],['area_kz'],['source_ru'],['source_kz'],['start_at','dt'],['end_at','dt'],['urgent','bool']];
 const AD_SPEC=()=>[['emoji'],['active','bool'],['title_ru'],['title_kz'],['text_ru','text'],['text_kz','text'],['link_url',null,{full:true}],['wa'],['starts_at','dt'],['ends_at','dt'],['sort_order','num']];
 function editor(spec,row,extraBtns){
  return `<form class="ed" data-ed>${spec.map(([n,k,o])=>{
@@ -134,8 +134,8 @@ async function vListings(box){
   +(rows.length?rows.map(r=>{const exp=new Date(r.expires_at).getTime()<now;const ph=(r.photos||[]);return `<div class="row lrow" data-id="${r.id}">
    ${ph[0]?`<img class="lthumb" src="${esc(lPhoto(ph[0]))}" alt="">`:`<div class="lthumb ph">${L.sec[r.section].split(' ')[0]}</div>`}
    <div class="lmain"><h3>${r.highlighted?'⭐ ':''}${esc(r.title)}</h3>
-   <div class="meta">${pill(r.status)}${exp&&r.status==='approved'?`<span class="pill rejected">${L.st.expired}</span>`:''} ${esc(L.sec[r.section])} · ${esc(lKindT(r))} · ${esc(lCatT(r))} · ${r.price_mode==='fixed'?esc(r.price)+' ₸':esc(L.pm[r.price_mode]||'')} · 📞 ${esc(r.phone)}${r.has_wa?' (WA)':''}
-    · ${fmtDT(r.created_at)} · ${L.until} ${fmtDT(r.expires_at)} · 👁 ${r.views} · 🖼 ${ph.length||L.noPhotos}${r.bumped_at?` · ⬆ ${L.bumped} ${fmtDT(r.bumped_at)}`:''} · ${t('device')}: ${esc(String(r.device_id||'').slice(0,8))}</div>
+   <div class="meta">${pill(r.status)}${exp&&r.status==='approved'?`<span class="pill rejected">${L.st.expired}</span>`:''} ${esc(L.sec[r.section])} · ${esc(lKindT(r))} · ${esc(lCatT(r))} · ${r.price_mode==='fixed'?esc(Number(r.price).toLocaleString('ru-RU').replace(/\s/g,' '))+' ₸ · ':(L.pm[r.price_mode]?esc(L.pm[r.price_mode])+' · ':'')}📞 ${esc(r.phone)}${r.has_wa?' (WA)':''}
+    · ${fmtDT(r.created_at)} · ${L.until} ${fmtDT(r.expires_at)} · 👁 ${r.views} · 🖼 ${ph.length||L.noPhotos}${r.bumped_at?` · ⬆ ${L.bumped} ${fmtDT(r.bumped_at)}`:''}${r.device_id?` · ${t('device')}: ${esc(String(r.device_id).slice(0,8))}`:''}</div>
    ${r.body?`<p class="pre">${esc(r.body)}</p>`:''}${r.place?`<p>📍 ${esc(r.place)}${r.event_date?' · 🗓 '+esc(r.event_date):''}</p>`:''}
    ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
    <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
@@ -188,7 +188,7 @@ async function vClaims(box){
   <div class="tabs">${['pending','approved','rejected',''].map(s=>`<button data-cls="${s}" class="${CLF===s?'on':''}">${s?L.st[s]:LT().all}</button>`).join('')}</div>`
  +(rows.length?rows.map(r=>{const s=S[r.specialist_id]||{};return `<div class="row lrow1" data-id="${r.id}">
    <h3>${s.verified?'<span class="pill approved">✔</span> ':''}${esc(s.name||'—')} · ${esc(s.phone||'')} · ${esc(subT(s.sub_id))}</h3>
-   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)} · ${t('device')}: ${esc(String(r.device_id||'').slice(0,8))}</div>
+   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${r.device_id?` · ${t('device')}: ${esc(String(r.device_id).slice(0,8))}`:''}</div>
    <p class="${r.phone_match?'okline':'warnline'}">${r.phone_match?L.match:L.nomatch} · 📞 ${esc(r.phone)}</p>
    <table class="cmp"><tr><th></th><th>${L.claim}</th><th>${L.now}</th></tr>${F.filter(k=>r[k]).map(k=>`<tr><td>${L.f[k]}</td><td><b>${esc(r[k])}</b></td><td>${esc(s[k]||'—')}</td></tr>`).join('')}</table>
    ${(r.photos||[]).length?`<div class="pgrid sm">${r.photos.map(p=>`<div class="ph"><img src="${esc(SB.publicUrl('profiles',p.path))}" alt=""></div>`).join('')}</div>`:''}
@@ -284,7 +284,7 @@ const vAds=crud('ads',AD_SPEC,r=>`<h3>${esc(r.emoji)} ${esc(lang==='kz'&&r.title
 // ---------- новости ----------
 const NEWS_SPEC=()=>[['category','select',Object.keys(T.ru.cats).map(k=>[k,t('cats')[k]])],['status','select',['draft','published','archived'].map(s=>[s,t('st')[s]])],
  ['publish_at','dt'],['pinned','bool'],['title_ru',null,{full:true}],['title_kz',null,{full:true}],['lead_ru','text'],['lead_kz','text'],['body_ru','long'],['body_kz','long'],
- ['video_url',null,{full:true}],['is_demo','bool']];
+ ['video_url',null,{full:true}]];
 function compress(src,maxSide,q){return new Promise((res,rej)=>{const isBlob=src instanceof Blob;const u=isBlob?URL.createObjectURL(src):src;const img=new Image();
  img.onload=()=>{const k=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
   const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);if(isBlob)URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error('encode')),'image/jpeg',q)};
