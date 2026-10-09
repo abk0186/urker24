@@ -242,7 +242,7 @@ function card(e,showSection){
   ${e.biz||e.verified?`<div class="biz">${e.biz?esc(e.biz):''}${e.verified?`<span class="vf">✔ ${t('verified')}</span>`:''}</div>`:''}
   <div class="idl"><span class="nm">${esc(e.name||e.owner||fmtPhone(e))}</span>${e.name||e.owner?`<span class="ph">${esc(fmtPhone(e))}</span>`:''}</div>
   ${e.note?`<p class="note">${esc(e.note)}</p>`:''}${e.address?`<p class="note">📍 ${esc(e.address)}</p>`:''}${profileHtml(e)}
-  ${e.star||e.new||bad||toll||others.length?`<div class="badges">${e.star?`<span class="badge star">${t('starB')}</span>`:''}${e.new?`<span class="badge new">${t('newB')}</span>`:''}
+  ${bad||toll||others.length?`<div class="badges">
    ${bad?`<span class="badge warn">${t('warn10')}</span>`:''}${toll?`<span class="badge">${t('tollfree')}</span>`:''}
    ${others.length?`<span class="badge">${t('dup')}${esc(others.join(', '))}</span>`:''}</div>`:''}
   <div class="actions">
