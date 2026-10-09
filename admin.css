@@ -76,7 +76,7 @@ body.admin h1,body.admin h2,.adm h1,.adm h2{overflow-wrap:anywhere;hyphens:auto}
  padding:calc(7px + var(--st)) calc(10px + var(--sr)) 7px calc(12px + var(--sl));box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .admbar[hidden]{display:none}
 .admbar .ab-t{font-size:15px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.admbar .ab-u{grid-column:1/-1;font-size:13px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.admbar .ab-u{grid-column:1;grid-row:2;align-self:center;font-size:13px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .admbar .sep{display:none}
 .admbar a,.admbar button{font:inherit;font-size:13.5px;font-weight:600;border-radius:10px;padding:6px 10px;text-decoration:none;white-space:nowrap;cursor:pointer}
 .admbar a{color:#fff;border:1px solid rgba(255,255,255,.45)}
@@ -84,3 +84,27 @@ body.admin h1,body.admin h2,.adm h1,.adm h2{overflow-wrap:anywhere;hyphens:auto}
 .admbar a:focus-visible,.admbar button:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
 @media (max-width:359px){.admbar{column-gap:5px;padding-left:calc(10px + var(--sl));padding-right:calc(8px + var(--sr))}.admbar a,.admbar button{padding:6px 8px;font-size:13px}.admbar .ab-t{font-size:14px}}
 body.admin.in .top{padding-top:8px;background:linear-gradient(135deg,#2c4f7c,#1e3a5f)}
+
+.admbar .ab-pw{grid-column:2/4;grid-row:2;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);padding:4px 10px}
+/* вход: пароль — главный способ, ссылка из письма — запасной */
+.login label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:0 0 4px 2px}
+.login .btn.primary{width:100%;margin-top:4px}
+.pwf{position:relative}
+.pwf input{padding-right:52px!important}
+.eye{position:absolute;right:4px;top:4px;width:44px;height:44px;border:0;background:transparent;font-size:20px;cursor:pointer;border-radius:10px}
+.eye:focus-visible{outline:3px solid var(--accent)}
+.login .forgot{margin:12px 2px 0;font-size:14px;color:var(--muted)}
+.login .or{display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:var(--muted);font-size:13px}
+.login .or::before,.login .or::after{content:'';flex:1;height:1px;background:var(--line)}
+.login .btn.ml{width:100%;background:transparent;color:var(--accent);border:1px solid var(--line);font-size:15px;font-weight:600;box-shadow:none;min-height:0;padding:11px 12px}
+/* окно «Пароль» */
+.pwm{z-index:60}
+.pwm h2{margin:0 0 6px;font-size:20px}
+.pwm label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px}
+.pwm input{width:100%;font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff}
+.pwm .pwf .eye{top:2px}
+.pwm small{display:block;margin-top:4px}
+.pwm .pwc-row{display:flex;gap:8px}.pwm .pwc-row input{flex:1;min-width:0}.pwm .pwc-row .b{flex:none}
+.pwm .pw-err{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:#fdecea;color:#a3271a;font-size:14px}
+.pwm .pw-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.pwm .pw-acts .b{flex:1 1 auto}

@@ -10,8 +10,8 @@ const FEAT=(window.URKER_CONFIG||{}).features||{}, F_LIST=!!FEAT.listings, F_CLA
 const $=(s,r=document)=>r.querySelector(s), adm=$('#adm');
 const detectLang=()=>{const s=localStorage.getItem('urker_lang');if(s==='kz'||s==='ru')return s;try{const l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);return l.some(x=>/^(kk|kz)\b/i.test(String(x)))?'kz':'ru'}catch(e){return 'ru'}};
 let lang=detectLang();
-const T={ru:{title:'Уркер · Админка',login:'Вход в админку',barT:'АДМИНКА',barAs:'вы вошли как',toSite:'← На сайт',docT:'🔐 Админка · Уркер',docLogin:'Вход в админку · Уркер',email:'Email',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
- magicSent:'Ссылка для входа отправлена на почту.',badLogin:'Неверный email или пароль',noBackend:'База не подключена: заполните config.js (адрес и anon-ключ Supabase).',
+const T={ru:{title:'Уркер · Админка',login:'Вход в админку',pwBtn:'🔑 Пароль',pwTitle:'Пароль для входа',pwIntro:'Задайте пароль — потом можно входить по почте и паролю, без письма.',pwNew:'Новый пароль',pwRep:'Повторите пароль',pwShow:'Показать пароль',pwMin:'Не меньше 8 символов',pwSave:'Сохранить пароль',cancel:'Отмена',pwShort:'Пароль слишком короткий — нужно не меньше 8 символов.',pwMismatch:'Пароли не совпадают.',pwOk:'Пароль сохранён. Теперь можно входить по почте и паролю',pwWeak:'Пароль слишком простой. Добавьте буквы и цифры и сделайте его длиннее.',pwSame:'Этот пароль уже установлен. Придумайте другой.',pwReauth:'Для смены пароля нужно подтверждение по почте. Нажмите «Прислать код», введите код из письма и сохраните ещё раз.',pwSendCode:'✉️ Прислать код',pwCode:'Код из письма',pwCodeSent:'Код отправлен на почту.',pwBadCode:'Код неверный или устарел. Запросите новый.',pwRate:'Слишком много попыток. Подождите минуту и попробуйте снова.',pwSession:'Сессия истекла. Выйдите и войдите снова по ссылке из письма.',pwNet:'Нет связи с сервером. Проверьте интернет и попробуйте снова.',pwFail:'Не удалось сохранить пароль',or:'или',forgot:'Забыли пароль? — войдите по ссылке из письма',magicNoEmail:'Сначала введите почту.',showPass:'Показать пароль',hidePass:'Скрыть пароль',barT:'АДМИНКА',barAs:'вы вошли как',toSite:'← На сайт',docT:'🔐 Админка · Уркер',docLogin:'Вход в админку · Уркер',email:'Почта (email)',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
+ magicSent:'Ссылка для входа отправлена на почту.',badLogin:'Неверная почта или пароль. Если пароль ещё не задан — войдите по ссылке из письма.',noBackend:'База не подключена: заполните config.js (адрес и anon-ключ Supabase).',
  noAccess:'У этого аккаунта нет прав администратора.',logout:'Выйти',
  tabs:{stats:'📊 Статистика',pending:'Заявки',listings:'🗂 Объявления жителей',claims:'✔ Владельцы',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
  approve:'Одобрить',reject:'Отклонить',save:'Сохранить',del:'Удалить',hide:'Скрыть',show:'Показать',edit:'Изменить',cancel:'Отмена',add:'+ Добавить',
@@ -34,8 +34,8 @@ const T={ru:{title:'Уркер · Админка',login:'Вход в админ�
   hintSched:'Дата публикации в будущем = новость появится на сайте автоматически в это время. Черновики видны только здесь.',
   hintVideo:'Ссылка на YouTube или Instagram (по желанию)',noTitle:'(без заголовка)',fromSug:'Фото из предложения перенесены в хранилище',photoErr:'Не удалось загрузить фото'},
  desc:'Что написал заявитель',wantsVip:'Хочет VIP/рекламу',consent:'Согласие на показ номера',stars:'Оценка',device:'Устройство',when:'Когда',contact:'Контакт',chooseSub:'— выберите —'},
- kz:{title:'Үркер · Әкімші беті',login:'Әкімші бетіне кіру',barT:'ӘКІМШІ БЕТІ',barAs:'кірдіңіз:',toSite:'← Сайтқа',docT:'🔐 Әкімші беті · Үркер',docLogin:'Әкімші бетіне кіру · Үркер',email:'Email',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
- magicSent:'Кіру сілтемесі поштаға жіберілді.',badLogin:'Email немесе құпиясөз қате',noBackend:'База қосылмаған: config.js файлын толтырыңыз (Supabase мекенжайы мен anon-кілті).',
+ kz:{title:'Үркер · Әкімші беті',login:'Әкімші бетіне кіру',pwBtn:'🔑 Құпиясөз',pwTitle:'Кіруге арналған құпиясөз',pwIntro:'Құпиясөз орнатыңыз — кейін хатсыз, пошта мен құпиясөз арқылы кіре аласыз.',pwNew:'Жаңа құпиясөз',pwRep:'Құпиясөзді қайталаңыз',pwShow:'Құпиясөзді көрсету',pwMin:'Кемінде 8 таңба',pwSave:'Құпиясөзді сақтау',cancel:'Болдырмау',pwShort:'Құпиясөз тым қысқа — кемінде 8 таңба керек.',pwMismatch:'Құпиясөздер сәйкес емес.',pwOk:'Құпиясөз сақталды. Енді пошта мен құпиясөз арқылы кіруге болады',pwWeak:'Құпиясөз тым қарапайым. Әріптер мен сандар қосып, ұзағырақ етіңіз.',pwSame:'Бұл құпиясөз қазір де орнатылған. Басқасын ойлап табыңыз.',pwReauth:'Құпиясөзді ауыстыру үшін поштамен растау керек. «Код жіберу» батырмасын басып, хаттағы кодты енгізіп, қайта сақтаңыз.',pwSendCode:'✉️ Код жіберу',pwCode:'Хаттағы код',pwCodeSent:'Код поштаға жіберілді.',pwBadCode:'Код қате немесе ескірген. Жаңасын сұраңыз.',pwRate:'Әрекет тым көп. Бір минут күтіп, қайталап көріңіз.',pwSession:'Сессия аяқталды. Шығып, хаттағы сілтеме арқылы қайта кіріңіз.',pwNet:'Сервермен байланыс жоқ. Интернетті тексеріп, қайталап көріңіз.',pwFail:'Құпиясөзді сақтау мүмкін болмады',or:'немесе',forgot:'Құпиясөзді ұмыттыңыз ба? — хаттағы сілтеме арқылы кіріңіз',magicNoEmail:'Алдымен поштаны енгізіңіз.',showPass:'Құпиясөзді көрсету',hidePass:'Құпиясөзді жасыру',barT:'ӘКІМШІ БЕТІ',barAs:'кірдіңіз:',toSite:'← Сайтқа',docT:'🔐 Әкімші беті · Үркер',docLogin:'Әкімші бетіне кіру · Үркер',email:'Пошта (email)',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
+ magicSent:'Кіру сілтемесі поштаға жіберілді.',badLogin:'Пошта немесе құпиясөз қате. Құпиясөз әлі орнатылмаған болса — хаттағы сілтеме арқылы кіріңіз.',noBackend:'База қосылмаған: config.js файлын толтырыңыз (Supabase мекенжайы мен anon-кілті).',
  noAccess:'Бұл аккаунтта әкімші құқығы жоқ.',logout:'Шығу',
  tabs:{stats:'📊 Статистика',pending:'Өтінімдер',listings:'🗂 Тұрғындар хабарландырулары',claims:'✔ Иелер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
  approve:'Мақұлдау',reject:'Қабылдамау',save:'Сақтау',del:'Жою',hide:'Жасыру',show:'Көрсету',edit:'Өзгерту',cancel:'Болдырмау',add:'+ Қосу',
@@ -60,7 +60,7 @@ const T={ru:{title:'Уркер · Админка',login:'Вход в админ�
  desc:'Өтініш берушінің жазғаны',wantsVip:'VIP/жарнама қалайды',consent:'Нөмірді көрсетуге келісім',stars:'Баға',device:'Құрылғы',when:'Қашан',contact:'Байланыс',chooseSub:'— таңдаңыз —'}};
 const t=k=>T[lang][k];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,3500)};
+let tt;const toast=(m,ms)=>{const e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,ms||3500)};
 const secT=s=>lang==='kz'?s.title_kz:s.title_ru;
 const subs=sec=>((D.sections.find(s=>s.id===sec)||{}).subs||[]);
 const subT=id=>{for(const s of D.sections)for(const x of s.subs)if(x.id===id)return x.implicit?secT(s):(lang==='kz'?x.title_kz:x.title);return id||'—'};
@@ -395,18 +395,65 @@ async function vStats(box){
 // ---------- login / boot ----------
 function vLogin(msg){
  adm.innerHTML=`<div class="login"><h1>${t('login')}</h1>${msg?`<p class="demo-note warn">${esc(msg)}</p>`:''}
-  <form id="lf"><input id="le" type="email" autocomplete="username" placeholder="${t('email')}" required><input id="lp" type="password" autocomplete="current-password" placeholder="${t('pass')}">
-  <button class="btn primary" type="submit">${t('signin')}</button></form>
-  <button class="btn" id="ml" style="background:#fff;color:var(--accent);border:2px solid var(--accent);width:100%;margin-top:10px">✉️ ${t('magic')}</button></div>`;
- $('#lf').onsubmit=async ev=>{ev.preventDefault();try{await SB.signInWithPassword($('#le').value.trim(),$('#lp').value);boot()}catch(e){toast(t('badLogin'))}};
- $('#ml').onclick=async()=>{const e=$('#le').value.trim();if(!e){$('#le').focus();return}try{await SB.signInWithOtp(e,location.origin+location.pathname);toast(t('magicSent'))}catch(err){toast(err.message)}};
+  <form id="lf" method="post" action="#" autocomplete="on">
+   <label for="le">${t('email')}</label><input id="le" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" required>
+   <label for="lp">${t('pass')}</label><div class="pwf"><input id="lp" name="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="lp" aria-label="${t('showPass')}" aria-pressed="false">👁</button></div>
+   <button class="btn primary" type="submit">${t('signin')}</button></form>
+  <p class="forgot">🔑 ${t('forgot')}</p>
+  <div class="or"><span>${t('or')}</span></div>
+  <button class="btn ml" id="ml" type="button">✉️ ${t('magic')}</button></div>`;
+ bindEyes(adm);
+ $('#lf').onsubmit=async ev=>{ev.preventDefault();try{await SB.signInWithPassword($('#le').value.trim(),$('#lp').value);boot()}catch(e){toast(t('badLogin'),6000)}};
+ $('#ml').onclick=async()=>{const e=$('#le').value.trim();if(!e||!$('#le').checkValidity()){toast(t('magicNoEmail'));$('#le').focus();return}try{await SB.signInWithOtp(e,location.origin+location.pathname);toast(t('magicSent'))}catch(err){toast(err.message)}};
+}
+// кнопка 👁 показать/скрыть пароль
+function bindEyes(root){root.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const ids=b.dataset.eye.split(',');const show=b.getAttribute('aria-pressed')!=='true';
+ ids.forEach(id=>{const i=document.getElementById(id);if(i)i.type=show?'text':'password'});b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',t(show?'hidePass':'showPass'));b.textContent=show?'🙈':'👁'})}
+// ---------- смена пароля ----------
+function pwError(e){const c=(e&&e.errorCode)||'',m=String((e&&e.message)||''),st=e&&e.status;
+ if(e&&e.name==='AbortError'||e instanceof TypeError)return t('pwNet');
+ if(c==='weak_password'||/weak|at least|characters/i.test(m)&&!c)return t('pwWeak');
+ if(c==='same_password'||/different from the old/i.test(m))return t('pwSame');
+ if(c==='reauthentication_needed'||/reauthenticat/i.test(m)&&c!=='reauthentication_not_valid')return 'REAUTH';
+ if(c==='reauthentication_not_valid'||c==='otp_expired'||/nonce|invalid.*code/i.test(m))return t('pwBadCode');
+ if(c==='over_email_send_rate_limit'||c==='over_request_rate_limit'||st===429)return t('pwRate');
+ if(st===401||st===403||c==='session_not_found'||c==='bad_jwt'||c==='session_expired')return t('pwSession');
+ return t('pwFail')+(m?': '+m:'')}
+function openPw(){
+ const em=esc(SB.email()||'');const prev=document.activeElement;
+ const box=document.createElement('div');box.className='modal pwm';box.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pwh">
+  <h2 id="pwh">🔑 ${t('pwTitle')}</h2><p class="muted">${t('pwIntro')}</p>
+  <form id="pwf" method="post" action="#" novalidate>
+   <input type="email" name="email" autocomplete="username" value="${em}" readonly hidden>
+   <label for="pw1">${t('pwNew')}</label><div class="pwf"><input id="pw1" name="new-password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="pwmin"><button type="button" class="eye" data-eye="pw1,pw2" aria-label="${t('showPass')}" aria-pressed="false">👁</button></div>
+   <small id="pwmin" class="muted">${t('pwMin')}</small>
+   <label for="pw2">${t('pwRep')}</label><input id="pw2" name="confirm-password" type="password" autocomplete="new-password" minlength="8" required>
+   <div id="pwcode" hidden><label for="pwc">${t('pwCode')}</label><div class="pwc-row"><input id="pwc" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10"><button type="button" class="b sec" id="pwsend">${t('pwSendCode')}</button></div></div>
+   <p class="pw-err" id="pwe" role="alert" hidden></p>
+   <div class="pw-acts"><button type="button" class="b" id="pwx">${t('cancel')}</button><button type="submit" class="b pri" id="pws">${t('pwSave')}</button></div>
+  </form></div>`;
+ document.body.appendChild(box);bindEyes(box);
+ const err=m=>{const e=$('#pwe');e.textContent=m||'';e.hidden=!m};
+ const close=()=>{box.remove();document.removeEventListener('keydown',kd);if(prev&&prev.focus)prev.focus()};
+ const kd=ev=>{if(ev.key==='Escape')close()};document.addEventListener('keydown',kd);
+ box.onclick=ev=>{if(ev.target===box)close()};$('#pwx').onclick=close;
+ $('#pwsend').onclick=async()=>{const b=$('#pwsend');b.disabled=true;try{await SB.reauthenticate();err('');toast(t('pwCodeSent'));$('#pwc').focus()}catch(e){const m=pwError(e);err(m==='REAUTH'?t('pwReauth'):m)}finally{b.disabled=false}};
+ $('#pwf').onsubmit=async ev=>{ev.preventDefault();const p1=$('#pw1').value,p2=$('#pw2').value;
+  if(p1.length<8){err(t('pwShort'));$('#pw1').focus();return}
+  if(p1!==p2){err(t('pwMismatch'));$('#pw2').focus();return}
+  const attrs={password:p1};const code=$('#pwc').value.trim();if(!$('#pwcode').hidden&&code)attrs.nonce=code;
+  const sb=$('#pws');sb.disabled=true;err('');
+  try{await SB.updateUser(attrs);close();toast(t('pwOk'),7000)}
+  catch(e){const m=pwError(e);if(m==='REAUTH'){$('#pwcode').hidden=false;err(t('pwReauth'));$('#pwsend').focus()}else err(m)}
+  finally{if(sb.isConnected)sb.disabled=false}};
+ $('#pw1').focus();
 }
 // заметная полоса «🔐 АДМИНКА · вы вошли как …» — только когда вошёл администратор
 function adminBar(on){const bar=$('#admbar');document.body.classList.toggle('in',!!on);
  if(!on){bar.hidden=true;bar.innerHTML='';document.title=t('docLogin');return}
- bar.innerHTML=`<b class="ab-t">🔐 ${t('barT')}</b><a class="ab-s" href="./">${t('toSite')}</a><button class="ab-lo" id="lo" type="button">${t('logout')}</button><span class="ab-u"><span class="sep">· </span>${t('barAs')} <span class="ab-e" title="${esc(SB.email()||'')}">${esc(SB.email()||'')}</span></span>`;
- bar.hidden=false;document.title=t('docT');$('#hUser').textContent='';  // email уже в полосе
-$('#lo').onclick=async()=>{await SB.signOut();boot()}}
+ bar.innerHTML=`<b class="ab-t">🔐 ${t('barT')}</b><a class="ab-s" href="./">${t('toSite')}</a><button class="ab-lo" id="lo" type="button">${t('logout')}</button><button class="ab-pw" id="pwb" type="button" aria-haspopup="dialog">${t('pwBtn')}</button><span class="ab-u"><span class="sep">· </span>${t('barAs')} <span class="ab-e" title="${esc(SB.email()||'')}">${esc(SB.email()||'')}</span></span>`;
+ bar.hidden=false;document.title=t('docT');$('#hUser').textContent=SB.email()||'';  // полный email ещё и в шапке: в полосе на узком экране он может обрезаться
+$('#lo').onclick=async()=>{await SB.signOut();boot()};$('#pwb').onclick=openPw}
 async function boot(){
  document.documentElement.lang=lang==='kz'?'kk':'ru';$('#hTitle').textContent=t('title');document.title=t('docLogin');
  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));

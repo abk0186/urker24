@@ -446,7 +446,6 @@ function viewCat(id,subId){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${s.emoji} ${esc(secTitle(s))}</h1></div>
   ${showChips?`<div class="chips"><button class="${subId?'':'on'}" data-sub="">${t('all')}</button>${vs.map(x=>`<button class="${x.id===subId?'on':''}" data-sub="${x.id}">${esc(x.emoji)} ${esc(subTitle(x))}</button>`).join('')}</div>`:''}
   <div class="sortbar"><span>${t('found')(list.length)}</span><select id="sort"><option value="list">${t('sortList')}</option><option value="rating" ${sortMode==='rating'?'selected':''}>${t('sortRating')}</option></select></div>
-  <p class="demo-note mini">ℹ️ ${t('sortNoteLive')}</p>
   ${list.some(e=>e.vip)?'':vipCard(s)}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
  $('#sort').onchange=ev=>{sortMode=ev.target.value;viewCat(id,subId)};

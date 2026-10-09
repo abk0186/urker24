@@ -18,7 +18,7 @@ function create(opts){
   try{
    const r=await fetch(url+path,{method,headers:h,body:body!=null?JSON.stringify(body):undefined,signal:ctl.signal,cache:'no-store'});
    const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(e){data=txt}
-   if(!r.ok){const m=(data&&(data.message||data.error_description||data.msg||data.error))||r.statusText;const err=new Error(m);err.status=r.status;err.code=String(m||'');throw err}
+   if(!r.ok){const m=(data&&(data.message||data.error_description||data.msg||data.error))||r.statusText;const err=new Error(m);err.status=r.status;err.code=String(m||'');err.errorCode=(data&&(data.error_code||(typeof data.code==='string'?data.code:'')||(typeof data.error==='string'?data.error:'')))||'';throw err}
    return data;
   }finally{clearTimeout(tm)}
  }
@@ -58,6 +58,9 @@ function create(opts){
    const h=new URLSearchParams(location.hash.replace(/^#/,''));
    if(h.get('access_token')){save(norm({access_token:h.get('access_token'),refresh_token:h.get('refresh_token'),expires_in:h.get('expires_in')}));history.replaceState(null,'',location.pathname+location.search);return true}
    return false},
+  // смена пароля вошедшего пользователя (Supabase Auth: PUT /auth/v1/user); nonce — код из письма, если включено «Secure password change»
+  async updateUser(attrs){if(!session)throw Object.assign(new Error('not_signed_in'),{status:401,errorCode:'session_not_found'});await fresh();return raw('PUT','/auth/v1/user',attrs,null,15000)},
+  async reauthenticate(){if(!session)throw Object.assign(new Error('not_signed_in'),{status:401,errorCode:'session_not_found'});await fresh();return raw('GET','/auth/v1/reauthenticate',null,null,15000)},
   async signOut(){try{await raw('POST','/auth/v1/logout',null)}catch(e){}save(null)},
   email(){try{return JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).email}catch(e){return ''}}
  };
