@@ -1,2 +1,4 @@
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /admin.html
+Sitemap: https://urker24.kz/sitemap.xml

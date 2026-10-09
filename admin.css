@@ -52,3 +52,9 @@ body.admin{padding-bottom:30px}
 .nmain h3{margin-top:0}
 .sched{color:#a15c00}
 p.pre{white-space:pre-wrap}
+/* тап-зоны и safe-area (09.10) */
+.b,.tabs button{min-height:44px}
+.pgrid .pb button{min-height:44px}
+.ed input,.ed select{min-height:44px}
+.ed .ck{min-height:44px}
+body.admin{padding-bottom:30px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}

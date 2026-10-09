@@ -147,3 +147,83 @@ form .chk input{width:26px;height:26px;flex:none;margin-top:1px}
 .thumbs .th{position:relative;width:92px;height:92px;border-radius:12px;overflow:hidden;background:#eee}
 .thumbs .th img{width:100%;height:100%;object-fit:cover}
 .thumbs .th button{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:14px}
+
+/* ===== компактные карточки, адаптивная сетка, safe-area, тап-зоны (09.10) ===== */
+:root{color-scheme:only light;--st:env(safe-area-inset-top,0px);--sr:env(safe-area-inset-right,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px)}
+body{padding-bottom:84px;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.top{padding:calc(8px + var(--st)) calc(16px + var(--sr)) 8px calc(16px + var(--sl))}
+.brand .logo{width:44px;height:44px;font-size:28px;border-radius:12px}
+main{padding:12px calc(14px + var(--sr)) 0 calc(14px + var(--sl))}
+.langbar{margin-top:8px;padding:0 calc(14px + var(--sr)) 0 calc(14px + var(--sl))}
+.langbar button{min-height:44px;font-size:17px}
+.netnote{width:auto;margin-left:calc(14px + var(--sl));margin-right:calc(14px + var(--sr))}
+.bottom{padding:4px calc(6px + var(--sr)) calc(4px + var(--sb)) calc(6px + var(--sl))}
+.bottom a{min-height:52px;justify-content:center;padding:4px 0}
+.toast{bottom:92px;bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.modal .sheet{padding-bottom:calc(24px + var(--sb));padding-left:calc(16px + var(--sl));padding-right:calc(16px + var(--sr))}
+/* шапка раздела */
+.crumbs{margin:0 0 8px;gap:8px}
+.back{width:44px;height:44px;font-size:20px;border-radius:12px;flex:none}
+.crumbs h1{font-size:20px}
+.chips{padding-bottom:8px;margin-left:calc(-14px - var(--sl));margin-right:calc(-14px - var(--sr));padding-left:calc(14px + var(--sl));padding-right:14px}
+.chips button{min-height:44px;padding:8px 13px;font-size:15px}
+.sortbar{margin:0 0 6px;font-size:14px}
+.sortbar select{min-height:44px;font-size:15px;padding:6px 8px;max-width:62%}
+.demo-note.mini{font-size:12.5px;padding:6px 10px;margin:0 0 8px;line-height:1.35}
+/* VIP-заглушка — одна строка */
+.vip-mini{display:flex;align-items:center;gap:10px;text-decoration:none;padding:8px 12px;min-height:52px;margin-bottom:8px}
+.vip-mini .vm-i{font-size:22px;flex:none}
+.vip-mini .vm-b{flex:1;min-width:0}.vip-mini .vm-b b{display:block;font-size:15px;line-height:1.25}.vip-mini .vm-b small{display:block;font-size:12px;color:var(--muted)}
+.vip-mini .vm-a{font-size:26px;color:var(--accent2);flex:none;line-height:1}
+/* компактная карточка специалиста */
+.card{padding:10px 12px 4px;margin-bottom:8px;border-radius:14px}
+.card.vip:not(.vip-mini){padding-top:10px}
+.card .tag{font-size:11px;padding:2px 7px;margin-bottom:2px}
+.card .sub{font-size:12.5px;line-height:1.25}
+.card .idl{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;margin:2px 0 0}
+.card .nm{font-size:18px;font-weight:700;line-height:1.25;margin:0;overflow-wrap:anywhere}
+.card .ph{font-size:15.5px;color:var(--muted);letter-spacing:.2px;white-space:nowrap}
+.card .note{font-size:14.5px;margin:3px 0 0;line-height:1.3}
+.card .badges{gap:4px;margin-top:5px}.card .badge{font-size:12px;padding:2px 8px}
+.card .actions{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.card .btn{min-height:44px;font-size:15.5px;border-radius:12px;gap:6px;padding:0 8px;min-width:0}
+.card .btn svg{width:20px;height:20px;flex:none}
+.card .btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.card .rate{margin-top:0;padding-top:0;border-top:0;font-size:13px;gap:6px;min-height:44px;justify-content:flex-start}
+.card .stars{font-size:14px;letter-spacing:0;flex:none}
+.card .rate .rc{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .rate button{flex:none;border:0;background:none;color:var(--accent);font-weight:700;font-size:14px;min-height:44px;min-width:44px;padding:0 2px 0 8px;cursor:pointer}
+.card .rate button small{font-weight:400;color:var(--muted)}
+@media(max-width:340px){.card{padding-left:10px;padding-right:10px}.card .btn{font-size:14px;gap:4px;padding:0 6px}.card .btn svg{width:18px;height:18px}.card .rate button small{display:none}}
+.cards,.ncards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0 12px}
+/* тап-зоны ≥44px */
+.hints button{min-height:44px}
+.ann-h a{display:inline-flex;align-items:center;min-height:44px}
+.lnk{display:inline-flex;align-items:center;min-height:44px}
+.radio{min-height:44px}
+form .chk{min-height:44px;align-items:center}
+.rate button,.thumbs .th button{min-height:44px;min-width:44px}
+.thumbs .th button{top:0;right:0;width:44px;height:44px;border-radius:0 0 0 14px}
+.empty .btn,.btn{min-height:44px}
+/* широкие экраны: больше колонок, контент не растягивается */
+@media(min-width:640px){
+ main,.langbar,.netnote{max-width:900px}
+ .tiles{grid-template-columns:repeat(3,1fr)}
+ .chips{margin-left:0;margin-right:0;padding-left:0}
+ main[data-view=add],main[data-view=report],main[data-view=suggest],main[data-view=article]{max-width:720px}
+ .modal{align-items:center}.modal .sheet{border-radius:22px;max-width:560px}
+ .bottom{padding-left:max(6px,calc((100% - 640px)/2));padding-right:max(6px,calc((100% - 640px)/2))}
+ .toast{bottom:calc(96px + var(--sb))}
+}
+@media(min-width:1000px){
+ main,.langbar,.netnote{max-width:1120px}
+ .tiles{grid-template-columns:repeat(4,1fr)}
+ .netnote{margin-left:auto;margin-right:auto}
+}
+@media(min-width:1400px){.tiles{grid-template-columns:repeat(5,1fr)}}
+/* телефон в альбомной ориентации: шапка не липнет, чтобы не съедать высоту */
+@media(orientation:landscape) and (max-height:500px){.top{position:static}.bottom a{min-height:44px}.bottom a span{font-size:18px}body{padding-bottom:64px;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}}
+@media(max-width:359px){.bottom a b{font-size:10.5px;letter-spacing:-.2px}.bottom{padding-left:calc(2px + var(--sl));padding-right:calc(2px + var(--sr))}}
+@media(max-width:400px){.bottom a b{font-size:11px}}
+@media(max-width:359px){.bottom a b{font-size:10.5px}}
+.pick button{min-width:44px;min-height:44px}

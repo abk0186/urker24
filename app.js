@@ -10,7 +10,7 @@ const T={
   searchPh:'Например: укол, газель',searchTitle:'Найти мастера или услугу',cats:'Все разделы',
   promoT:'Здесь может быть ваша реклама',promoS:'Баннер для кафе, магазинов и акций Уркера',ad:'Реклама · демо',
   wa:'Написать в WhatsApp',call:'Позвонить',noName:'Номер из списка',noReviews:'пока нет отзывов',review:'Оценить',demo:'демо',
-  sortList:'Как в списке',sortRating:'Сначала с высоким рейтингом',all:'Все',found:n=>`Найдено: ${n}`,sections:'Подходящие разделы',
+  sortList:'Как в списке',sortRating:'По рейтингу',all:'Все',found:n=>`Найдено: ${n}`,sections:'Подходящие разделы',
   nothing:'Пока никого нет по запросу',nothingS:'Знаете такого мастера или у вас свой бизнес? Добавьте его — после проверки он появится здесь.',addBiz:'➕ Добавить свой бизнес',
   starB:'⭐ Рекомендован чатом',newB:'🆕 Новый',dup:'Этот номер есть и в разделах: ',warn10:'⚠️ В номере 10 цифр — нужно уточнить',tollfree:'☎️ Бесплатная линия 8-800, только звонок',
   vipT:'Здесь может быть ваша карточка',vipS:'Закреплённое место вверху раздела с подсветкой. Платная услуга — демо.',vip:'Закреплено · VIP · демо',
@@ -25,7 +25,7 @@ const T={
   searchPh:'Мысалы: укол, жүк',searchTitle:'Маман немесе қызмет табу',cats:'Барлық бөлімдер',
   promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Үркердегі кафе, дүкен және акцияларға арналған баннер',ad:'Жарнама · демо',
   wa:'WhatsApp-қа жазу',call:'Қоңырау шалу',noName:'Тізімдегі нөмір',noReviews:'әзірге пікір жоқ',review:'Бағалау',demo:'демо',
-  sortList:'Тізімдегідей',sortRating:'Алдымен жоғары рейтинг',all:'Барлығы',found:n=>`Табылды: ${n}`,sections:'Сәйкес бөлімдер',
+  sortList:'Тізімдегідей',sortRating:'Рейтинг бойынша',all:'Барлығы',found:n=>`Табылды: ${n}`,sections:'Сәйкес бөлімдер',
   nothing:'Бұл сұрау бойынша әзірге ешкім жоқ',nothingS:'Осындай маманды білесіз бе, әлде өз бизнесіңіз бар ма? Қосыңыз — тексерістен кейін осында шығады.',addBiz:'➕ Бизнесіңізді қосу',
   starB:'⭐ Чат ұсынған',newB:'🆕 Жаңа',dup:'Бұл нөмір мына бөлімдерде де бар: ',warn10:'⚠️ Нөмірде 10 сан — нақтылау керек',tollfree:'☎️ 8-800 тегін желі, тек қоңырау',
   vipT:'Мұнда сіздің карточкаңыз болуы мүмкін',vipS:'Бөлімнің жоғарғы жағындағы ерекшеленген орын. Ақылы қызмет — демо.',vip:'Бекітілген · VIP · демо',
@@ -39,7 +39,7 @@ const T={
 };
 const t=k=>T[lang][k];
 // ---- Полный казахский словарь + новые ключи для обоих языков ----
-Object.assign(T.ru,{err_bad_photo:'Фото не подошло. Попробуйте другое (JPEG, до ~400 КБ после сжатия).',err_too_many_photos:'Можно добавить не больше 3 фото',navNews:'Новости',newsTitle:'Новости района',newsAll:'Все новости →',newsEmpty:'Пока новостей нет',
+Object.assign(T.ru,{waS:'WhatsApp',callS:'Позвонить',err_bad_photo:'Фото не подошло. Попробуйте другое (JPEG, до ~400 КБ после сжатия).',err_too_many_photos:'Можно добавить не больше 3 фото',navNews:'Новости',newsTitle:'Новости района',newsAll:'Все новости →',newsEmpty:'Пока новостей нет',
  newsEmptyS:'Знаете, что интересного происходит в Уркере? Предложите новость — после проверки она появится здесь.',newsSuggest:'✍️ Предложить новость',
  fallbackNote:'Текст есть только на казахском языке',pinned:'📌 Закреплено',newsFound:'Новости',video:'Видео',photosN:n=>`${n} фото`,readMore:'Читать →',
  newsCats:{event:'🎉 Событие',opening:'🏪 Открытие',achievement:'🏆 Достижение',improvement:'🌳 Благоустройство',akimat:'🏛 Акимат',other:'📰 Другое'},
@@ -63,8 +63,8 @@ Object.assign(T.ru,{err_bad_photo:'Фото не подошло. Попробу�
  waGreet:'Здравствуйте! Нашёл(ла) ваш номер в списке специалистов Уркера.',
  nothing:q=>`Пока никого нет по запросу «${q}»`,
  addErr:'Заполните название, раздел, номер из 11 цифр и отметьте согласие',repErr:'Напишите, что случилось и где',
- docTitle:'Уркер · Мастера и услуги (черновик)',demoForm:'демо-форма'});
-T.kz={err_bad_photo:'Фото жарамады. Басқасын көріңіз (JPEG, сығудан кейін ~400 КБ-қа дейін).',err_too_many_photos:'3 фотодан артық қосуға болмайды',navNews:'Жаңалықтар',newsTitle:'Аудан жаңалықтары',newsAll:'Барлығы →',newsEmpty:'Әзірге жаңалық жоқ',
+ docTitle:'Уркер 24 — мастера, услуги, объявления и новости района Уркер, Астана',demoForm:'демо-форма'});
+T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарамады. Басқасын көріңіз (JPEG, сығудан кейін ~400 КБ-қа дейін).',err_too_many_photos:'3 фотодан артық қосуға болмайды',navNews:'Жаңалықтар',newsTitle:'Аудан жаңалықтары',newsAll:'Барлығы →',newsEmpty:'Әзірге жаңалық жоқ',
  newsEmptyS:'Үркерде не қызық болып жатқанын білесіз бе? Жаңалық ұсыныңыз — тексеруден кейін осында шығады.',newsSuggest:'✍️ Жаңалық ұсыну',
  fallbackNote:'Мәтін тек орыс тілінде берілген',pinned:'📌 Бекітілген',newsFound:'Жаңалықтар',video:'Бейне',photosN:n=>`${n} фото`,readMore:'Оқу →',
  newsCats:{event:'🎉 Іс-шара',opening:'🏪 Ашылу',achievement:'🏆 Жетістік',improvement:'🌳 Абаттандыру',akimat:'🏛 Әкімдік',other:'📰 Басқа'},
@@ -91,7 +91,7 @@ T.kz={err_bad_photo:'Фото жарамады. Басқасын көріңіз 
  promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Үркердегі кафе, дүкендер мен акцияларға арналған баннер',ad:'Жарнама · демо',
  wa:'WhatsApp-қа жазу',call:'Қоңырау шалу',noName:'Тізімдегі нөмір',noReviews:'әзірге пікір жоқ',review:'Баға беру',demo:'демо',
  waGreet:'Сәлеметсіз бе! Нөміріңізді Үркер мамандарының тізімінен таптым.',
- sortList:'Тізімдегі ретпен',sortRating:'Алдымен рейтингі жоғарылар',all:'Барлығы',found:n=>`Табылғаны: ${n}`,sections:'Сәйкес бөлімдер',
+ sortList:'Тізімдегі ретпен',sortRating:'Рейтинг бойынша',all:'Барлығы',found:n=>`Табылғаны: ${n}`,sections:'Сәйкес бөлімдер',
  nothing:q=>`«${q}» сұрауы бойынша әзірге ешкім жоқ`,
  nothingS:'Осындай шеберді білесіз бе, әлде өз бизнесіңіз бар ма? Қосыңыз — тексеруден кейін осында пайда болады.',addBiz:'➕ Өз бизнесіңізді қосу',
  starB:'⭐ Чат ұсынған',newB:'🆕 Жаңа',dup:'Бұл нөмір мына бөлімдерде де бар: ',warn10:'⚠️ Нөмірде 10 сан ғана бар — нақтылау қажет',
@@ -114,7 +114,7 @@ T.kz={err_bad_photo:'Фото жарамады. Басқасын көріңіз 
  rType:'Не болды?',rTitle:'Не болып жатқанын қысқаша жазыңыз',rTitlePh:'Мысалы: таңертеңнен бері жарық жоқ',rArea:'Көшелер / үйлер',
  rWhen:'Қашан (күні мен уақыты)',rSrc:'Ақпарат қайдан алынды?',rSrcPh:'Мысалы: Астана-РЭК хабарламасы, өзім көрдім',
  rContact:'Телефоныңыз (міндетті емес, нақтылау үшін)',rSend:'Модерацияға жіберу',rSent:'Рақмет! Бұл — демо: жұмыс нұсқасында хабарлама модерацияға жіберіледі.',
- repErr:'Не болғанын және қай жерде екенін жазыңыз',docTitle:'Үркер · Шеберлер мен қызметтер (жоба)',demoForm:'демо-форма'};
+ repErr:'Не болғанын және қай жерде екенін жазыңыз',docTitle:'Үркер 24 — Үркер ауданының шеберлері, қызметтері, хабарландырулары мен жаңалықтары, Астана',demoForm:'демо-форма'};
 
 
 // ---------- backend ----------
@@ -208,20 +208,19 @@ function card(e,showSection){
  const waMsg=encodeURIComponent(t('waGreet'));
  return `<article class="card ${e.vip?'vip':''}" id="e${e.id}">${e.vip?`<span class="tag">${t('vipLive')}</span>`:''}
   <div class="sub">${esc(x.emoji||s.emoji)} ${showSection?esc(secTitle(s))+' · ':''}${esc(subTitle(x))}</div>
-  <div class="nm">${esc(e.name||fmtPhone(e))}</div>
-  ${e.name?`<div class="ph">${esc(fmtPhone(e))}</div>`:''}
+  <div class="idl"><span class="nm">${esc(e.name||fmtPhone(e))}</span>${e.name?`<span class="ph">${esc(fmtPhone(e))}</span>`:''}</div>
   ${e.note?`<p class="note">${esc(e.note)}</p>`:''}${e.address?`<p class="note">📍 ${esc(e.address)}</p>`:''}
-  <div class="badges">${e.star?`<span class="badge star">${t('starB')}</span>`:''}${e.new?`<span class="badge new">${t('newB')}</span>`:''}
+  ${e.star||e.new||bad||toll||others.length?`<div class="badges">${e.star?`<span class="badge star">${t('starB')}</span>`:''}${e.new?`<span class="badge new">${t('newB')}</span>`:''}
    ${bad?`<span class="badge warn">${t('warn10')}</span>`:''}${toll?`<span class="badge">${t('tollfree')}</span>`:''}
-   ${others.length?`<span class="badge">${t('dup')}${esc(others.join(', '))}</span>`:''}</div>
+   ${others.length?`<span class="badge">${t('dup')}${esc(others.join(', '))}</span>`:''}</div>`:''}
   <div class="actions">
-   <a class="btn wa ${e.wa?'':'off'}" ${e.wa?`href="https://wa.me/${e.wa}?text=${waMsg}" target="_blank" rel="noopener"`:'aria-disabled="true"'}>${WA_SVG}${t('wa')}</a>
-   <a class="btn call ${bad?'off':''}" ${bad?'aria-disabled="true"':`href="tel:${esc(e.tel)}"`}>📞 ${t('call')}</a>
+   <a class="btn wa ${e.wa?'':'off'}" aria-label="${esc(t('wa'))}: ${esc(e.name||fmtPhone(e))}" ${e.wa?`href="https://api.whatsapp.com/send?phone=${e.wa}&text=${waMsg}" target="_blank" rel="noopener"`:'aria-disabled="true"'}>${WA_SVG}<span>${t('waS')}</span></a>
+   <a class="btn call ${bad?'off':''}" aria-label="${esc(t('call'))}: ${esc(fmtPhone(e))}" ${bad?'aria-disabled="true"':`href="tel:${esc(e.tel)}"`}>📞 <span>${t('callS')}</span></a>
   </div>
-  <div class="rate">${stars(r.avg)} <span>${r.n?`${r.avg.toFixed(1)} · ${t('reviewsN')(r.n)}`:t('noReviews')}</span>
+  <div class="rate">${stars(r.avg)}<span class="rc">${r.n?`${r.avg.toFixed(1)} · ${t('reviewsN')(r.n)}`:t('noReviews')}</span>
    <button data-review="${e.id}">✍️ ${t('review')}${LIVE?'':` <small>(${t('demo')})</small>`}</button></div>
  </article>`}
-const vipCard=()=>`<article class="card vip"><span class="tag">📌 ${LIVE?t('vipOffer'):t('vip')}</span><div class="nm">${t('vipT')}</div><p class="note">${t('vipS')}</p></article>`;
+const vipCard=()=>`<a class="card vip vip-mini" href="#/add" title="${esc(t('vipS'))}"><span class="vm-i">📌</span><span class="vm-b"><b>${t('vipT')}</b><small>${LIVE?t('vipOffer'):t('vip')}</small></span><span class="vm-a">›</span></a>`;
 const promo=()=>ADS.length?ADS.slice(0,2).map(a=>{const href=a.link_url||(a.wa?`https://wa.me/${a.wa}`:'#/add');return `<a class="promo live" href="${esc(href)}" ${href.startsWith('http')?'target="_blank" rel="noopener sponsored"':''}><span class="pi">${esc(a.emoji||'☕')}</span><span class="tag">${t('adLive')}</span><b>${esc(L({ru:a.title_ru,kz:a.title_kz}))}</b><span>${esc(L({ru:a.text_ru,kz:a.text_kz}))}</span></a>`}).join(''):`<a class="promo" href="#/add"><span class="pi">☕</span><span class="tag">${t('ad')}</span><b>${t('promoT')}</b><span>${t('promoS')}</span></a>`;
 const nothing=q=>`<div class="empty"><div style="font-size:52px">🤷</div><h2>${t('nothing')(esc(q))}</h2><p>${t('nothingS')}</p><a class="btn primary" href="#/add">${t('addBiz')}</a></div>`;
 const searchBox=(q='')=>`<section class="hero"><h2>${t('searchTitle')}</h2><div class="search"><span class="ic">🔍</span><input id="q" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="${t('searchPh')}" value="${esc(q)}"></div>
@@ -237,7 +236,7 @@ function renderResults(q){
  if(!r.list.length){box.innerHTML=annHtml+(an.length||nw.length?'':nothing(q));return}
  box.innerHTML=annHtml+`<div class="sortbar"><span>${t('found')(r.list.length)}</span></div>
   ${r.subs.length?`<div class="sugg-l">${t('sections')}:</div><div class="chips">${r.subs.map(([id,n])=>{const x=subById[id];return `<button data-goto="${x.section}|${id}">${esc(x.emoji)} ${esc(subTitle(x))} · ${n}</button>`}).join('')}</div>`:''}
-  ${r.list.map(e=>card(e,true)).join('')}`;
+  <div class="cards">${r.list.map(e=>card(e,true)).join('')}</div>`;
 }
 function bindSearch(){
  const inp=$('#q');if(!inp)return;
@@ -333,7 +332,7 @@ function viewNews(){
  const list=newsSorted().filter(n=>!newsFilter||n.category===newsFilter);
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>📰 ${t('newsTitle')}</h1></div>
  <div class="chips"><button class="${newsFilter?'':'on'}" data-nf="">${t('all')}</button>${Object.keys(T.ru.newsCats).map(k=>`<button class="${newsFilter===k?'on':''}" data-nf="${k}">${esc(t('newsCats')[k])}</button>`).join('')}</div>
- ${list.length?list.map(n=>newsCard(n,false)).join(''):newsEmpty()}
+ ${list.length?'<div class="ncards">'+list.map(n=>newsCard(n,false)).join('')+'</div>':newsEmpty()}
  <a class="btn primary" style="margin:8px 0 6px" href="#/news/suggest">${t('newsSuggest')}</a>`;
  app.querySelectorAll('[data-nf]').forEach(b=>b.onclick=()=>{newsFilter=b.dataset.nf;viewNews()});
 }
@@ -394,8 +393,7 @@ function viewSuggest(){
 function viewHome(q=''){
  app.innerHTML=`${searchBox(q)}<div id="results"></div>
  <div id="homeBody">${annBlock()}${newsBlock()}${promo()}<h2>${t('cats')}</h2><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
-  return `<a class="tile" href="#/c/${s.id}"><span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}</div>
-  <p class="foot">${t('foot')}</p></div>`;
+  return `<a class="tile" href="#/c/${s.id}"><span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}</div></div>`;
  bindSearch();
 }
 let sortMode='list';
@@ -409,8 +407,8 @@ function viewCat(id,subId){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${s.emoji} ${esc(secTitle(s))}</h1></div>
   ${showChips?`<div class="chips"><button class="${subId?'':'on'}" data-sub="">${t('all')}</button>${vs.map(x=>`<button class="${x.id===subId?'on':''}" data-sub="${x.id}">${esc(x.emoji)} ${esc(subTitle(x))}</button>`).join('')}</div>`:''}
   <div class="sortbar"><span>${t('found')(list.length)}</span><select id="sort"><option value="list">${t('sortList')}</option><option value="rating" ${sortMode==='rating'?'selected':''}>${t('sortRating')}</option></select></div>
-  <p class="demo-note">${LIVE?'ℹ️ '+t('sortNoteLive'):'🧪 '+t('sortNote')}</p>
-  ${list.some(e=>e.vip)?'':vipCard()}${list.map(e=>card(e,false)).join('')}`;
+  <p class="demo-note mini">${LIVE?'ℹ️ '+t('sortNoteLive'):'🧪 '+t('sortNote')}</p>
+  ${list.some(e=>e.vip)?'':vipCard()}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
  $('#sort').onchange=ev=>{sortMode=ev.target.value;viewCat(id,subId)};
 }
@@ -467,6 +465,7 @@ let tt;function toast(msg){const el=$('#toast');el.textContent=msg;el.hidden=fal
 // ---------- router ----------
 function route(){setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trackView()},0);
  const h=location.hash||'#/';let nav='home';
+ app.dataset.view=(h.match(/^#\/(news\/suggest|news\/[^/?]+|[a-z]+)/)||[,'home'])[1].replace(/^news\/(?!suggest).+/,'article').replace('news/suggest','suggest');
  if(h.startsWith('#/c/')){const [id,sub]=h.slice(4).split('/');viewCat(id,sub)}
  else if(h.startsWith('#/add')){viewAdd();nav='add'}
  else if(h.startsWith('#/ann')){viewAnn(h.split('/')[2]);nav='ann'}
