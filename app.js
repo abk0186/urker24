@@ -63,6 +63,7 @@ Object.assign(T.ru,{waS:'WhatsApp',callS:'Позвонить',err_bad_photo:'Ф�
  sortNoteLive:'Сначала VIP, затем по рейтингу с учётом числа отзывов (одна пятёрка не обгонит десятки хороших оценок). Отзывы проходят проверку.',
  err_already_reviewed:'Вы уже оставляли отзыв этому мастеру.',err_rate_limited:'Слишком много отправок. Попробуйте позже.',
  err_invalid_phone:'Проверьте номер телефона.',err_no_consent:'Отметьте согласие на показ номера.',
+ viewsA:'Просмотры',addPhoto:'Добавить фото',photoCount:'Выбрано: {n} из {m}',vRequired:'Заполните это поле',vCheck:'Отметьте этот пункт',vChoose:'Выберите вариант из списка',vFormat:'Проверьте, правильно ли заполнено поле',
  err_generic:'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.',stillLoading:'Подождите пару секунд — данные ещё загружаются, затем отправьте снова.',offlineForm:'Сейчас нет связи с сервером. Попробуйте позже.',
  back:'Назад',hints:['сантехник','газель','укол','электрик','такси','уголь'],
  waGreet:'Здравствуйте! Нашёл ваш контакт на сайте https://urker24.kz в разделе «{s}».',
@@ -88,6 +89,7 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
  sortNoteLive:'Алдымен VIP, содан кейін пікір санын ескеретін рейтинг бойынша (бір ғана бестік ондаған жақсы бағадан озбайды). Пікірлер тексеруден өтеді.',
  err_already_reviewed:'Сіз бұл шеберге пікір қалдырып қойғансыз.',err_rate_limited:'Тым көп жіберілді. Кейінірек қайталап көріңіз.',
  err_invalid_phone:'Телефон нөмірін тексеріңіз.',err_no_consent:'Нөмірді көрсетуге келісім белгісін қойыңыз.',
+ viewsA:'Қаралым',addPhoto:'Фото қосу',photoCount:'Таңдалды: {n} / {m}',vRequired:'Осы өрісті толтырыңыз',vCheck:'Осы тармақты белгілеңіз',vChoose:'Тізімнен бір нұсқаны таңдаңыз',vFormat:'Өрістің дұрыс толтырылғанын тексеріңіз',
  err_generic:'Жіберу мүмкін болмады. Интернетті тексеріп, қайталап көріңіз.',stillLoading:'Бірнеше секунд күтіңіз — деректер әлі жүктелуде, содан кейін қайта жіберіңіз.',offlineForm:'Қазір сервермен байланыс жоқ. Кейінірек қайталап көріңіз.',
  draft:'Жоба-прототип · жариялауға арналмаған',brand:'Үркер',tagline:'Жаныңыздағы шеберлер мен қызметтер',
  navHome:'Басты бет',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Маңызды',back:'Артқа',
@@ -125,9 +127,25 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
 // ---------- backend ----------
 const SB=window.SBCreate?window.SBCreate({auth:false}):{enabled:false};
 let LIVE=false, OFFLINE=false, ADS=[];
-let LOADING=!!SB.enabled;   // пока база не ответила — «Загрузка…», никаких демо-данных
+let LOADING=!!SB.enabled;
+// счётчики просмотров новостей и «Важно» (10_views.sql). Нет функции в базе — счётчики просто не показываются.
+let VIEWS={};const vKey=(k,id)=>k+':'+id;
+const vw=(k,id)=>{const n=VIEWS[vKey(k,id)]||0;return n>0?`<span class="vw" data-vw="${vKey(k,id)}" aria-label="${t('viewsA')}: ${n}">👁 ${n}</span>`:`<span class="vw" data-vw="${vKey(k,id)}"></span>`};  // 0 — не показываем
+const seenNow={};  // не дёргать базу повторно при перерисовке той же страницы
+function countView(k,id){if(!LIVE||seenNow[vKey(k,id)])return;seenNow[vKey(k,id)]=1;
+ SB.rpc('content_view',{p_kind:k,p_id:+id,p_device_id:deviceId()},8000).then(n=>{n=+n||0;if(n<1)return;VIEWS[vKey(k,id)]=n;
+  document.querySelectorAll(`[data-vw="${vKey(k,id)}"]`).forEach(e=>{e.textContent='👁 '+n;e.setAttribute('aria-label',t('viewsA')+': '+n)})}).catch(()=>{})}   // пока база не ответила — «Загрузка…», никаких демо-данных
 function deviceId(){let d=localStorage.getItem('urker_device');if(!d||!/^[A-Za-z0-9-]{8,64}$/.test(d)){d=(crypto.randomUUID?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join(''));localStorage.setItem('urker_device',d)}return d}
 const errMsg=e=>{const c=String(e&&e.code||'');for(const k of ['already_reviewed','rate_limited','invalid_phone','no_consent','bad_photo','too_many_photos','bad_instagram','bad_2gis','too_long','empty','not_found'])if(c.includes(k))return t('err_'+k);return t('err_generic')};
+// Выбор фото: системная кнопка «Choose files» скрыта (она на языке браузера), вместо неё — своя кнопка RU/KZ.
+// Поле остаётся в документе (визуально скрыто), поэтому доступно с клавиатуры: Tab → Enter/Пробел.
+const fcText=(n,m)=>t('photoCount').replace('{n}',n).replace('{m}',m);
+const fileBtn=(id,m)=>`<div class="fpick"><input id="${id}" type="file" accept="image/*" multiple class="vh-file"><label for="${id}" class="file-btn">📷 ${t('addPhoto')}</label><span class="fcount" id="${id}-n" aria-live="polite">${fcText(0,m)}</span></div>`;
+const setFC=(id,n,m)=>{const e=document.getElementById(id+'-n');if(e)e.textContent=fcText(n,m)};
+// Подсказки браузера при проверке форм («Please fill out this field») — заменяем своими RU/KZ
+document.addEventListener('invalid',ev=>{const el=ev.target;if(!el||!el.setCustomValidity)return;el.setCustomValidity('');const v=el.validity;
+ el.setCustomValidity(v.valueMissing?t(el.type==='checkbox'||el.type==='radio'?'vCheck':el.tagName==='SELECT'?'vChoose':'vRequired'):t('vFormat'))},true);
+['input','change'].forEach(n=>document.addEventListener(n,ev=>{const el=ev.target;if(el&&el.setCustomValidity)el.setCustomValidity('')},true));
 const hp=()=>`<div style="position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden" aria-hidden="true"><label>Website<input id="hpf" name="website" tabindex="-1" autocomplete="off"></label></div>`;
 
 // ---------- статистика (анонимно, без cookies) ----------
@@ -287,7 +305,7 @@ function annCard(a,compact){const ty=ANN_TYPES[a.type]||ANN_TYPES.other,act=annA
  const msg=`${ty.ic} ${L(a.title)}\n📍 ${L(a.area)}\n🕒 ${annWhen(a)}${a.source?'\n'+t('annSource')+': '+L(a.source):''}`;
  return `<article class="ann ${a.urgent&&act?'urgent':''} ${act?'':'done'}" style="--tc:${ty.c}">
   <div class="ann-ic">${ty.ic}</div><div class="ann-b">
-  <div class="ann-tags">${a.urgent&&act?`<span class="tag urg">❗ ${t('annUrgent')}</span>`:''}<span class="st ${act?'on':''}">${act?'● '+t('annActive'):'✓ '+t('annDone')}</span></div>
+  <div class="ann-tags">${a.urgent&&act?`<span class="tag urg">❗ ${t('annUrgent')}</span>`:''}<span class="st ${act?'on':''}">${act?'● '+t('annActive'):'✓ '+t('annDone')}</span>${vw('ann',a.id)}</div>
   <h3>${esc(L(a.title))}</h3>
   <div class="ann-l">📍 ${esc(L(a.area))}</div><div class="ann-l">🕒 ${esc(annWhen(a))}</div>
   ${!compact&&a.source?`<div class="ann-l src">${t('annSource')}: ${esc(L(a.source))}</div>`:''}
@@ -305,6 +323,7 @@ function viewAnn(focusId){
  ${list.length?list.map(a=>`<div id="a${a.id}">${annCard(a,false)}</div>`).join(''):annEmpty()}
  <a class="btn primary" style="margin:8px 0 6px" href="#/report">${t('annReport')}</a>`;
  app.querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{annFilter=b.dataset.af;viewAnn()});
+ if(focusId&&ANN.some(a=>String(a.id)===String(focusId)))countView('ann',focusId);
  if(focusId){const el=document.getElementById('a'+focusId);if(el)setTimeout(()=>{el.scrollIntoView({block:'center'});el.firstElementChild.classList.add('flash')},30)}
 }
 function viewReport(){
@@ -338,7 +357,7 @@ function newsCover(n,cls){const c=(t('newsCats')[n.category]||'📰').split(' ')
  return n.cover?`<div class="${cls}" style="background-image:url('${esc(n.cover)}')"></div>`:`<div class="${cls} ph"><span>${c}</span></div>`}
 function newsCard(n,compact){const ti=LT(n.title),le=LT(n.lead);
  return `<a class="news-card ${compact?'compact':''}" href="#/news/${n.id}">${newsCover(n,'nc-img')}<div class="nc-b">
-  <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span></div>
+  <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span>${vw('news',n.id)}</div>
   <h3>${esc(ti.text)}</h3>${compact?'':`<p>${esc(le.text)}</p>`}<small>${esc(newsDate(n))}${n.photos&&n.photos.length>1?' · 🖼 '+t('photosN')(n.photos.length):''}${n.video?' · ▶️ '+t('video'):''}</small></div></a>`}
 const newsEmpty=()=>LOADING?`<div class="ann-empty">⏳ <b>${t('loading')}</b></div>`:`<div class="ann-empty">📰 <b>${t('newsEmpty')}</b><span>${t('newsEmptyS')}</span><a href="#/news/suggest" class="lnk">${t('newsSuggest')}</a></div>`;
 function newsBlock(){const l=newsSorted().slice(0,3);
@@ -365,6 +384,7 @@ function viewArticle(id){
  if(id==='suggest')return viewSuggest();
  const n=NEWS.find(x=>String(x.id)===String(id));
  if(!n){app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/news'">←</button><h1>📰</h1></div><div class="empty"><h2>${t('newsNotFound')}</h2><a class="btn primary" href="#/news">${t('newsAll')}</a></div>`;return}
+ countView('news',n.id);
  const ti=LT(n.title),le=LT(n.lead),bo=LT(n.body),fb=ti.fb||bo.fb||le.fb;
  const photos=(n.photos||[]).filter(Boolean);
  const link=location.origin+location.pathname+'#/news/'+n.id;
@@ -372,7 +392,7 @@ function viewArticle(id){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/news'" aria-label="${t('back')}">←</button><h1 class="sm">📰 ${t('newsTitle')}</h1></div>
  <article class="article">
   ${photos.length>1?`<div class="gallery" id="gal">${photos.map((u,i)=>`<img src="${esc(u)}" alt="" loading="${i?'lazy':'eager'}">`).join('')}</div><div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:newsCover(n,'art-cover')}
-  <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span><small>${esc(newsDate(n))}</small></div>
+  <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span><small>${esc(newsDate(n))}</small>${vw('news',n.id)}</div>
   <h1>${esc(ti.text)}</h1>
   ${fb?`<p class="fb-note">🌐 ${t('fallbackNote')}</p>`:''}
   ${le.text?`<p class="lead">${esc(le.text)}</p>`:''}
@@ -392,10 +412,10 @@ function viewSuggest(){
  <form id="sugf" novalidate style="position:relative">${hp()}
   <div class="f"><label for="s1">${t('sTitle')}</label><input id="s1" maxlength="200" placeholder="${t('sTitlePh')}"></div>
   <div class="f"><label for="s2">${t('sText')}</label><textarea id="s2" maxlength="5000" style="min-height:140px"></textarea></div>
-  <div class="f"><label for="s3">${t('sPhotos')}</label><input id="s3" type="file" accept="image/*" multiple><div class="thumbs" id="sth"></div></div>
+  <div class="f"><label for="s3">${t('sPhotos')}</label>${fileBtn('s3',3)}<div class="thumbs" id="sth"></div></div>
   <div class="f"><label for="s4">${t('sContact')}</label><input id="s4" maxlength="60"></div>
   <button class="btn primary" type="submit">${t('sSend')}</button></form>`;
- const draw=()=>{$('#sth').innerHTML=photos.map((p,i)=>`<div class="th"><img src="${p}" alt=""><button type="button" data-rm="${i}" aria-label="✕">✕</button></div>`).join('')};
+ const draw=()=>{setFC('s3',photos.length,3);$('#sth').innerHTML=photos.map((p,i)=>`<div class="th"><img src="${p}" alt=""><button type="button" data-rm="${i}" aria-label="✕">✕</button></div>`).join('')};
  $('#sth').onclick=ev=>{const b=ev.target.closest('[data-rm]');if(b){photos.splice(+b.dataset.rm,1);draw()}};
  $('#s3').onchange=async ev=>{const files=[...ev.target.files];ev.target.value='';
   if(photos.length+files.length>3)toast(t('sTooMany'));
@@ -508,14 +528,14 @@ function openClaim(id){
    <label for="cl5">${t('clHours')}</label><input id="cl5" class="rv-in" maxlength="120">
    <label for="cl6">${t(lang==='kz'?'clDescrKz':'clDescrRu')} <small id="cl6n">0/300</small></label><textarea id="cl6" class="rv-in" maxlength="300" style="min-height:70px"></textarea>
    <label for="cl7">${t(lang==='kz'?'clDescrRu':'clDescrKz')} <small id="cl7n">0/300</small></label><textarea id="cl7" class="rv-in" maxlength="300" style="min-height:60px"></textarea>
-   <label for="cl8">${t('clPhotos')}</label><input id="cl8" type="file" accept="image/*" multiple><div class="thumbs" id="clth"></div>
+   <label for="cl8">${t('clPhotos')}</label>${fileBtn('cl8',3)}<div class="thumbs" id="clth"></div>
    <label for="cl9">${t('clPhone')}</label><input id="cl9" class="rv-in" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="8 7XX XXX XX XX">
    <button class="btn primary" style="margin-top:12px">${t('clSend')}</button></form>
   <button class="btn" style="background:#eee;color:#333;width:100%;margin-top:8px" id="clc">${t('close')}</button></div>`;
  m.hidden=false;m.scrollTop=0;
  const ru=lang==='kz'?'#cl7':'#cl6',kz=lang==='kz'?'#cl6':'#cl7';
  ['cl6','cl7'].forEach(i=>$('#'+i).oninput=()=>{$('#'+i+'n').textContent=$('#'+i).value.length+'/300'});
- const draw=()=>{$('#clth').innerHTML=files.map((f,i)=>`<div class="th"><img src="${f.url}" alt=""><button type="button" data-rm="${i}" aria-label="✕">✕</button></div>`).join('')};
+ const draw=()=>{setFC('cl8',files.length,3);$('#clth').innerHTML=files.map((f,i)=>`<div class="th"><img src="${f.url}" alt=""><button type="button" data-rm="${i}" aria-label="✕">✕</button></div>`).join('')};
  $('#clth').onclick=ev=>{const b=ev.target.closest('[data-rm]');if(!b)return;URL.revokeObjectURL(files[+b.dataset.rm].url);files.splice(+b.dataset.rm,1);draw()};
  $('#cl8').onchange=ev=>{const fs=[...ev.target.files];ev.target.value='';fs.slice(0,3-files.length).forEach(f=>files.push({file:f,url:URL.createObjectURL(f)}));if(fs.length>3)toast(t('err_too_many_photos'));draw()};
  $('#clc').onclick=()=>{m.hidden=true};m.onclick=ev=>{if(ev.target===m)m.hidden=true};
@@ -578,15 +598,17 @@ async function loadBackend(){
  if(!SB.enabled){LOADING=false;return}
  const get=async(q,ms)=>{try{return await SB.get(q,ms)}catch(e){await new Promise(r=>setTimeout(r,1500));return SB.get(q,ms)}};  // одна повторная попытка
  try{
-  const [sp,an,ad,nw]=await Promise.all([
+  const [sp,an,ad,nw,vc]=await Promise.all([
    get('specialists_public?select=*&order=sort_order.asc,id.asc',15000),
    get('announcements?select=*&order=start_at.desc.nullslast',15000).catch(()=>null),
    get('ads?select=*&order=sort_order.asc',15000).catch(()=>null),
-   get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',15000).catch(()=>null)]);
+   get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',15000).catch(()=>null),
+   SB.rpc('content_view_counts',{},10000).catch(()=>null)]);
   if(window.URKER_L)await URKER_L.load().catch(e=>console.warn('listings',e&&e.message));
   if(!Array.isArray(sp)||!sp.length)throw new Error('empty');
   D.entries=sp.filter(r=>subById[r.sub_id]).map(mapSpec);
   ANN=Array.isArray(an)?an.filter(r=>!r.is_demo).map(mapAnn):[];ADS=Array.isArray(ad)?ad:[];NEWS=Array.isArray(nw)?nw.filter(r=>!r.is_demo).map(mapNews):[];
+  VIEWS={};if(Array.isArray(vc))vc.forEach(x=>{VIEWS[vKey(x.kind,x.item_id)]=+x.views||0});
   LIVE=true;OFFLINE=false;sortMode='rating';buildIndex();
  }catch(e){OFFLINE=true;LIVE=false;console.warn('Urker backend unreachable, using built-in list',e&&e.message)}
  LOADING=false;
@@ -594,7 +616,7 @@ async function loadBackend(){
  const q=$('#q');if(q&&document.activeElement===q)renderResults(q.value);else route();
 }
 function setMeta(title,desc){document.title=title||t('docTitle');const d=document.querySelector('meta[name="description"]');if(d){if(!d.dataset.def)d.dataset.def=d.content;d.content=desc||(lang==='ru'?d.dataset.def:t('docTitle'))}}
-window.URKER_APP={t,esc,$,app,SB,isLive:()=>LIVE,isOffline:()=>OFFLINE,toast,deviceId,hp,formNote,sending,errMsg,norm,tokScore,WA_SVG,MONTHS,lang:()=>lang,setMeta,track,
+window.URKER_APP={fileBtn,setFC,t,esc,$,app,SB,isLive:()=>LIVE,isOffline:()=>OFFLINE,toast,deviceId,hp,formNote,sending,errMsg,norm,tokScore,WA_SVG,MONTHS,lang:()=>lang,setMeta,track,
  addDict(ru,kz){Object.assign(T.ru,ru||{});Object.assign(T.kz,kz||{})}};
 const start=()=>{applyLang();route();loadBackend().then(()=>{if(LIVE)trackView()});loadMetrika()};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();

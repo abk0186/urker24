@@ -71,3 +71,16 @@ table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}table.
 table.cmp th{color:#7a6a5c;font-weight:600}
 body.admin h1,body.admin h2,.adm h1,.adm h2{overflow-wrap:anywhere;hyphens:auto}
 @media (max-width:380px){body.admin .langbar{gap:6px}body.admin .langbar .lb-l{font-size:13px}body.admin .langbar button{font-size:15px;padding-left:2px;padding-right:2px}}
+/* полоса «🔐 АДМИНКА» — видно сразу, что вы в админке */
+.admbar{position:sticky;top:0;z-index:50;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;column-gap:6px;row-gap:3px;background:#1e3a5f;color:#fff;line-height:1.25;
+ padding:calc(7px + var(--st)) calc(10px + var(--sr)) 7px calc(12px + var(--sl));box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.admbar[hidden]{display:none}
+.admbar .ab-t{font-size:15px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admbar .ab-u{grid-column:1/-1;font-size:13px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.admbar .sep{display:none}
+.admbar a,.admbar button{font:inherit;font-size:13.5px;font-weight:600;border-radius:10px;padding:6px 10px;text-decoration:none;white-space:nowrap;cursor:pointer}
+.admbar a{color:#fff;border:1px solid rgba(255,255,255,.45)}
+.admbar button{background:#fff;color:#1e3a5f;border:0}
+.admbar a:focus-visible,.admbar button:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+@media (max-width:359px){.admbar{column-gap:5px;padding-left:calc(10px + var(--sl));padding-right:calc(8px + var(--sr))}.admbar a,.admbar button{padding:6px 8px;font-size:13px}.admbar .ab-t{font-size:14px}}
+body.admin.in .top{padding-top:8px;background:linear-gradient(135deg,#2c4f7c,#1e3a5f)}

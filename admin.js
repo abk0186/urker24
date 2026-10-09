@@ -2,11 +2,15 @@
 'use strict';
 const SB=window.SBCreate({auth:true}), D=window.URKER_DATA;
 // Выключатели разделов (config.js → features): вкладки и поля появляются после запуска 06 / 08 SQL
+// подсказки браузера при проверке форм — по-русски / по-казахски (а не на языке браузера)
+document.addEventListener('invalid',ev=>{const el=ev.target;if(!el||!el.setCustomValidity)return;el.setCustomValidity('');const kz=lang==='kz',v=el.validity;
+ el.setCustomValidity(v.valueMissing?(kz?'Осы өрісті толтырыңыз':'Заполните это поле'):(el.type==='email'?(kz?'Дұрыс email енгізіңіз':'Введите корректный email'):(kz?'Өрістің дұрыс толтырылғанын тексеріңіз':'Проверьте, правильно ли заполнено поле')))},true);
+['input','change'].forEach(n=>document.addEventListener(n,ev=>{const el=ev.target;if(el&&el.setCustomValidity)el.setCustomValidity('')},true));
 const FEAT=(window.URKER_CONFIG||{}).features||{}, F_LIST=!!FEAT.listings, F_CLAIM=!!FEAT.claims;
 const $=(s,r=document)=>r.querySelector(s), adm=$('#adm');
 const detectLang=()=>{const s=localStorage.getItem('urker_lang');if(s==='kz'||s==='ru')return s;try{const l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);return l.some(x=>/^(kk|kz)\b/i.test(String(x)))?'kz':'ru'}catch(e){return 'ru'}};
 let lang=detectLang();
-const T={ru:{title:'Уркер · Админка',login:'Вход для администратора',email:'Email',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
+const T={ru:{title:'Уркер · Админка',login:'Вход в админку',barT:'АДМИНКА',barAs:'вы вошли как',toSite:'← На сайт',docT:'🔐 Админка · Уркер',docLogin:'Вход в админку · Уркер',email:'Email',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
  magicSent:'Ссылка для входа отправлена на почту.',badLogin:'Неверный email или пароль',noBackend:'База не подключена: заполните config.js (адрес и anon-ключ Supabase).',
  noAccess:'У этого аккаунта нет прав администратора.',logout:'Выйти',
  tabs:{stats:'📊 Статистика',pending:'Заявки',listings:'🗂 Объявления жителей',claims:'✔ Владельцы',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
@@ -30,7 +34,7 @@ const T={ru:{title:'Уркер · Админка',login:'Вход для адм�
   hintSched:'Дата публикации в будущем = новость появится на сайте автоматически в это время. Черновики видны только здесь.',
   hintVideo:'Ссылка на YouTube или Instagram (по желанию)',noTitle:'(без заголовка)',fromSug:'Фото из предложения перенесены в хранилище',photoErr:'Не удалось загрузить фото'},
  desc:'Что написал заявитель',wantsVip:'Хочет VIP/рекламу',consent:'Согласие на показ номера',stars:'Оценка',device:'Устройство',when:'Когда',contact:'Контакт',chooseSub:'— выберите —'},
- kz:{title:'Үркер · Әкімші беті',login:'Әкімшінің кіруі',email:'Email',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
+ kz:{title:'Үркер · Әкімші беті',login:'Әкімші бетіне кіру',barT:'ӘКІМШІ БЕТІ',barAs:'кірдіңіз:',toSite:'← Сайтқа',docT:'🔐 Әкімші беті · Үркер',docLogin:'Әкімші бетіне кіру · Үркер',email:'Email',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
  magicSent:'Кіру сілтемесі поштаға жіберілді.',badLogin:'Email немесе құпиясөз қате',noBackend:'База қосылмаған: config.js файлын толтырыңыз (Supabase мекенжайы мен anon-кілті).',
  noAccess:'Бұл аккаунтта әкімші құқығы жоқ.',logout:'Шығу',
  tabs:{stats:'📊 Статистика',pending:'Өтінімдер',listings:'🗂 Тұрғындар хабарландырулары',claims:'✔ Иелер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
@@ -205,9 +209,8 @@ async function vClaims(box){
 }
 async function render(){
  const c=await counts().catch(()=>({}));
- adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}<button class="b" id="lo">${t('logout')}</button></div><div id="list">…</div>`;
+ adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}</div><div id="list">…</div>`;
  adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';render()});
- $('#lo').onclick=async()=>{await SB.signOut();boot()};
  try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
 }
 const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
@@ -301,7 +304,7 @@ function newsEditor(slot,row,onDone){
  f.querySelector('[name=publish_at]').closest('div').insertAdjacentHTML('beforeend',`<small class="hint">${N.hintSched}</small>`);
  f.querySelector('[name=video_url]').placeholder='https://www.youtube.com/watch?v=…';f.querySelector('[name=video_url]').closest('div').insertAdjacentHTML('beforeend',`<small class="hint">${N.hintVideo}</small>`);
  f.querySelector('.acts').insertAdjacentHTML('beforebegin',`<div class="full"><label>${N.photos}</label><small class="hint">${N.hintPhotos}</small><div class="pgrid" id="pg"></div>
-  <label class="b sec upl">${N.addPhotos}<input type="file" accept="image/*" multiple id="pf" hidden></label> <span class="meta" id="pst"></span></div>`);
+  <input type="file" accept="image/*" multiple id="pf" class="vh-file"><label for="pf" class="b sec upl">${N.addPhotos}</label> <span class="meta" id="pst"></span></div>`);
  const pg=f.querySelector('#pg');
  const coverOf=()=>st.photos.some(p=>p.url===st.cover)?st.cover:(st.photos[0]&&st.photos[0].url)||'';
  const draw=()=>{const c=coverOf();pg.innerHTML=st.photos.map((p,i)=>`<div class="ph ${p.url===c?'cv':''}"><img src="${esc(p.url)}" alt="">${p.url===c?`<span class="cvb">${N.cover}</span>`:''}
@@ -398,16 +401,23 @@ function vLogin(msg){
  $('#lf').onsubmit=async ev=>{ev.preventDefault();try{await SB.signInWithPassword($('#le').value.trim(),$('#lp').value);boot()}catch(e){toast(t('badLogin'))}};
  $('#ml').onclick=async()=>{const e=$('#le').value.trim();if(!e){$('#le').focus();return}try{await SB.signInWithOtp(e,location.origin+location.pathname);toast(t('magicSent'))}catch(err){toast(err.message)}};
 }
+// заметная полоса «🔐 АДМИНКА · вы вошли как …» — только когда вошёл администратор
+function adminBar(on){const bar=$('#admbar');document.body.classList.toggle('in',!!on);
+ if(!on){bar.hidden=true;bar.innerHTML='';document.title=t('docLogin');return}
+ bar.innerHTML=`<b class="ab-t">🔐 ${t('barT')}</b><a class="ab-s" href="./">${t('toSite')}</a><button class="ab-lo" id="lo" type="button">${t('logout')}</button><span class="ab-u"><span class="sep">· </span>${t('barAs')} <span class="ab-e" title="${esc(SB.email()||'')}">${esc(SB.email()||'')}</span></span>`;
+ bar.hidden=false;document.title=t('docT');$('#hUser').textContent='';  // email уже в полосе
+$('#lo').onclick=async()=>{await SB.signOut();boot()}}
 async function boot(){
- document.documentElement.lang=lang==='kz'?'kk':'ru';$('#hTitle').textContent=t('title');document.title=t('title');
+ document.documentElement.lang=lang==='kz'?'kk':'ru';$('#hTitle').textContent=t('title');document.title=t('docLogin');
  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
  if(!SB.enabled){adm.innerHTML=`<div class="row">⚠️ ${t('noBackend')}</div>`;return}
  SB.handleRedirect();
- if(!SB.session()){$('#hUser').textContent='';return vLogin()}
+ if(!SB.session()){$('#hUser').textContent='';adminBar(false);return vLogin()}
  let isAdm=false;try{isAdm=await SB.rpc('is_admin',{})}catch(e){}
- if(!SB.session())return vLogin();
+ if(!SB.session()){adminBar(false);return vLogin()}
  $('#hUser').textContent=SB.email();
- if(!isAdm){adm.innerHTML=`<div class="row">⛔ ${t('noAccess')}</div><button class="b" id="lo2">${t('logout')}</button>`;$('#lo2').onclick=async()=>{await SB.signOut();boot()};return}
+ if(!isAdm){adminBar(false);adm.innerHTML=`<div class="row">⛔ ${t('noAccess')}</div><button class="b" id="lo2">${t('logout')}</button>`;$('#lo2').onclick=async()=>{await SB.signOut();boot()};return}
+ adminBar(true);
  render();
 }
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{lang=b.dataset.lang;localStorage.setItem('urker_lang',lang);boot()});

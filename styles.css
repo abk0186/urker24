@@ -333,3 +333,15 @@ form .chk{min-height:44px;align-items:center}
 .f input[type=file]::file-selector-button{min-height:44px;margin-right:10px;padding:0 16px;border:2px solid var(--accent);border-radius:12px;background:#fff;color:var(--accent);font:inherit;font-weight:700;cursor:pointer}
 .f input[type=file]{color:transparent}            /* «файл не выбран» не показываем — выбранные фото видны миниатюрами */
 .thumbs img,.thumbs .th{width:96px;height:96px}
+/* выбор фото: своя кнопка вместо системной «Choose files» */
+.vh-file{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;border:0!important;opacity:0!important;white-space:nowrap}
+.fpick{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:4px}
+.f label.file-btn,label.file-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;margin:0;padding:0 18px;border:2px solid var(--accent);border-radius:14px;background:#fff;color:var(--accent);font-size:16px;font-weight:700;cursor:pointer;user-select:none}
+.f label.file-btn:active{transform:scale(.98)}
+.vh-file:focus-visible+label,.vh-file:focus+label.file-btn{outline:3px solid var(--accent);outline-offset:2px}
+.fcount{color:var(--muted);font-size:14px}
+/* счётчик просмотров «👁 123» в углу карточек (0 — не показываем) */
+.vw{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.vw:empty{display:none}
+.lc-img{position:relative}
+.lcard .lc-img .lc-vw{position:absolute;display:block;width:auto;height:auto;opacity:1;inset:auto;top:6px;right:6px;padding:2px 7px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:600;line-height:1.4}
