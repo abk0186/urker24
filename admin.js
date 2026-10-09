@@ -1,0 +1,307 @@
+(function(){
+'use strict';
+const SB=window.SBCreate({auth:true}), D=window.URKER_DATA;
+const $=(s,r=document)=>r.querySelector(s), adm=$('#adm');
+let lang=localStorage.getItem('urker_lang')==='kz'?'kz':'ru';
+const T={ru:{title:'Уркер · Админка',login:'Вход для администратора',email:'Email',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
+ magicSent:'Ссылка для входа отправлена на почту.',badLogin:'Неверный email или пароль',noBackend:'База не подключена: заполните config.js (адрес и anon-ключ Supabase).',
+ noAccess:'У этого аккаунта нет прав администратора.',logout:'Выйти',
+ tabs:{stats:'📊 Статистика',pending:'Заявки',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
+ approve:'Одобрить',reject:'Отклонить',save:'Сохранить',del:'Удалить',hide:'Скрыть',show:'Показать',edit:'Изменить',cancel:'Отмена',add:'+ Добавить',
+ toAnn:'→ Сделать объявлением',done:'Обработано',saved:'Сохранено',deleted:'Удалено',confirmDel:'Удалить безвозвратно?',empty:'Пусто',
+ needSub:'Выберите подкатегорию перед одобрением',search:'Поиск по имени, номеру, описанию…',
+ f:{name:'Имя / название',section_id:'Раздел',sub_id:'Подкатегория',note:'Описание на карточке',address:'Адрес',phone:'Телефон (8XXXXXXXXXX)',wa:'WhatsApp (7XXXXXXXXXX, пусто = из телефона)',
+  recommended:'⭐ Рекомендован чатом',is_new:'🆕 Новый',vip:'📌 VIP / закреплён',vip_until:'VIP до (пусто = бессрочно)',sort_order:'Порядок',status:'Статус',admin_note:'Заметка админа',
+  type:'Тип',title_ru:'Заголовок (RU)',title_kz:'Заголовок (KZ)',area_ru:'Улицы / район (RU)',area_kz:'Улицы / район (KZ)',source_ru:'Источник (RU)',source_kz:'Источник (KZ)',
+  start_at:'Начало',end_at:'Окончание',urgent:'❗ Срочно',is_demo:'Пример (демо)',text_ru:'Текст (RU)',text_kz:'Текст (KZ)',emoji:'Эмодзи',link_url:'Ссылка (https://…)',
+  active:'Включено',starts_at:'Показывать с',ends_at:'Показывать до',category:'Рубрика',lead_ru:'Кратко / анонс (RU)',lead_kz:'Кратко / анонс (KZ)',
+  body_ru:'Полный текст (RU)',body_kz:'Полный текст (KZ)',video_url:'Видео: YouTube / Instagram',pinned:'📌 Закрепить сверху',publish_at:'Дата публикации'},
+ cats:{event:'🎉 Событие',opening:'🏪 Открытие',achievement:'🏆 Достижение',improvement:'🌳 Благоустройство',akimat:'🏛 Акимат',other:'📰 Другое'},
+ st:{pending:'на проверке',approved:'одобрено',rejected:'отклонено',hidden:'скрыто',draft:'черновик',published:'опубликовано',archived:'в архиве',done:'обработано'},
+ types:{power:'⚡ Свет',water:'💧 Вода',gas:'🔥 Газ',repair:'🚧 Ремонт',other:'📢 Другое'},
+ st_:{today:'Сегодня',d7:'7 дней',d30:'30 дней',visitors:'посетителей',views:'просмотров',daily:'По дням (30 дней)',searches:'Частые поиски',notFound:'Искали, но ничего не нашли',contacted:'Кому чаще пишут и звонят',devices:'Устройства',langs:'Язык',referrers:'Откуда приходят',pages:'Популярные страницы',mobile:'Телефон',desktop:'Компьютер',unknown:'неизвестно',times:'раз',results:'в ср. найдено',none:'Пока нет данных',calls:'звонков',privacy:'Анонимная статистика: без cookies и IP, посетитель — случайный id в браузере. Дни — по времени Астаны.',legendV:'посетители',legendN:'просмотры'},
+ n:{sugg:'Предложения жителей',toNews:'→ Сделать новостью',addNews:'+ Новая новость',list:'Все новости',photos:'Фотографии',addPhotos:'📷 Добавить фото',uploading:'Загрузка фото…',
+  cover:'Обложка',setCover:'★ Обложка',left:'←',right:'→',rm:'✕',publish:'Опубликовать',unpublish:'Снять с публикации',pin:'📌 Закрепить',unpin:'📌 Открепить',
+  scheduled:'⏰ запланировано на',views:'просм.',needTitle:'Нужен заголовок хотя бы на одном языке',top:'📰 Популярные новости (30 дней)',sugFrom:'Предложение жителя',
+  hintPhotos:'Фото сжимаются в браузере до ~1600 px (JPEG) и загружаются в хранилище Supabase. Первое фото или отмеченное ★ — обложка.',
+  hintSched:'Дата публикации в будущем = новость появится на сайте автоматически в это время. Черновики видны только здесь.',
+  hintVideo:'Ссылка на YouTube или Instagram (по желанию)',noTitle:'(без заголовка)',fromSug:'Фото из предложения перенесены в хранилище',photoErr:'Не удалось загрузить фото'},
+ desc:'Что написал заявитель',wantsVip:'Хочет VIP/рекламу',consent:'Согласие на показ номера',stars:'Оценка',device:'Устройство',when:'Когда',contact:'Контакт',chooseSub:'— выберите —'},
+ kz:{title:'Үркер · Әкімші беті',login:'Әкімшінің кіруі',email:'Email',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
+ magicSent:'Кіру сілтемесі поштаға жіберілді.',badLogin:'Email немесе құпиясөз қате',noBackend:'База қосылмаған: config.js файлын толтырыңыз (Supabase мекенжайы мен anon-кілті).',
+ noAccess:'Бұл аккаунтта әкімші құқығы жоқ.',logout:'Шығу',
+ tabs:{stats:'📊 Статистика',pending:'Өтінімдер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
+ approve:'Мақұлдау',reject:'Қабылдамау',save:'Сақтау',del:'Жою',hide:'Жасыру',show:'Көрсету',edit:'Өзгерту',cancel:'Болдырмау',add:'+ Қосу',
+ toAnn:'→ Хабарландыру жасау',done:'Өңделді',saved:'Сақталды',deleted:'Жойылды',confirmDel:'Біржола жою керек пе?',empty:'Бос',
+ needSub:'Мақұлдамас бұрын ішкі бөлімді таңдаңыз',search:'Аты, нөмірі, сипаттамасы бойынша іздеу…',
+ f:{name:'Аты / атауы',section_id:'Бөлім',sub_id:'Ішкі бөлім',note:'Карточкадағы сипаттама',address:'Мекенжай',phone:'Телефон (8XXXXXXXXXX)',wa:'WhatsApp (7XXXXXXXXXX, бос болса — телефоннан)',
+  recommended:'⭐ Чат ұсынған',is_new:'🆕 Жаңа',vip:'📌 VIP / бекітілген',vip_until:'VIP мерзімі (бос — шектеусіз)',sort_order:'Реті',status:'Мәртебесі',admin_note:'Әкімші жазбасы',
+  type:'Түрі',title_ru:'Тақырыбы (RU)',title_kz:'Тақырыбы (KZ)',area_ru:'Көшелер / аудан (RU)',area_kz:'Көшелер / аудан (KZ)',source_ru:'Дереккөз (RU)',source_kz:'Дереккөз (KZ)',
+  start_at:'Басталуы',end_at:'Аяқталуы',urgent:'❗ Шұғыл',is_demo:'Мысал (демо)',text_ru:'Мәтін (RU)',text_kz:'Мәтін (KZ)',emoji:'Эмодзи',link_url:'Сілтеме (https://…)',
+  active:'Қосулы',starts_at:'Көрсету басталуы',ends_at:'Көрсету аяқталуы',category:'Айдар',lead_ru:'Қысқаша / анонс (RU)',lead_kz:'Қысқаша / анонс (KZ)',
+  body_ru:'Толық мәтін (RU)',body_kz:'Толық мәтін (KZ)',video_url:'Бейне: YouTube / Instagram',pinned:'📌 Жоғарыға бекіту',publish_at:'Жариялау күні'},
+ cats:{event:'🎉 Іс-шара',opening:'🏪 Ашылу',achievement:'🏆 Жетістік',improvement:'🌳 Абаттандыру',akimat:'🏛 Әкімдік',other:'📰 Басқа'},
+ st:{pending:'тексеруде',approved:'мақұлданды',rejected:'қабылданбады',hidden:'жасырылды',draft:'жоба',published:'жарияланды',archived:'мұрағатта',done:'өңделді'},
+ types:{power:'⚡ Жарық',water:'💧 Су',gas:'🔥 Газ',repair:'🚧 Жөндеу',other:'📢 Басқа'},
+ st_:{today:'Бүгін',d7:'7 күн',d30:'30 күн',visitors:'келуші',views:'қаралым',daily:'Күндер бойынша (30 күн)',searches:'Жиі іздегендер',notFound:'Іздеді, бірақ ештеңе таппады',contacted:'Кімге жиі жазады және қоңырау шалады',devices:'Құрылғылар',langs:'Тіл',referrers:'Қайдан келеді',pages:'Танымал беттер',mobile:'Телефон',desktop:'Компьютер',unknown:'белгісіз',times:'рет',results:'орташа табылғаны',none:'Әзірге дерек жоқ',calls:'қоңырау',privacy:'Анонимді статистика: cookies пен IP жоқ, келуші — браузердегі кездейсоқ id. Күндер Астана уақытымен.',legendV:'келушілер',legendN:'қаралымдар'},
+ n:{sugg:'Тұрғындардың ұсыныстары',toNews:'→ Жаңалық жасау',addNews:'+ Жаңа жаңалық',list:'Барлық жаңалықтар',photos:'Фотосуреттер',addPhotos:'📷 Фото қосу',uploading:'Фото жүктелуде…',
+  cover:'Мұқаба',setCover:'★ Мұқаба',left:'←',right:'→',rm:'✕',publish:'Жариялау',unpublish:'Жариялаудан алу',pin:'📌 Бекіту',unpin:'📌 Босату',
+  scheduled:'⏰ жоспарланған уақыты',views:'қаралым',needTitle:'Кемінде бір тілде тақырып керек',top:'📰 Танымал жаңалықтар (30 күн)',sugFrom:'Тұрғынның ұсынысы',
+  hintPhotos:'Фотолар браузерде ~1600 px-ке дейін сығылады (JPEG) және Supabase қоймасына жүктеледі. Бірінші немесе ★ белгіленген фото — мұқаба.',
+  hintSched:'Жариялау күні болашақта болса, жаңалық сол уақытта сайтта өздігінен шығады. Жобаларды тек осы жерде көресіз.',
+  hintVideo:'YouTube немесе Instagram сілтемесі (міндетті емес)',noTitle:'(тақырыпсыз)',fromSug:'Ұсыныстағы фотолар қоймаға көшірілді',photoErr:'Фотоны жүктеу мүмкін болмады'},
+ desc:'Өтініш берушінің жазғаны',wantsVip:'VIP/жарнама қалайды',consent:'Нөмірді көрсетуге келісім',stars:'Баға',device:'Құрылғы',when:'Қашан',contact:'Байланыс',chooseSub:'— таңдаңыз —'}};
+const t=k=>T[lang][k];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,3500)};
+const secT=s=>lang==='kz'?s.title_kz:s.title_ru;
+const subs=sec=>((D.sections.find(s=>s.id===sec)||{}).subs||[]);
+const subT=id=>{for(const s of D.sections)for(const x of s.subs)if(x.id===id)return x.implicit?secT(s):(lang==='kz'?x.title_kz:x.title);return id||'—'};
+const fmtDT=iso=>iso?new Date(iso).toLocaleString('ru-RU',{timeZone:'Asia/Almaty',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+const toLocalInput=iso=>iso?new Date(new Date(iso).getTime()+5*3600e3).toISOString().slice(0,16):'';
+const fromLocalInput=v=>v?v+':00+05:00':null;
+const normWa=p=>{const d=String(p||'').replace(/\D/g,'');if(/^8\d{10}$/.test(d)&&!/^8800/.test(d))return '7'+d.slice(1);if(/^7\d{10}$/.test(d))return d;return null};
+let tab='stats',editing=null,filterQ='',CACHE={};
+
+// ---------- generic editor ----------
+function field(name,val,kind,opts){
+ if(kind==='long')return `<div class="full"><label>${esc(t('f')[name]||name)}</label><textarea name="${name}" rows="${opts&&opts.rows||8}">${esc(val)}</textarea></div>`;
+ const L=t('f')[name]||name;
+ if(kind==='bool')return `<div><label class="ck"><input type="checkbox" name="${name}" ${val?'checked':''}> ${esc(L)}</label></div>`;
+ if(kind==='select')return `<div><label>${esc(L)}</label><select name="${name}">${opts.map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(val??'')?'selected':''}>${esc(l)}</option>`).join('')}</select></div>`;
+ if(kind==='text')return `<div class="full"><label>${esc(L)}</label><textarea name="${name}" rows="2">${esc(val)}</textarea></div>`;
+ if(kind==='dt')return `<div><label>${esc(L)} <small>(Астана)</small></label><input type="datetime-local" name="${name}" value="${esc(toLocalInput(val))}"></div>`;
+ if(kind==='num')return `<div><label>${esc(L)}</label><input type="number" name="${name}" value="${esc(val)}"></div>`;
+ return `<div class="${opts&&opts.full?'full':''}"><label>${esc(L)}</label><input name="${name}" value="${esc(val)}"></div>`;
+}
+function collect(form,spec){const o={};for(const [n,k] of spec){const el=form.elements[n];if(!el)continue;
+ if(k==='bool')o[n]=el.checked;else if(k==='dt')o[n]=fromLocalInput(el.value);else if(k==='long')o[n]=el.value.replace(/\r/g,'').trim();else if(k==='num')o[n]=el.value===''?0:+el.value;else o[n]=el.value.trim()}return o}
+const SPEC_SPEC=()=>[['name'],['phone'],['section_id','select',D.sections.map(s=>[s.id,s.emoji+' '+secT(s)])],['sub_id','select'],['note','text'],['address',null,{full:true}],['wa'],
+ ['sort_order','num'],['recommended','bool'],['is_new','bool'],['vip','bool'],['vip_until','dt'],['status','select',['pending','approved','rejected','hidden'].map(s=>[s,t('st')[s]])],['admin_note','text']];
+const ANN_SPEC=()=>[['type','select',Object.keys(T.ru.types).map(k=>[k,t('types')[k]])],['status','select',['draft','published','archived'].map(s=>[s,t('st')[s]])],
+ ['title_ru',null,{full:true}],['title_kz',null,{full:true}],['area_ru'],['area_kz'],['source_ru'],['source_kz'],['start_at','dt'],['end_at','dt'],['urgent','bool'],['is_demo','bool']];
+const AD_SPEC=()=>[['emoji'],['active','bool'],['title_ru'],['title_kz'],['text_ru','text'],['text_kz','text'],['link_url',null,{full:true}],['wa'],['starts_at','dt'],['ends_at','dt'],['sort_order','num']];
+function editor(spec,row,extraBtns){
+ return `<form class="ed" data-ed>${spec.map(([n,k,o])=>{
+   if(n==='sub_id')return field('sub_id',row.sub_id,'select',[['',t('chooseSub')]].concat(subs(row.section_id).map(x=>[x.id,x.implicit?secT(D.sections.find(s=>s.id===row.section_id)):(lang==='kz'?x.title_kz:x.title)])));
+   return field(n,row[n],k,o)}).join('')}
+  <div class="full acts" style="display:flex;gap:8px;flex-wrap:wrap"><button class="b pri" data-act="save">${t('save')}</button>${extraBtns||''}<button type="button" class="b" data-act="cancel">${t('cancel')}</button></div></form>`;
+}
+
+// ---------- data ----------
+async function counts(){
+ const [p,r,m,n]=await Promise.all([SB.get('specialists?select=id&status=eq.pending'),SB.get('reviews?select=id&status=eq.pending'),SB.get('reports?select=id&status=eq.pending'),
+  SB.get('news_suggestions?select=id&status=eq.pending').catch(()=>[])]);
+ return{pending:p.length,reviews:r.length,reports:m.length,news:n.length};
+}
+async function specNames(){if(!CACHE.names){const rows=await SB.get('specialists?select=id,name,phone,sub_id');CACHE.names=Object.fromEntries(rows.map(r=>[r.id,r]))}return CACHE.names}
+
+// ---------- views ----------
+async function render(){
+ const c=await counts().catch(()=>({}));
+ adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}<button class="b" id="lo">${t('logout')}</button></div><div id="list">…</div>`;
+ adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';render()});
+ $('#lo').onclick=async()=>{await SB.signOut();boot()};
+ try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,ann:vAnn,ads:vAds,news:vNews})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
+}
+const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
+function bindSpecEditor(box,row,onDone){
+ const f=box.querySelector('[data-ed]');
+ f.elements.section_id.onchange=()=>{row=Object.assign(row,collect(f,SPEC_SPEC()),{section_id:f.elements.section_id.value,sub_id:''});box.innerHTML=box.innerHTML;onDone('rerender',row)};
+ f.onclick=async ev=>{const a=ev.target.dataset.act;if(!a)return;ev.preventDefault();
+  if(a==='cancel'){editing=null;return render()}
+  const v=collect(f,SPEC_SPEC());if(!v.wa)v.wa=normWa(v.phone);v.phone=v.phone.replace(/\D/g,'');if(!v.sub_id)v.sub_id=null;
+  if(a==='approve')v.status='approved';if(a==='reject')v.status='rejected';
+  if(v.status==='approved'&&!v.sub_id){toast(t('needSub'));return}
+  try{if(row.id)await SB.update('specialists','id=eq.'+row.id,v);else await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
+}
+async function vPending(box){
+ const rows=await SB.get('specialists?select=*&status=eq.pending&order=created_at.asc');
+ box.innerHTML=rows.length?rows.map(r=>`<div class="row" data-id="${r.id}"><h3>${esc(r.name)} · ${esc(r.phone)}</h3>
+  <div class="meta">${fmtDT(r.created_at)} · ${esc(secT(D.sections.find(s=>s.id===r.section_id)||{title_ru:r.section_id,title_kz:r.section_id}))}${r.wants_vip?' · <span class="pill vip">'+t('wantsVip')+'</span>':''}${r.consent?' · ✅ '+t('consent'):''}</div>
+  <p><b>${t('desc')}:</b> ${esc(r.description)}<br>${r.address?'📍 '+esc(r.address):''}</p>
+  <div class="slot">${editor(SPEC_SPEC(),r,`<button class="b ok" data-act="approve">${t('approve')}</button><button class="b no" data-act="reject">${t('reject')}</button>`)}</div></div>`).join(''):`<div class="row">${t('empty')}</div>`;
+ rows.forEach(r=>{const slot=box.querySelector(`[data-id="${r.id}"] .slot`);const bind=(x)=>bindSpecEditor(slot,x,(k,nr)=>{slot.innerHTML=editor(SPEC_SPEC(),nr,`<button class="b ok" data-act="approve">${t('approve')}</button><button class="b no" data-act="reject">${t('reject')}</button>`);bind(nr)});bind(r)});
+}
+async function vSpecs(box){
+ const rows=await SB.get('specialists?select=*&status=in.(approved,hidden,rejected)&order=section_id.asc,sort_order.asc,id.asc');
+ const q=filterQ.toLowerCase();const list=rows.filter(r=>!q||[r.name,r.phone,r.note,r.address,subT(r.sub_id)].join(' ').toLowerCase().includes(q));
+ box.innerHTML=`<input class="filter" id="fq" placeholder="${t('search')}" value="${esc(filterQ)}"><button class="b pri" id="addSpec" style="margin-bottom:10px">${t('add')}</button>
+  <div id="newSlot"></div>`+list.map(r=>`<div class="row" data-id="${r.id}"><h3>${r.vip?'<span class="pill vip">VIP</span>':''}${r.recommended?'⭐ ':''}${esc(r.name||'—')} · ${esc(r.phone)}</h3>
+  <div class="meta">${pill(r.status)} ${esc(subT(r.sub_id))} · ${esc(r.note)}</div>
+  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="vip">${r.vip?'VIP ✕':'📌 VIP'}</button>
+  <button class="b" data-a="vis">${r.status==='approved'?t('hide'):t('show')}</button><button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join('');
+ const fq=$('#fq');fq.oninput=()=>{filterQ=fq.value;clearTimeout(fq._t);fq._t=setTimeout(()=>vSpecs(box).then(()=>{const n=$('#fq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),250)};
+ $('#addSpec').onclick=()=>{const slot=$('#newSlot');const r={section_id:D.sections[0].id,status:'approved',sort_order:5000,name:'',phone:''};const bind=x=>{slot.innerHTML=editor(SPEC_SPEC(),x);bindSpecEditor(slot,x,(k,nr)=>bind(nr))};bind(r)};
+ box.querySelectorAll('.row[data-id]').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
+  try{if(a==='edit'){const slot=el.querySelector('.slot');const bind=x=>{slot.innerHTML=editor(SPEC_SPEC(),x);bindSpecEditor(slot,x,(k,nr)=>bind(nr))};bind(Object.assign({},r));return}
+   if(a==='vip')await SB.update('specialists','id=eq.'+r.id,{vip:!r.vip});
+   if(a==='vis')await SB.update('specialists','id=eq.'+r.id,{status:r.status==='approved'?'hidden':'approved'});
+   if(a==='del'){if(!confirm(t('confirmDel')))return;await SB.remove('specialists','id=eq.'+r.id);CACHE.names=null}
+   toast(t('saved'));vSpecs(box)}catch(e){toast(e.message)}}});
+}
+async function vReviews(box){
+ const [pend,appr,names]=await Promise.all([SB.get('reviews?select=*&status=eq.pending&order=created_at.asc'),SB.get('reviews?select=*&status=eq.approved&order=created_at.desc&limit=30'),specNames()]);
+ const card=(r,btns)=>{const s=names[r.specialist_id]||{};return `<div class="row" data-id="${r.id}"><h3>${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)} · ${esc(s.name||s.phone||('#'+r.specialist_id))} <small>(${esc(subT(s.sub_id))})</small></h3>
+  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)} · ${esc(r.author_name)} ${r.phone?'· '+esc(r.phone):''} · ${t('device')}: ${esc(String(r.device_id).slice(0,8))}</div><p>${esc(r.text)}</p><div class="acts">${btns}</div></div>`};
+ box.innerHTML=(pend.length?pend.map(r=>card(r,`<button class="b ok" data-a="approved">${t('approve')}</button><button class="b no" data-a="rejected">${t('reject')}</button>`)).join(''):`<div class="row">${t('empty')}</div>`)
+  +(appr.length?`<h2>${t('st').approved}</h2>`+appr.map(r=>card(r,`<button class="b" data-a="rejected">${t('hide')}</button>`)).join(''):'');
+ box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;try{await SB.update('reviews','id=eq.'+el.closest('.row').dataset.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
+}
+async function vReports(box){
+ const rows=await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=100');
+ box.innerHTML=rows.length?rows.map(r=>`<div class="row" data-id="${r.id}"><h3>${esc(t('types')[r.type]||r.type)} · ${esc(r.title)}</h3>
+  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}</div><p>📍 ${esc(r.area)}<br>🕒 ${esc(r.when_text)}<br>ℹ️ ${esc(r.source)} ${r.contact?'<br>📞 '+esc(r.contact):''}</p>
+  <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="ann">${t('toAnn')}</button><button class="b" data-a="done">${t('done')}</button><button class="b no" data-a="rejected">${t('reject')}</button>`:''}</div></div>`).join(''):`<div class="row">${t('empty')}</div>`;
+ box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;const r=rows.find(x=>x.id==el.closest('.row').dataset.id);
+  try{if(a==='ann'){tab='ann';editing={type:r.type,title_ru:r.title,area_ru:r.area,source_ru:r.source,status:'draft',report_id:r.id,start_at:r.when_text&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(r.when_text)?r.when_text+':00+05:00':null};return render()}
+   await SB.update('reports','id=eq.'+r.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
+}
+function crud(table,spec,rowsHtml){return async function(box){
+ const rows=await SB.get(table+'?select=*&order=created_at.desc&limit=200');
+ box.innerHTML=`<button class="b pri" id="addRow" style="margin-bottom:10px">${t('add')}</button><div id="edSlot"></div>`+(rows.length?rows.map(r=>`<div class="row" data-id="${r.id}">${rowsHtml(r)}
+  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join(''):`<div class="row">${t('empty')}</div>`);
+ const open=(slot,row)=>{slot.innerHTML=editor(spec(),row);const f=slot.querySelector('[data-ed]');f.onclick=async ev=>{const a=ev.target.dataset.act;if(!a)return;ev.preventDefault();
+   if(a==='cancel'){editing=null;return render()}
+   const v=collect(f,spec());if('wa' in v)v.wa=normWa(v.wa);
+   try{if(row.id)await SB.update(table,'id=eq.'+row.id,v);else{if(row.report_id)v.report_id=row.report_id;await SB.insert(table,v);if(row.report_id)await SB.update('reports','id=eq.'+row.report_id,{status:'done'})}
+    editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}}};
+ $('#addRow').onclick=()=>open($('#edSlot'),{});
+ if(editing){open($('#edSlot'),editing);editing=null}
+ box.querySelectorAll('.row[data-id]').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
+  if(a==='edit')return open(el.querySelector('.slot'),r);
+  if(a==='del'&&confirm(t('confirmDel'))){try{await SB.remove(table,'id=eq.'+r.id);toast(t('deleted'));render()}catch(e){toast(e.message)}}}});
+}}
+const vAnn=crud('announcements',ANN_SPEC,r=>`<h3>${r.urgent?'❗ ':''}${esc(t('types')[r.type])} · ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${fmtDT(r.start_at)} — ${fmtDT(r.end_at)} · ${esc(r.area_ru)}</div>`);
+const vAds=crud('ads',AD_SPEC,r=>`<h3>${esc(r.emoji)} ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${r.active?'<span class="pill approved">ON</span>':'<span class="pill">OFF</span>'} ${fmtDT(r.starts_at)} — ${fmtDT(r.ends_at)} · ${esc(r.link_url||r.wa||'')}</div>`);
+
+// ---------- новости ----------
+const NEWS_SPEC=()=>[['category','select',Object.keys(T.ru.cats).map(k=>[k,t('cats')[k]])],['status','select',['draft','published','archived'].map(s=>[s,t('st')[s]])],
+ ['publish_at','dt'],['pinned','bool'],['title_ru',null,{full:true}],['title_kz',null,{full:true}],['lead_ru','text'],['lead_kz','text'],['body_ru','long'],['body_kz','long'],
+ ['video_url',null,{full:true}],['is_demo','bool']];
+function compress(src,maxSide,q){return new Promise((res,rej)=>{const isBlob=src instanceof Blob;const u=isBlob?URL.createObjectURL(src):src;const img=new Image();
+ img.onload=()=>{const k=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+  const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);if(isBlob)URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error('encode')),'image/jpeg',q)};
+ img.onerror=()=>{if(isBlob)URL.revokeObjectURL(u);rej(new Error('image'))};img.src=u})}
+const rnd=()=>Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>b.toString(16).padStart(2,'0')).join('');
+async function uploadPhoto(src){const b=await compress(src,1600,0.82);const d=new Date(Date.now()+5*3600e3).toISOString();
+ return SB.upload('news',`${d.slice(0,4)}/${d.slice(5,7)}/${rnd()}.jpg`,b,'image/jpeg')}
+const ntitle=r=>(lang==='kz'?(r.title_kz||r.title_ru):(r.title_ru||r.title_kz))||t('n').noTitle;
+function newsEditor(slot,row,onDone){
+ const N=t('n');const st={photos:(row.photos||[]).map(p=>typeof p==='string'?{url:p,path:''}:p),cover:row.cover_url||'',uploaded:[],removed:[]};
+ if(!row.status)row.status='draft';if(!row.category)row.category='other';
+ slot.innerHTML=`${row.suggestion_id?`<p class="demo-note live">✍️ ${N.sugFrom} #${row.suggestion_id}</p>`:''}${editor(NEWS_SPEC(),row)}`;
+ const f=slot.querySelector('[data-ed]');
+ f.querySelector('[name=publish_at]').closest('div').insertAdjacentHTML('beforeend',`<small class="hint">${N.hintSched}</small>`);
+ f.querySelector('[name=video_url]').placeholder='https://www.youtube.com/watch?v=…';f.querySelector('[name=video_url]').closest('div').insertAdjacentHTML('beforeend',`<small class="hint">${N.hintVideo}</small>`);
+ f.querySelector('.acts').insertAdjacentHTML('beforebegin',`<div class="full"><label>${N.photos}</label><small class="hint">${N.hintPhotos}</small><div class="pgrid" id="pg"></div>
+  <label class="b sec upl">${N.addPhotos}<input type="file" accept="image/*" multiple id="pf" hidden></label> <span class="meta" id="pst"></span></div>`);
+ const pg=f.querySelector('#pg');
+ const coverOf=()=>st.photos.some(p=>p.url===st.cover)?st.cover:(st.photos[0]&&st.photos[0].url)||'';
+ const draw=()=>{const c=coverOf();pg.innerHTML=st.photos.map((p,i)=>`<div class="ph ${p.url===c?'cv':''}"><img src="${esc(p.url)}" alt="">${p.url===c?`<span class="cvb">${N.cover}</span>`:''}
+  <div class="pb"><button type="button" data-p="cover" data-i="${i}" title="${N.setCover}">★</button><button type="button" data-p="l" data-i="${i}">${N.left}</button><button type="button" data-p="r" data-i="${i}">${N.right}</button><button type="button" data-p="rm" data-i="${i}" class="no">${N.rm}</button></div></div>`).join('')};
+ pg.onclick=ev=>{const b=ev.target.closest('[data-p]');if(!b)return;ev.preventDefault();const i=+b.dataset.i,a=b.dataset.p,P=st.photos;
+  if(a==='cover')st.cover=P[i].url;if(a==='l'&&i>0)[P[i-1],P[i]]=[P[i],P[i-1]];if(a==='r'&&i<P.length-1)[P[i+1],P[i]]=[P[i],P[i+1]];
+  if(a==='rm'){const [x]=P.splice(i,1);if(x.path)st.removed.push(x.path)}draw()};
+ const addFiles=async(list)=>{const pst=f.querySelector('#pst');let k=0;for(const src of list){pst.textContent=`${N.uploading} ${++k}/${list.length}`;
+   try{const r=await uploadPhoto(src);st.uploaded.push(r.path);st.photos.push(r);draw()}catch(e){toast(N.photoErr+': '+e.message)}}pst.textContent=''};
+ f.querySelector('#pf').onchange=ev=>{const l=[...ev.target.files];ev.target.value='';addFiles(l)};
+ draw();
+ if(row._sugPhotos&&row._sugPhotos.length){addFiles(row._sugPhotos).then(()=>toast(N.fromSug));delete row._sugPhotos}
+ f.onclick=async ev=>{const a=ev.target.dataset.act;if(!a)return;ev.preventDefault();
+  if(a==='cancel'){for(const p of st.uploaded)SB.removeFile('news',p).catch(()=>{});editing=null;return render()}
+  const v=collect(f,NEWS_SPEC());if(!v.title_ru&&!v.title_kz){toast(N.needTitle);return}
+  if(!v.publish_at)delete v.publish_at;v.photos=st.photos.map(p=>({url:p.url,path:p.path||''}));v.cover_url=coverOf();
+  try{if(row.id)await SB.update('news','id=eq.'+row.id,Object.assign(v,{updated_at:new Date().toISOString()}));
+   else{if(row.suggestion_id)v.suggestion_id=row.suggestion_id;await SB.insert('news',v);if(row.suggestion_id)await SB.update('news_suggestions','id=eq.'+row.suggestion_id,{status:'accepted'})}
+   for(const p of st.removed)SB.removeFile('news',p).catch(()=>{});
+   editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
+}
+async function vNews(box){
+ const N=t('n');
+ const [sug,rows,top]=await Promise.all([SB.get('news_suggestions?select=*&status=eq.pending&order=created_at.asc'),SB.get('news?select=*&order=pinned.desc,publish_at.desc&limit=300'),
+  SB.rpc('admin_top_news',{p_days:30}).catch(()=>[])]);
+ const views=Object.fromEntries((top||[]).map(x=>[x.news_id,x.views]));const now=Date.now();
+ box.innerHTML=(sug.length?`<h2>✍️ ${N.sugg} <span class="cnt">${sug.length}</span></h2>`+sug.map(s=>`<div class="row" data-sid="${s.id}"><h3>${esc(s.title)}</h3>
+   <div class="meta">${fmtDT(s.created_at)}${s.contact?' · 📞 '+esc(s.contact):''} · ${t('device')}: ${esc(String(s.device_id||'').slice(0,8))}</div><p class="pre">${esc(s.text)}</p>
+   ${(s.photos||[]).length?`<div class="pgrid sm">${s.photos.map(u=>/^data:image\/(jpeg|webp);base64,/.test(u)?`<div class="ph"><img src="${esc(u)}" alt=""></div>`:'').join('')}</div>`:''}
+   <div class="acts"><button class="b ok" data-a="tonews">${N.toNews}</button><button class="b no" data-a="rejected">${t('reject')}</button></div></div>`).join(''):'')
+  +`<button class="b pri" id="addNews" style="margin:6px 0 10px">${N.addNews}</button><div id="edSlot"></div><h2>${N.list}</h2>`
+  +(rows.length?rows.map(r=>{const sch=r.status==='published'&&new Date(r.publish_at).getTime()>now;return `<div class="row nrow" data-id="${r.id}">
+   ${r.cover_url?`<img class="nthumb" src="${esc(r.cover_url)}" alt="">`:`<div class="nthumb ph">${esc((t('cats')[r.category]||'📰').split(' ')[0])}</div>`}
+   <div class="nmain"><h3>${r.pinned?'📌 ':''}${esc(ntitle(r))}</h3>
+   <div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${esc(t('cats')[r.category]||'')} · ${sch?`<b class="sched">${N.scheduled} ${fmtDT(r.publish_at)}</b>`:fmtDT(r.publish_at)}
+    ${(r.photos||[]).length?' · 🖼 '+r.photos.length:''}${r.video_url?' · ▶️':''}${views[r.id]?` · 👁 ${views[r.id]} ${N.views}`:''}${!r.title_kz||!r.title_ru?` · <span class="pill">${r.title_kz?'KZ':'RU'} only</span>`:''}</div>
+   <div class="acts"><button class="b" data-a="edit">${t('edit')}</button>${r.status==='published'?`<button class="b" data-a="unpub">${N.unpublish}</button>`:`<button class="b ok" data-a="pub">${N.publish}</button>`}
+   <button class="b sec" data-a="pin">${r.pinned?N.unpin:N.pin}</button><button class="b no" data-a="del">${t('del')}</button></div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
+ $('#addNews').onclick=()=>newsEditor($('#edSlot'),{});
+ if(editing&&editing._news){const e=editing;editing=null;newsEditor($('#edSlot'),e)}
+ box.querySelectorAll('.row[data-sid] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;const s=sug.find(x=>x.id==el.closest('.row').dataset.sid);
+  try{if(a==='tonews'){newsEditor($('#edSlot'),{title_ru:s.title,body_ru:s.text,status:'draft',category:'other',suggestion_id:s.id,_sugPhotos:(s.photos||[]).filter(u=>/^data:image\//.test(u))});$('#edSlot').scrollIntoView({behavior:'smooth'});return}
+   await SB.update('news_suggestions','id=eq.'+s.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
+ box.querySelectorAll('.nrow').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
+  try{if(a==='edit')return newsEditor(el.querySelector('.slot'),Object.assign({},r));
+   if(a==='pub')await SB.update('news','id=eq.'+r.id,{status:'published'});
+   if(a==='unpub')await SB.update('news','id=eq.'+r.id,{status:'draft'});
+   if(a==='pin')await SB.update('news','id=eq.'+r.id,{pinned:!r.pinned});
+   if(a==='del'){if(!confirm(t('confirmDel')))return;await SB.remove('news','id=eq.'+r.id);for(const p of (r.photos||[]))if(p&&p.path)SB.removeFile('news',p.path).catch(()=>{});toast(t('deleted'));return render()}
+   toast(t('saved'));render()}catch(e){toast(e.message)}}});
+}
+
+// ---------- статистика ----------
+function chart(daily){
+ const W=640,H=180,P=24,n=daily.length,max=Math.max(1,...daily.map(d=>d.views)),bw=(W-P*2)/n;
+ const y=v=>H-P-(v/max)*(H-P*2);
+ const bars=daily.map((d,i)=>`<rect x="${(P+i*bw+1).toFixed(1)}" y="${y(d.views).toFixed(1)}" width="${Math.max(1,bw-2).toFixed(1)}" height="${(H-P-y(d.views)).toFixed(1)}" fill="#f4c7a8"><title>${d.day}: ${d.views} / ${d.visitors}</title></rect>`).join('');
+ const line=daily.map((d,i)=>`${(P+i*bw+bw/2).toFixed(1)},${y(d.visitors).toFixed(1)}`).join(' ');
+ const lbl=daily.map((d,i)=>(i%5===0||i===n-1)?`<text x="${(P+i*bw+bw/2).toFixed(1)}" y="${H-6}" font-size="11" text-anchor="middle" fill="#7a6a5c">${d.day.slice(8,10)}.${d.day.slice(5,7)}</text>`:'').join('');
+ return `<svg viewBox="0 0 ${W} ${H}" class="chart" role="img"><text x="${P}" y="14" font-size="11" fill="#7a6a5c">max ${max}</text>${bars}<polyline points="${line}" fill="none" stroke="#e8603c" stroke-width="2.5"/>${daily.map((d,i)=>`<circle cx="${(P+i*bw+bw/2).toFixed(1)}" cy="${y(d.visitors).toFixed(1)}" r="2.5" fill="#e8603c"/>`).join('')}${lbl}</svg>
+  <div class="legend"><span><i style="background:#e8603c"></i>${t('st_').legendV}</span><span><i style="background:#f4c7a8"></i>${t('st_').legendN}</span></div>`;
+}
+function split(obj){const S=t('st_');const tot=Object.values(obj).reduce((a,b)=>a+b,0);if(!tot)return `<p class="meta">${S.none}</p>`;
+ return Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const pct=Math.round(v*100/tot);const name=S[k]||({ru:'Русский',kz:'Қазақша'})[k]||k;
+  return `<div class="bar"><span>${esc(name)}</span><b>${v} · ${pct}%</b><div><i style="width:${pct}%"></i></div></div>`}).join('')}
+async function vStats(box){
+ const [s,tn]=await Promise.all([SB.rpc('admin_stats',{p_days:30}),SB.rpc('admin_top_news',{p_days:30}).catch(()=>[])]),S=t('st_');
+ const tile=(k)=>`<div class="kpi"><small>${S[k]}</small><b>${s.totals[k].visitors}</b><span>${S.visitors}</span><em>${s.totals[k].views} ${S.views}</em></div>`;
+ const list=(rows,fn)=>rows.length?`<ol class="tl">${rows.map(fn).join('')}</ol>`:`<p class="meta">${S.none}</p>`;
+ box.innerHTML=`<p class="demo-note live">🔒 ${S.privacy}</p>
+  <div class="kpis">${tile('today')}${tile('d7')}${tile('d30')}</div>
+  <div class="row"><h3>${S.daily}</h3>${chart(s.daily)}</div>
+  <div class="grid2">
+   <div class="row"><h3>🔍 ${S.searches}</h3>${list(s.top_searches,x=>`<li><span>${esc(x.query)}</span><b>${x.cnt} ${S.times}</b><small>${S.results}: ${x.avg_results}</small></li>`)}</div>
+   <div class="row"><h3>🤷 ${S.notFound}</h3>${list(s.top_not_found,x=>`<li><span>${esc(x.query)}</span><b>${x.cnt} ${S.times}</b></li>`)}</div>
+  </div>
+  <div class="row"><h3>📞 ${S.contacted}</h3>${list(s.top_contacted,x=>`<li><span>${esc(x.name||x.phone||('#'+x.specialist_id))} <small>${esc(subT(x.sub_id))}</small></span><b>${x.total}</b><small>WhatsApp ${x.wa} · ${S.calls} ${x.calls}</small></li>`)}</div>
+  <div class="row"><h3>${t('n').top}</h3>${list(tn||[],x=>`<li><span>${esc((lang==='kz'?(x.title_kz||x.title_ru):(x.title_ru||x.title_kz)))}</span><b>${x.views} ${S.views}</b><small>${x.visitors} ${S.visitors}</small></li>`)}</div>
+  <div class="grid2"><div class="row"><h3>📱 ${S.devices}</h3>${split(s.devices)}</div><div class="row"><h3>🌐 ${S.langs}</h3>${split(s.langs)}</div></div>
+  <div class="grid2">
+   <div class="row"><h3>↪️ ${S.referrers}</h3>${list(s.referrers,x=>`<li><span>${esc(x.referrer_domain)}</span><b>${x.cnt}</b></li>`)}</div>
+   <div class="row"><h3>📄 ${S.pages}</h3>${list(s.top_pages,x=>`<li><span>${esc(x.path)}</span><b>${x.cnt}</b></li>`)}</div>
+  </div>`;
+}
+
+// ---------- login / boot ----------
+function vLogin(msg){
+ adm.innerHTML=`<div class="login"><h1>${t('login')}</h1>${msg?`<p class="demo-note warn">${esc(msg)}</p>`:''}
+  <form id="lf"><input id="le" type="email" autocomplete="username" placeholder="${t('email')}" required><input id="lp" type="password" autocomplete="current-password" placeholder="${t('pass')}">
+  <button class="btn primary" type="submit">${t('signin')}</button></form>
+  <button class="btn" id="ml" style="background:#fff;color:var(--accent);border:2px solid var(--accent);width:100%;margin-top:10px">✉️ ${t('magic')}</button></div>`;
+ $('#lf').onsubmit=async ev=>{ev.preventDefault();try{await SB.signInWithPassword($('#le').value.trim(),$('#lp').value);boot()}catch(e){toast(t('badLogin'))}};
+ $('#ml').onclick=async()=>{const e=$('#le').value.trim();if(!e){$('#le').focus();return}try{await SB.signInWithOtp(e,location.origin+location.pathname);toast(t('magicSent'))}catch(err){toast(err.message)}};
+}
+async function boot(){
+ document.documentElement.lang=lang==='kz'?'kk':'ru';$('#hTitle').textContent=t('title');document.title=t('title');
+ document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
+ if(!SB.enabled){adm.innerHTML=`<div class="row">⚠️ ${t('noBackend')}</div>`;return}
+ SB.handleRedirect();
+ if(!SB.session()){$('#hUser').textContent='';return vLogin()}
+ let isAdm=false;try{isAdm=await SB.rpc('is_admin',{})}catch(e){}
+ if(!SB.session())return vLogin();
+ $('#hUser').textContent=SB.email();
+ if(!isAdm){adm.innerHTML=`<div class="row">⛔ ${t('noAccess')}</div><button class="b" id="lo2">${t('logout')}</button>`;$('#lo2').onclick=async()=>{await SB.signOut();boot()};return}
+ render();
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{lang=b.dataset.lang;localStorage.setItem('urker_lang',lang);boot()});
+boot();
+})();
