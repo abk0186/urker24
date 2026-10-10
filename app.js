@@ -435,7 +435,7 @@ function viewHome(q=''){
  bindSearch();
 }
 let sortMode='list';
-function viewCat(id,subId){
+function viewCat(id,subId,focusId){  // focusId: #/c/<раздел>/<подраздел>/<id карточки> — ссылка на конкретную карточку (кнопка «📲 Отправить автору» в админке)
  const s=secById[id];if(!s)return viewHome();
  const vs=visibleSubs(s);const showChips=!(vs.length<=1&&(vs[0]||{}).implicit);
  let list=D.entries.filter(e=>e.section===id&&(!subId||e.sub===subId));
@@ -449,6 +449,7 @@ function viewCat(id,subId){
   ${list.some(e=>e.vip)?'':vipCard(s)}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
  $('#sort').onchange=ev=>{sortMode=ev.target.value;viewCat(id,subId)};
+ if(focusId&&/^\d+$/.test(focusId)){const el=document.getElementById('e'+focusId);if(el)setTimeout(()=>{el.scrollIntoView({block:'center'});el.style.outline='3px solid #f4a340';el.style.outlineOffset='2px';setTimeout(()=>{el.style.outline='';el.style.outlineOffset=''},5000)},60)}
 }
 function formNote(liveKey){return OFFLINE?`<p class="demo-note warn">⚠️ ${t('offlineForm')}</p>`:`<p class="demo-note live">ℹ️ ${t(liveKey)}</p>`}
 async function sending(btn,fn){btn.disabled=true;try{await fn()}finally{btn.disabled=false}}
@@ -560,7 +561,7 @@ let tt;function toast(msg){const el=$('#toast');el.textContent=msg;el.hidden=fal
 function route(){setMeta();setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trackView()},0);
  const h=location.hash||'#/';let nav='home';
  app.dataset.view=(h.match(/^#\/(news\/suggest|news\/[^/?]+|[a-z]+)/)||[,'home'])[1].replace(/^news\/(?!suggest).+/,'article').replace('news/suggest','suggest');
- if(h.startsWith('#/c/')){const [id,sub]=h.slice(4).split('/');viewCat(id,sub)}
+ if(h.startsWith('#/c/')){const [id,sub,fid]=h.slice(4).split('?')[0].split('/');viewCat(id,sub,fid)}
  else if(h.startsWith('#/add')){viewAdd();nav=document.querySelector('[data-nav=post]')?'post':'add'}
  else if(h.startsWith('#/ann')){viewAnn(h.split('/')[2]);nav=document.querySelector('[data-nav=ann]')?'ann':'menu'}
  else if(h.startsWith('#/news')){const id=h.split('/')[2];if(id)viewArticle(decodeURIComponent(id));else viewNews();nav='news'}

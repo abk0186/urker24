@@ -60,6 +60,25 @@ const T={ru:{title:'Уркер · Админка',login:'Вход в админ�
   hintSched:'Жариялау күні болашақта болса, жаңалық сол уақытта сайтта өздігінен шығады. Жобаларды тек осы жерде көресіз.',
   hintVideo:'YouTube немесе Instagram сілтемесі (міндетті емес)',noTitle:'(тақырыпсыз)',fromSug:'Ұсыныстағы фотолар қоймаға көшірілді',photoErr:'Фотоны жүктеу мүмкін болмады'},
  desc:'Өтініш берушінің жазғаны',wantsVip:'VIP/жарнама қалайды',consent:'Нөмірді көрсетуге келісім',stars:'Баға',device:'Құрылғы',when:'Қашан',contact:'Байланыс',chooseSub:'— таңдаңыз —'}};
+// общий счётчик «🔔 Новое: N» над вкладками
+Object.assign(T.ru,{newT:'🔔 Новое',noNew:'✅ Новых нет',newAria:'Ждут проверки',nb:{pending:'Заявки',listings:'Объявления жителей',news:'Предложения новостей',reviews:'Отзывы',reports:'Сообщения',claims:'Заявки владельцев'}});
+Object.assign(T.kz,{newT:'🔔 Жаңа',noNew:'✅ Жаңа жоқ',newAria:'Тексеруді күтуде',nb:{pending:'Өтінімдер',listings:'Тұрғындар хабарландырулары',news:'Жаңалық ұсыныстары',reviews:'Пікірлер',reports:'Хабарламалар',claims:'Иелер өтінімдері'}});
+Object.assign(T.ru,{shareA:'📲 Отправить автору',shareT:'Отправить автору ссылку в WhatsApp',approvedL:'✅ Объявление одобрено',approvedC:'✅ Карточка одобрена',closeX:'Закрыть'});
+Object.assign(T.kz,{shareA:'📲 Авторға жіберу',shareT:'Авторға сілтемені WhatsApp-қа жіберу',approvedL:'✅ Хабарландыру мақұлданды',approvedC:'✅ Карточка мақұлданды',closeX:'Жабу'});
+// «📲 Отправить автору»: поздравление KZ + RU со ссылкой на опубликованное (без секретного токена автора)
+const PUB='https://urker24.kz/';
+const pubLink=(kind,r)=>kind==='l'?PUB+'#/item/'+r.id:PUB+'#/c/'+encodeURIComponent(r.section_id)+'/'+encodeURIComponent(r.sub_id)+'/'+r.id;
+function shareUrl(kind,r){
+ if(!r||r.status!=='approved')return '';
+ const ph=kind==='l'?(/^7\d{10}$/.test(String(r.phone||''))?String(r.phone):null):(normWa(r.wa)||normWa(r.phone));
+ if(!ph||(kind==='c'&&!(r.section_id&&r.sub_id)))return '';
+ const u=pubLink(kind,r),nm=String((kind==='l'?r.title:(r.name||r.business_name))||'').trim(),q=nm?' «'+nm+'»':'';
+ const msg=kind==='l'
+  ?`Құттықтаймыз! Сіздің${q} хабарландыруыңыз urker24.kz сайтында жарияланды. Сілтемемен бөлісіңіз: ${u}\n\nПоздравляем! Ваше объявление${q} размещено на urker24.kz. Делитесь ссылкой: ${u}`
+  :`Құттықтаймыз! Сіздің${q} карточка-визиткаңыз urker24.kz сайтында жарияланды. Сілтемемен бөлісіңіз: ${u}\n\nПоздравляем! Ваша карточка-визитка${q} размещена на urker24.kz. Делитесь ссылкой: ${u}`;
+ return 'https://api.whatsapp.com/send?phone='+ph+'&text='+encodeURIComponent(msg)}
+const shareBtn=(kind,r)=>{const h=shareUrl(kind,r);return h?`<a class="b ok wa-share" target="_blank" rel="noopener" href="${esc(h)}" title="${esc(t('shareT'))}">${t('shareA')}</a>`:''};
+let JUST=null;  // только что одобренное: {kind,row} — плашка над списком с кнопкой «📲 Отправить автору»
 const t=k=>T[lang][k];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt;const toast=(m,ms)=>{const e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,ms||3500)};
@@ -100,11 +119,15 @@ function editor(spec,row,extraBtns){
 }
 
 // ---------- data ----------
+const NB_KEYS=['pending','listings','claims','news','reviews','reports'];
+const nbKeys=()=>NB_KEYS.filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM));
+let NB_RPC=true;
 async function counts(){
+ if(NB_RPC){try{const o=await SB.rpc('admin_counts',{});if(o&&typeof o==='object'){const c={};for(const k of nbKeys())c[k]=+o[k]||0;return c}}catch(e){if(e&&(e.errorCode==='PGRST202'||e.status===404||/could not find the function/i.test(String(e.message))))NB_RPC=false;else throw e}}  // 13_admin_counts.sql ещё не запущен — считаем по таблицам
  const [p,r,m,n]=await Promise.all([SB.get('specialists?select=id&status=eq.pending'),SB.get('reviews?select=id&status=eq.pending'),SB.get('reports?select=id&status=eq.pending'),
   SB.get('news_suggestions?select=id&status=eq.pending').catch(()=>[])]);
  const l=F_LIST?await SB.get('listings?select=id&status=eq.pending').catch(()=>[]):[];const cl=F_CLAIM?await SB.get('spec_claims?select=id&status=eq.pending').catch(()=>[]):[];
- return{pending:p.length,reviews:r.length,reports:m.length,news:n.length,listings:l.length,claims:cl.length};
+ const all={pending:p.length,reviews:r.length,reports:m.length,news:n.length,listings:l.length,claims:cl.length},c={};for(const k of nbKeys())c[k]=all[k];return c;
 }
 async function specNames(){if(!CACHE.names){const rows=await SB.get('specialists?select=id,name,phone,sub_id');CACHE.names=Object.fromEntries(rows.map(r=>[r.id,r]))}return CACHE.names}
 
@@ -154,7 +177,7 @@ async function vListings(box){
    ${r.body?`<p class="pre">${esc(r.body)}</p>`:''}${r.place?`<p>📍 ${esc(r.place)}${r.event_date?' · 🗓 '+esc(r.event_date):''}</p>`:''}
    ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
    <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
-    ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`:''}${['rejected','deleted','closed'].includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
+    ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`+shareBtn('l',r):''}${['rejected','deleted','closed'].includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
     <button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
     <button class="b no" data-a="del">${t('del')}</button></div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LF.status=b.dataset.ls;vListings(box)});
@@ -164,7 +187,7 @@ async function vListings(box){
  $('#purge').onclick=async()=>{try{const old=await SB.get('listings?select=id,photos,status,expires_at&or=(status.in.(deleted,rejected),expires_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+',closed_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+')');
    let n=0;for(const r of old){if(!(r.photos||[]).length)continue;for(const p of r.photos){if(p.path){await SB.removeFile('listings',p.path).catch(()=>{});n++}}await SB.update('listings','id=eq.'+r.id,{photos:[]})}toast(LT().purged(n));vListings(box)}catch(e){toast(e.message)}};
  box.querySelectorAll('.lrow').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
-  try{if(a==='approved'||a==='rejected')await SB.update('listings','id=eq.'+r.id,{status:a});
+  try{if(a==='approved'||a==='rejected'){await SB.update('listings','id=eq.'+r.id,{status:a});JUST=a==='approved'?{kind:'l',row:Object.assign({},r,{status:'approved'})}:null}
    if(a==='hl')await SB.update('listings','id=eq.'+r.id,{highlighted:!r.highlighted});
    if(a==='bump')await SB.update('listings','id=eq.'+r.id,{bumped_at:new Date().toISOString()});
    if(a==='extend')await SB.update('listings','id=eq.'+r.id,{expires_at:new Date(Math.max(Date.now(),new Date(r.expires_at).getTime())+30*864e5).toISOString()});
@@ -224,10 +247,37 @@ async function vClaims(box){
    if(a==='del'){if(!confirm(t('confirmDel')))return;const used=JSON.stringify(s.photos||[]);for(const p of (r.photos||[]))if(p.path&&!used.includes(p.path))await SB.removeFile('profiles',p.path).catch(()=>{});await SB.remove('spec_claims','id=eq.'+r.id)}
    if(a!=='apply')toast(t('saved'));render()}catch(e){toast(e.message)}}});
 }
+// «🔔 Новое: N» — сумма всего, что ждёт проверки; ниже — только ненулевые очереди, нажатие открывает вкладку
+let NB_C=null,NB_TIMER=0,NB_SEQ=0;
+function nbHtml(c){
+ if(!c)return '';
+ const ks=nbKeys().filter(k=>c[k]>0),sum=ks.reduce((a,k)=>a+c[k],0);
+ if(!sum)return `<div class="nb-h nb-zero">${t('noNew')}</div>`;
+ return `<div class="nb-h"><span>${t('newT')}:</span> <b class="nb-n">${sum}</b></div><div class="nb-l" role="list" aria-label="${esc(t('newAria'))}">${ks.map(k=>`<button type="button" role="listitem" class="nb-i" data-go="${k}"><span class="nb-t">${esc(t('nb')[k])}</span><span class="cnt">${c[k]}</span></button>`).join('')}</div>`}
+function applyCounts(c){
+ NB_C=c;const box=$('#nbox');if(!box)return;
+ const sum=c?nbKeys().reduce((a,k)=>a+(c[k]||0),0):0;
+ box.className='nbox'+(c&&!sum?' zero':'')+(c?'':' nb-off');box.innerHTML=nbHtml(c);
+ adm.querySelectorAll('.tabs [data-tab]').forEach(b=>{const k=b.dataset.tab,n=c&&c[k]||0;let el=b.querySelector('.cnt');
+  if(n){if(!el){el=document.createElement('span');el.className='cnt';b.appendChild(el)}el.textContent=n}else if(el)el.remove()});
+ box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goTo(b.dataset.go))}
+async function refreshCounts(){clearTimeout(NB_TIMER);const my=++NB_SEQ;try{const c=await counts();if(my===NB_SEQ)applyCounts(c)}catch(e){}}
+const countsSoon=()=>{clearTimeout(NB_TIMER);NB_TIMER=setTimeout(refreshCounts,350)};
+// после любого изменения в базе (одобрить/отклонить/удалить/сохранить) — пересчитать
+for(const m of ['insert','update','remove']){const f=SB[m];SB[m]=(...a)=>f(...a).then(r=>{countsSoon();return r})}
+{const f=SB.rpc;SB.rpc=(fn,...a)=>f(fn,...a).then(r=>{if(/^admin_apply/.test(fn))countsSoon();return r})}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&$('#nbox'))refreshCounts()});
+function goTo(k){tab=k;editing=null;filterQ='';JUST=null;
+ if(k==='listings')LF={status:'pending',section:'',q:''};if(k==='claims')CLF='pending';
+ render().then(()=>{const tb=adm.querySelector('.tabs');if(tb){const y=tb.getBoundingClientRect().top+scrollY-(($('#admbar')||{}).offsetHeight||0)-8;if(y<scrollY)scrollTo({top:Math.max(0,y)})}})}
 async function render(){
- const c=await counts().catch(()=>({}));
- adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}</div><div id="list">…</div>`;
- adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';render()});
+ clearTimeout(NB_TIMER);const my=++NB_SEQ;
+ const c=await counts().catch(()=>null);
+ adm.innerHTML=`<section id="nbox" class="nbox" aria-live="polite"></section><div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}</button>`).join('')}</div>${JUST&&shareUrl(JUST.kind,JUST.row)?`<div class="row just" id="just"><div><b>${JUST.kind==='l'?t('approvedL'):t('approvedC')}</b>: ${esc(JUST.kind==='l'?JUST.row.title:(JUST.row.name||JUST.row.phone))}</div><div class="acts">${shareBtn(JUST.kind,JUST.row)}<button type="button" class="b" id="justX">${t('closeX')}</button></div></div>`:''}<div id="list">…</div>`;
+ {const x=$('#justX');if(x)x.onclick=()=>{JUST=null;$('#just').remove()}}
+ if(my===NB_SEQ)applyCounts(c);else applyCounts(NB_C);
+ {const tb=adm.querySelector('.tabs'),on=tb&&tb.querySelector('button.on');if(on&&(on.offsetLeft+on.offsetWidth>tb.scrollLeft+tb.clientWidth||on.offsetLeft<tb.scrollLeft))tb.scrollLeft=Math.max(0,on.offsetLeft-12)}
+ adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';JUST=null;render()});
  try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,cards:vCards,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
 }
 const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
@@ -239,7 +289,8 @@ function bindSpecEditor(box,row,onDone){
   const v=collect(f,SPEC_SPEC());if(!v.wa)v.wa=normWa(v.phone);v.phone=v.phone.replace(/\D/g,'');if(!v.sub_id)v.sub_id=null;
   if(a==='approve')v.status='approved';if(a==='reject')v.status='rejected';
   if(v.status==='approved'&&!v.sub_id){toast(t('needSub'));return}
-  try{if(row.id)await SB.update('specialists','id=eq.'+row.id,v);else await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;CACHE.allSpecs=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
+  try{let saved;if(row.id)saved=await SB.update('specialists','id=eq.'+row.id,v);else saved=await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;
+   if(a==='approve'){const sr=Array.isArray(saved)&&saved[0]?saved[0]:Object.assign({},row,v);JUST={kind:'c',row:sr}}CACHE.allSpecs=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
 }
 async function vPending(box){
  const rows=await SB.get('specialists?select=*&status=eq.pending&order=created_at.asc');
@@ -256,7 +307,7 @@ async function vSpecs(box){
   <div id="newSlot"></div>`+list.map(r=>`<div class="row" data-id="${r.id}"><h3>${r.vip?'<span class="pill vip">VIP</span>':''}${r.recommended?'⭐ ':''}${esc(r.name||'—')} · ${esc(r.phone)}</h3>
   <div class="meta">${pill(r.status)} ${esc(subT(r.sub_id))} · ${esc(r.note)}</div>
   <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="vip">${r.vip?'VIP ✕':'📌 VIP'}</button>
-  <button class="b" data-a="vis">${r.status==='approved'?t('hide'):t('show')}</button><button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join('');
+  <button class="b" data-a="vis">${r.status==='approved'?t('hide'):t('show')}</button>${shareBtn('c',r)}<button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join('');
  const fq=$('#fq');fq.oninput=()=>{filterQ=fq.value;clearTimeout(fq._t);fq._t=setTimeout(()=>vSpecs(box).then(()=>{const n=$('#fq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),250)};
  $('#addSpec').onclick=()=>{const slot=$('#newSlot');const r={section_id:D.sections[0].id,status:'approved',sort_order:5000,name:'',phone:''};const bind=x=>{slot.innerHTML=editor(SPEC_SPEC(),x);bindSpecEditor(slot,x,(k,nr)=>bind(nr))};bind(r)};
  box.querySelectorAll('.row[data-id]').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
@@ -281,7 +332,7 @@ async function vCards(box){
   +list.slice(0,200).map(r=>`<div class="row" data-id="${r.id}"><h3>${r.vip?'<span class="pill vip">VIP</span>':''}${esc(r.name||'—')} · ${esc(r.phone)}</h3>
   <div class="meta">${pill(r.status)} #${r.id} · ${esc(secOf(r.section_id)?secT(secOf(r.section_id)):r.section_id)} → ${esc(subT(r.sub_id))} · ${esc((t('src')||{})[r.source]||r.source)}</div>
   ${r.note?`<p>${esc(r.note)}</p>`:''}${r.address?`<p>📍 ${esc(r.address)}</p>`:''}${r.description?`<p class="meta">${esc(t('desc'))}: ${esc(r.description)}</p>`:''}
-  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b" data-a="vis">${r.status==='approved'?t('hide'):t('show')}</button><button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join('');
+  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b" data-a="vis">${r.status==='approved'?t('hide'):t('show')}</button>${shareBtn('c',r)}<button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join('');
  const re=(fn)=>{CACHE.allSpecs=fn?null:CACHE.allSpecs;return vCards(box)};
  const aq=$('#aq');aq.oninput=()=>{AF.q=aq.value;clearTimeout(aq._t);aq._t=setTimeout(()=>re().then(()=>{const n=$('#aq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),250)};
  $('#asec').onchange=e=>{AF.sec=e.target.value;AF.sub='';re()};$('#asub').onchange=e=>{AF.sub=e.target.value;re()};$('#ast').onchange=e=>{AF.st=e.target.value;re()};
@@ -300,7 +351,7 @@ async function vReviews(box){
  box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;try{await SB.update('reviews','id=eq.'+el.closest('.row').dataset.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
 }
 async function vReports(box){
- const rows=await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=100');
+ const rows=(await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=100')).sort((a,b)=>(b.status==='pending')-(a.status==='pending'));
  box.innerHTML=rows.length?rows.map(r=>`<div class="row" data-id="${r.id}"><h3>${esc(t('types')[r.type]||r.type)} · ${esc(r.title)}</h3>
   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}</div><p>📍 ${esc(r.area)}<br>🕒 ${esc(r.when_text)}<br>ℹ️ ${esc(r.source)} ${r.contact?'<br>📞 '+esc(r.contact):''}</p>
   <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="ann">${t('toAnn')}</button><button class="b" data-a="done">${t('done')}</button><button class="b no" data-a="rejected">${t('reject')}</button>`:''}</div></div>`).join(''):`<div class="row">${t('empty')}</div>`;

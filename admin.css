@@ -113,3 +113,21 @@ body.admin.in .top{padding-top:8px;background:linear-gradient(135deg,#2c4f7c,#1e
 .admbar .ab-rf:disabled{opacity:.6;cursor:progress}
 @media (max-width:359px){.admbar .ab-pw,.admbar .ab-rf{padding:4px 8px}}
 @media (max-width:359px){.admbar .ab-rt{display:none}}
+/* общий счётчик «🔔 Новое: N» над вкладками */
+.nbox{background:#fff;border:2px solid #f3b9a6;border-radius:16px;padding:10px 12px 12px;margin:2px 0 10px;box-shadow:0 2px 8px rgba(214,59,31,.08)}
+.nbox.zero{border:1px solid #cfe9d8;background:#f2fbf5;box-shadow:none;padding:9px 12px}
+.nbox.nb-off{display:none}
+.nbox .nb-h{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:var(--ink);line-height:1.2}
+.nbox .nb-n{display:inline-block;min-width:34px;padding:2px 10px;border-radius:999px;background:#d63b1f;color:#fff;font-size:18px;text-align:center}
+.nbox .nb-zero{font-size:16px;font-weight:600;color:#1d7a43}
+.nbox .nb-l{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.nbox .nb-i{display:inline-flex;align-items:center;gap:6px;min-height:40px;max-width:100%;border:1px solid var(--line);background:#fff8f1;border-radius:999px;padding:6px 8px 6px 13px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;text-align:left}
+.nbox .nb-i:hover{border-color:var(--accent)}
+.nbox .nb-i:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+.nbox .nb-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nbox .cnt{flex:none;display:inline-block;min-width:24px;padding:2px 7px;border-radius:999px;background:#d63b1f;color:#fff;font-size:13px;font-weight:700;text-align:center}
+@media (max-width:359px){.nbox{padding:8px 9px 10px}.nbox .nb-h{font-size:17px}.nbox .nb-l{gap:6px}.nbox .nb-i{font-size:14px;padding:5px 6px 5px 10px}}
+/* «📲 Отправить автору» */
+a.b.wa-share{display:inline-flex;align-items:center;text-decoration:none;min-height:44px;box-sizing:border-box}
+.row.just{background:#f2fbf5;border-color:#cfe9d8}
+.row.just .acts{margin-top:8px}
