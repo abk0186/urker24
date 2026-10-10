@@ -302,7 +302,7 @@ const annTokens=a=>norm([L(a.title),L(a.area),L(a.source),ANN_TYPES[a.type]?.kw|
 function annSearch(query){const qs=norm(query).split(' ').filter(w=>w.length>=2);if(!qs.length)return[];
  return annSorted().filter(a=>{const tk=annTokens(a);return qs.every(q=>tokScore(q,tk)>0)})}
 function annCard(a,compact){const ty=ANN_TYPES[a.type]||ANN_TYPES.other,act=annActive(a);
- const msg=`${ty.ic} ${L(a.title)}\n📍 ${L(a.area)}\n🕒 ${annWhen(a)}${a.source?'\n'+t('annSource')+': '+L(a.source):''}`;
+ const msg=`${ty.ic} ${L(a.title)}\n📍 ${L(a.area)}\n🕒 ${annWhen(a)}${a.source?'\n'+t('annSource')+': '+L(a.source):''}\nhttps://urker24.kz/#/ann/${a.id}`;
  return `<article class="ann ${a.urgent&&act?'urgent':''} ${act?'':'done'}" style="--tc:${ty.c}">
   <div class="ann-ic">${ty.ic}</div><div class="ann-b">
   <div class="ann-tags">${a.urgent&&act?`<span class="tag urg">❗ ${t('annUrgent')}</span>`:''}<span class="st ${act?'on':''}">${act?'● '+t('annActive'):'✓ '+t('annDone')}</span>${vw('ann',a.id)}</div>

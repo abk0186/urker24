@@ -7,7 +7,7 @@ const {esc,$,SB}=A; const t=k=>A.t(k);
 const ON=!!(((window.URKER_CONFIG||{}).features||{}).listings);
 if(ON){const nv=document.querySelector('nav.bottom');if(nv)nv.innerHTML=[['#/','home','🏠','navHome',''],['#/bazar','bazar','🛍','navBazar',''],['#/post','post','➕','navPost',' class="post"'],['#/news','news','📰','navNews',''],['#/menu','menu','☰','navMenu','']].map(([h,k,e,i,c])=>`<a href="${h}" data-nav="${k}"${c}><span>${e}</span><b data-i18n="${i}">${A.t(i)||''}</b></a>`).join('')}
 A.addDict({
- navBazar:'Барахолка',navPost:'Подать',navMenu:'Меню',waGreetL:'Здравствуйте! Пишу по объявлению на Уркер 24:',
+ navBazar:'Барахолка',navPost:'Подать',navMenu:'Меню',waGreetL:'Здравствуйте! Нашёл ваше объявление «{t}» на сайте {u}',
  lSec:{market:'Барахолка',ads:'Объявления',lost:'Потеряшки'},
  lSecD:{market:'Продам, куплю, отдам даром',ads:'Аренда, работа, услуги, попутчики',lost:'Потерял или нашёл'},
  lKind:{sell:'Продам',buy:'Куплю',free:'Отдам даром',rent_offer:'Сдам',rent_seek:'Сниму',job_offer:'Вакансия',job_seek:'Ищу работу',gig:'Подработка',service:'Услуги частных лиц',ride:'Попутчики',other:'Разное',lost:'Потерял',found:'Нашёл'},
@@ -35,7 +35,7 @@ A.addDict({
  menuAddBiz:'Добавить мастера или бизнес',menuLang:'Язык',homeSections:'Разделы',lFound:'Объявления жителей',
  lErr:{bad_token:'Ссылка недействительна',invalid_phone:'Проверьте номер телефона',bad_price:'Проверьте цену',bad_title:'Слишком короткий заголовок',bad_kind:'Выберите тип и категорию',too_many_photos:'Не больше 5 фото',locked:'Объявление отклонено модератором'}
 },{
- navBazar:'Барахолка',navPost:'Қосу',navMenu:'Мәзір',waGreetL:'Сәлеметсіз бе! Үркер 24 сайтындағы хабарландыру бойынша жазып отырмын:',
+ navBazar:'Барахолка',navPost:'Қосу',navMenu:'Мәзір',waGreetL:'Сәлеметсіз бе! Сіздің «{t}» хабарландыруыңызды urker24.kz сайтынан таптым: {u}',
  lSec:{market:'Барахолка',ads:'Хабарландырулар',lost:'Жоғалғандар'},
  lSecD:{market:'Сатамын, сатып аламын, тегін беремін',ads:'Жалға беру, жұмыс, қызмет, жолсерік',lost:'Жоғалттым немесе таптым'},
  lKind:{sell:'Сатамын',buy:'Сатып аламын',free:'Тегін беремін',rent_offer:'Жалға беремін',rent_seek:'Жалға аламын',job_offer:'Бос жұмыс орны',job_seek:'Жұмыс іздеймін',gig:'Қосымша жұмыс',service:'Жеке қызметтер',ride:'Жолсеріктер',other:'Әртүрлі',lost:'Жоғалттым',found:'Таптым'},
@@ -99,7 +99,7 @@ function viewList(sec){
  A.app.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{F.kind=b.dataset.lk;if(sec==='ads'&&!RENT(F.kind))F.cat='';viewList(sec)});
  A.app.querySelectorAll('[data-lc]').forEach(b=>b.onclick=()=>{F.cat=b.dataset.lc;viewList(sec)});
 }
-function contactBtns(l){const name=l.title;const wa=l.has_wa?`https://api.whatsapp.com/send?phone=${l.phone}&text=${encodeURIComponent(t('waGreetL')+' «'+l.title+'»')}`:'';
+function contactBtns(l){const name=l.title;const wa=l.has_wa?`https://api.whatsapp.com/send?phone=${l.phone}&text=${encodeURIComponent(t('waGreetL').replace('{t}',()=>l.title).replace('{u}',()=>'https://urker24.kz/#/item/'+l.id))}`:'';
  return `<div class="actions lact"><a class="btn wa ${wa?'':'off'}" ${wa?`href="${wa}" target="_blank" rel="noopener"`:'aria-disabled="true"'} aria-label="${esc(t('wa'))}">${A.WA_SVG}<span>${t('waS')}</span></a>
   <a class="btn call" href="tel:+${esc(l.phone)}" aria-label="${esc(t('call'))}: ${esc(fmtPhone(l.phone))}">📞 <span>${t('callS')}</span></a></div>`}
 async function viewItem(id){
