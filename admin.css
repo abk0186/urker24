@@ -85,7 +85,7 @@ body.admin h1,body.admin h2,.adm h1,.adm h2{overflow-wrap:anywhere;hyphens:auto}
 @media (max-width:359px){.admbar{column-gap:5px;padding-left:calc(10px + var(--sl));padding-right:calc(8px + var(--sr))}.admbar a,.admbar button{padding:6px 8px;font-size:13px}.admbar .ab-t{font-size:14px}}
 body.admin.in .top{padding-top:8px;background:linear-gradient(135deg,#2c4f7c,#1e3a5f)}
 
-.admbar .ab-pw{grid-column:2/4;grid-row:2;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);padding:4px 10px}
+.admbar .ab-pw{grid-column:2;grid-row:2;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);padding:4px 10px}
 /* вход: пароль — главный способ, ссылка из письма — запасной */
 .login label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:0 0 4px 2px}
 .login .btn.primary{width:100%;margin-top:4px}
@@ -108,3 +108,8 @@ body.admin.in .top{padding-top:8px;background:linear-gradient(135deg,#2c4f7c,#1e
 .pwm .pw-err{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:#fdecea;color:#a3271a;font-size:14px}
 .pwm .pw-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .pwm .pw-acts .b{flex:1 1 auto}
+/* кнопка «🔄 Обновить» — для приложения с экрана «Домой», где нет кнопки браузера */
+.admbar .ab-rf{grid-column:3;grid-row:2;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);padding:4px 10px}
+.admbar .ab-rf:disabled{opacity:.6;cursor:progress}
+@media (max-width:359px){.admbar .ab-pw,.admbar .ab-rf{padding:4px 8px}}
+@media (max-width:359px){.admbar .ab-rt{display:none}}
