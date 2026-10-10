@@ -31,6 +31,8 @@ A.addDict({
  mStatus:{pending:'На проверке',approved:'Опубликовано',rejected:'Отклонено',closed:'Закрыто',deleted:'Удалено'},mExpires:'Показывается до',mEdit:'✏️ Изменить',mClose:{market:'✅ Продано',ads:'✅ Неактуально',lost:'✅ Нашлось'},
  mRenew:'🔄 Продлить',mDelete:'🗑 Удалить',mConfirmDel:'Удалить объявление безвозвратно?',mDeleted:'Объявление удалено',mSaved:'Сохранено',mSavedPending:'Сохранено — отправлено на повторную проверку',
  mRenewed:'Продлено до',mBadLink:'Ссылка недействительна или объявление удалено',mManage:'Управление объявлением',
+ pSavedMy:'Ссылка также сохранена в «Мои объявления» на этом телефоне.',pOpenMy:'🗂 Мои объявления',mExpired:'Срок показа истёк — нажмите «Продлить»',
+ mGone:'Ссылка недействительна или объявление удалено',mForget:'Убрать из списка',mMyNote:'Список хранится только на этом телефоне. Чтобы управлять объявлением с другого телефона, откройте свою секретную ссылку.',mOnlyYou:'Изменять, закрывать и удалять объявление можете только вы — по этой ссылке.',
  menuTitle:'Все разделы',menuMasters:'Мастера и услуги',menuMastersD:'Каталог специалистов района',menuAlerts:'Важно',menuAlertsD:'Отключения, ремонт, перекрытия',menuNews:'Новости района',menuNewsD:'Что происходит в Уркере',
  menuAddBiz:'Добавить мастера или бизнес',menuLang:'Язык',homeSections:'Разделы',lFound:'Объявления жителей',
  lErr:{bad_token:'Ссылка недействительна',invalid_phone:'Проверьте номер телефона',bad_price:'Проверьте цену',bad_title:'Слишком короткий заголовок',bad_kind:'Выберите тип и категорию',too_many_photos:'Не больше 5 фото',locked:'Объявление отклонено модератором'}
@@ -59,6 +61,8 @@ A.addDict({
  mStatus:{pending:'Тексеруде',approved:'Жарияланған',rejected:'Қабылданбады',closed:'Жабылды',deleted:'Жойылды'},mExpires:'Көрсетіледі',mEdit:'✏️ Өзгерту',mClose:{market:'✅ Сатылды',ads:'✅ Өзекті емес',lost:'✅ Табылды'},
  mRenew:'🔄 Ұзарту',mDelete:'🗑 Жою',mConfirmDel:'Хабарландыруды біржола жою керек пе?',mDeleted:'Хабарландыру жойылды',mSaved:'Сақталды',mSavedPending:'Сақталды — қайта тексеруге жіберілді',
  mRenewed:'Ұзартылды:',mBadLink:'Сілтеме жарамсыз немесе хабарландыру жойылған',mManage:'Хабарландыруды басқару',
+ pSavedMy:'Сілтеме осы телефондағы «Менің хабарландыруларым» бөлімінде де сақталды.',pOpenMy:'🗂 Менің хабарландыруларым',mExpired:'Көрсету мерзімі бітті — «Ұзарту» басыңыз',
+ mGone:'Сілтеме жарамсыз немесе хабарландыру жойылған',mForget:'Тізімнен алып тастау',mMyNote:'Тізім тек осы телефонда сақталады. Хабарландыруды басқа телефоннан басқару үшін құпия сілтемеңізді ашыңыз.',mOnlyYou:'Хабарландыруды осы сілтеме арқылы тек сіз өзгерте, жаба және жоя аласыз.',
  menuTitle:'Барлық бөлімдер',menuMasters:'Шеберлер мен қызметтер',menuMastersD:'Аудан мамандарының каталогы',menuAlerts:'Маңызды',menuAlertsD:'Өшірулер, жөндеу, жол жабылуы',menuNews:'Аудан жаңалықтары',menuNewsD:'Үркерде не болып жатыр',
  menuAddBiz:'Шебер немесе бизнес қосу',menuLang:'Тіл',homeSections:'Бөлімдер',lFound:'Тұрғындардың хабарландырулары',
  lErr:{bad_token:'Сілтеме жарамсыз',invalid_phone:'Телефон нөмірін тексеріңіз',bad_price:'Бағаны тексеріңіз',bad_title:'Тақырып тым қысқа',bad_kind:'Түрі мен санатын таңдаңыз',too_many_photos:'5 фотодан артық емес',locked:'Хабарландыруды модератор қабылдамады'}
@@ -199,8 +203,9 @@ function done(r,p,sec){const link=secretLink(r.id,r.token);
  A.app.innerHTML=`<div class="crumbs"><h1>✅ ${t('pDone')}</h1></div>
  <p class="demo-note live">${r.status==='approved'?t('pDoneLive'):t('pDonePending')}</p>
  <div class="secret"><p>🔑 ${t('pSecret')}</p><input id="sl" readonly value="${esc(link)}"><button class="btn primary" id="cp">${t('pCopy')}</button>
- <a class="btn wa sm" href="https://wa.me/?text=${encodeURIComponent(p.title+'\n'+link)}" target="_blank" rel="noopener">${A.WA_SVG}${t('pSaveWa')}</a></div>
- <a class="btn sm ghost" href="#/my/${r.id}/${r.token}">${t('mManage')}</a>${r.status==='approved'?`<a class="btn sm ghost" href="#/item/${r.id}">${t('pView')}</a>`:''}`;
+ <a class="btn wa sm" href="https://wa.me/?text=${encodeURIComponent(p.title+'\n'+link)}" target="_blank" rel="noopener">${A.WA_SVG}${t('pSaveWa')}</a>
+ <p class="meta">✅ ${t('pSavedMy')}</p></div>
+ <a class="btn sm ghost" href="#/my/${r.id}/${r.token}">${t('mManage')}</a><a class="btn sm ghost" href="#/my">${t('pOpenMy')}</a>${r.status==='approved'?`<a class="btn sm ghost" href="#/item/${r.id}">${t('pView')}</a>`:''}`;
  $('#cp').onclick=async()=>{const i=$('#sl');i.select();try{await navigator.clipboard.writeText(i.value)}catch(e){document.execCommand&&document.execCommand('copy')}A.toast(t('pCopied'))};
 }
 async function viewManage(id,tok){
@@ -213,10 +218,10 @@ async function viewManage(id,tok){
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1 class="sm">🔑 ${t('mManage')}</h1></div>
  <div class="card mcard"><div class="sub">${S.e} ${t('lSec')[r.section]} · ${esc(t('lKind')[r.kind]||'')}</div><div class="idl"><span class="nm">${esc(r.title)}</span></div>
   <div class="badges"><span class="badge ${r.status==='approved'?'new':r.status==='rejected'?'warn':''}">${t('mStatus')[r.status]||r.status}</span>${fmtPrice(r)?`<span class="badge">${esc(fmtPrice(r))}</span>`:''}<span class="badge">${t('lViews')(r.views||0)}</span>
-  ${open?`<span class="badge">${t('mExpires')} ${esc(fmtDate(r.expires_at))}</span>`:''}</div></div>
+  ${open?(new Date(r.expires_at).getTime()<Date.now()?`<span class="badge warn">${t('mExpired')}</span>`:`<span class="badge">${t('mExpires')} ${esc(fmtDate(r.expires_at))}</span>`):''}</div></div>
  <div class="mgrid">${open?`<button class="btn sm ghost" data-m="edit">${t('mEdit')}</button><button class="btn sm ok" data-m="close">${t('mClose')[r.section]}</button><button class="btn sm ghost" data-m="renew">${t('mRenew')}</button>`:''}
   ${r.status==='approved'?`<a class="btn sm ghost" href="#/item/${r.id}">${t('pView')}</a>`:''}<button class="btn sm danger" data-m="del">${t('mDelete')}</button></div>
- <div class="secret"><p>🔑 ${t('pSecret')}</p><input id="sl" readonly value="${esc(secretLink(r.id,tok))}"><button class="btn sm ghost" id="cp">${t('pCopy')}</button></div>`;
+ <div class="secret"><p>🔑 ${t('pSecret')}</p><input id="sl" readonly value="${esc(secretLink(r.id,tok))}"><button class="btn sm ghost" id="cp">${t('pCopy')}</button><p class="meta">🔒 ${t('mOnlyYou')}</p></div>`;
  $('#cp').onclick=async()=>{const i=$('#sl');i.select();try{await navigator.clipboard.writeText(i.value)}catch(e){}A.toast(t('pCopied'))};
  A.app.querySelector('.mgrid').onclick=async ev=>{const b=ev.target.closest('[data-m]');if(!b)return;const m=b.dataset.m;
   try{if(m==='close'){await SB.rpc('listing_close',{p_id:r.id,p_token:tok});await load();return viewManage(id,tok)}
@@ -232,8 +237,18 @@ async function viewManage(id,tok){
 }
 function viewMy(){A.setMeta(t('pMy')+' — Уркер 24','');const a=my();
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/menu'" aria-label="${t('back')}">←</button><h1>🗂 ${t('pMy')}</h1></div>
- ${a.length?a.map(x=>`<a class="mrow" href="#/my/${x.id}/${x.token}"><span>${(SECT[x.section]||{}).e||'🗂'}</span><b>${esc(x.title)}</b><small>${t('lSec')[x.section]||''}</small></a>`).join(''):`<div class="ann-empty"><span>${t('pMyEmpty')}</span></div>`}
- <a class="btn primary" style="margin-top:10px" href="#/post">${t('lPostBtn')}</a>`}
+ ${a.length?`<div class="mlist">${a.map(x=>`<a class="mrow" data-my="${x.id}" href="#/my/${x.id}/${x.token}"><span>${(SECT[x.section]||{}).e||'🗂'}</span><b>${esc(x.title)}</b><small>${t('lSec')[x.section]||''}<i class="myst" style="font-style:normal"></i></small></a>`).join('')}</div>`:`<div class="ann-empty"><span>${t('pMyEmpty')}</span></div>`}
+ ${a.length?`<p class="meta">🔒 ${t('mMyNote')}</p>`:''}
+ <a class="btn primary" style="margin-top:10px" href="#/post">${t('lPostBtn')}</a>`;
+ if(!a.length||!A.isLive())return;
+ SB.rpc('listing_my',{p_items:a.map(x=>({id:x.id,token:x.token}))},10000).then(res=>{if(!Array.isArray(res))return;let ch=false;
+  res.forEach(s=>{const row=A.app.querySelector(`[data-my="${s.id}"]`);if(!row)return;const st=row.querySelector('.myst');
+   if(s.gone){row.style.opacity='.6';st.textContent=' · '+t('mGone');const b=document.createElement('button');b.className='btn sm ghost';b.style.margin='0 14px 10px';b.textContent=t('mForget');
+    b.onclick=()=>{saveMy(my().filter(x=>x.id!==s.id));viewMy()};row.after(b);return}
+   const exp=(s.status==='approved'||s.status==='pending')&&new Date(s.expires_at).getTime()<Date.now();
+   st.textContent=' · '+(exp?t('mExpired'):(s.status==='closed'?t('lClosed')[s.section]:(t('mStatus')[s.status]||s.status)));
+   const m=my().find(x=>x.id===s.id);if(m&&m.title!==s.title){ch=true;row.querySelector('b').textContent=s.title}});
+  if(ch)saveMy(my().map(x=>{const r=res.find(y=>y.id===x.id&&!y.gone);return r?Object.assign(x,{title:r.title}):x}))}).catch(()=>{})}
 function viewMenu(){A.setMeta(t('menuTitle')+' — Уркер 24','');
  const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
   ['#/news','📰',t('menuNews'),t('menuNewsD')],['#/ann','⚠️',t('menuAlerts'),t('menuAlertsD')],...(ON?[['#/my','🔑',t('pMy'),'']]:[]),['#/add','➕',t('menuAddBiz'),''],['#/report','📣',t('repTitle'),''],['#/install','📲',t('pwaMenu')||'',''],['#/search','🔍',t('navSearch'),'']];

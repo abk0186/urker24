@@ -13,10 +13,10 @@ let lang=detectLang();
 const T={ru:{title:'Уркер · Админка',login:'Вход в админку',pwBtn:'🔑 Пароль',pwTitle:'Пароль для входа',pwIntro:'Задайте пароль — потом можно входить по почте и паролю, без письма.',pwNew:'Новый пароль',pwRep:'Повторите пароль',pwShow:'Показать пароль',pwMin:'Не меньше 8 символов',pwSave:'Сохранить пароль',cancel:'Отмена',pwShort:'Пароль слишком короткий — нужно не меньше 8 символов.',pwMismatch:'Пароли не совпадают.',pwOk:'Пароль сохранён. Теперь можно входить по почте и паролю',pwWeak:'Пароль слишком простой. Добавьте буквы и цифры и сделайте его длиннее.',pwSame:'Этот пароль уже установлен. Придумайте другой.',pwReauth:'Для смены пароля нужно подтверждение по почте. Нажмите «Прислать код», введите код из письма и сохраните ещё раз.',pwSendCode:'✉️ Прислать код',pwCode:'Код из письма',pwCodeSent:'Код отправлен на почту.',pwBadCode:'Код неверный или устарел. Запросите новый.',pwRate:'Слишком много попыток. Подождите минуту и попробуйте снова.',pwSession:'Сессия истекла. Выйдите и войдите снова по ссылке из письма.',pwNet:'Нет связи с сервером. Проверьте интернет и попробуйте снова.',pwFail:'Не удалось сохранить пароль',or:'или',forgot:'Забыли пароль? — войдите по ссылке из письма',magicNoEmail:'Сначала введите почту.',showPass:'Показать пароль',hidePass:'Скрыть пароль',barT:'АДМИНКА',barAs:'вы вошли как',toSite:'← На сайт',docT:'🔐 Админка · Уркер',docLogin:'Вход в админку · Уркер',email:'Почта (email)',pass:'Пароль',signin:'Войти',magic:'Прислать ссылку для входа на почту',
  magicSent:'Ссылка для входа отправлена на почту.',badLogin:'Неверная почта или пароль. Если пароль ещё не задан — войдите по ссылке из письма.',noBackend:'База не подключена: заполните config.js (адрес и anon-ключ Supabase).',
  noAccess:'У этого аккаунта нет прав администратора.',logout:'Выйти',
- tabs:{stats:'📊 Статистика',pending:'Заявки',listings:'🗂 Объявления жителей',claims:'✔ Владельцы',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
+ tabs:{stats:'📊 Статистика',pending:'Заявки',cards:'🔎 Все карточки',listings:'🗂 Объявления жителей',claims:'✔ Владельцы',news:'📰 Новости',reviews:'Отзывы',reports:'Сообщения',specs:'Специалисты',ann:'Объявления',ads:'Реклама'},
  approve:'Одобрить',reject:'Отклонить',save:'Сохранить',del:'Удалить',hide:'Скрыть',show:'Показать',edit:'Изменить',cancel:'Отмена',add:'+ Добавить',
  toAnn:'→ Сделать объявлением',done:'Обработано',saved:'Сохранено',deleted:'Удалено',confirmDel:'Удалить безвозвратно?',empty:'Пусто',
- needSub:'Выберите подкатегорию перед одобрением',search:'Поиск по имени, номеру, описанию…',
+ needSub:'Выберите подкатегорию перед одобрением',search:'Поиск по имени, номеру, описанию…',cardsQ:'Поиск: имя, описание, адрес, телефон в любом виде (8 701…, +7 701…)',allSec:'Все разделы',allSub:'Все подкатегории',allSt:'Все статусы',foundN:n=>`Найдено: ${n}`,first200:'Показаны первые 200 — уточните поиск',src:{whatsapp_list:'из первого списка',submission:'заявка с сайта',admin:'добавлено админом'},lq:'Поиск: заголовок, текст, место, телефон',
  f:{name:'Имя / название',section_id:'Раздел',sub_id:'Подкатегория',note:'Описание на карточке',address:'Адрес',phone:'Телефон (8XXXXXXXXXX)',wa:'WhatsApp (7XXXXXXXXXX, пусто = из телефона)',
   recommended:'⭐ Рекомендован чатом',is_new:'🆕 Новый',vip:'📌 VIP / закреплён',vip_until:'VIP до (пусто = бессрочно)',sort_order:'Порядок',status:'Статус',admin_note:'Заметка админа',verified:'✔ Проверено (платный профиль в будущем)',business_name:'Название бизнеса',owner_name:'Имя владельца',instagram:'Instagram (handle без @)',gis_url:'Ссылка 2ГИС',hours:'Часы работы',descr_ru:'Описание RU (≤300)',descr_kz:'Описание KZ (≤300)',
   type:'Тип',title_ru:'Заголовок (RU)',title_kz:'Заголовок (KZ)',area_ru:'Улицы / район (RU)',area_kz:'Улицы / район (KZ)',source_ru:'Источник (RU)',source_kz:'Источник (KZ)',
@@ -37,10 +37,10 @@ const T={ru:{title:'Уркер · Админка',login:'Вход в админ�
  kz:{title:'Үркер · Әкімші беті',login:'Әкімші бетіне кіру',pwBtn:'🔑 Құпиясөз',pwTitle:'Кіруге арналған құпиясөз',pwIntro:'Құпиясөз орнатыңыз — кейін хатсыз, пошта мен құпиясөз арқылы кіре аласыз.',pwNew:'Жаңа құпиясөз',pwRep:'Құпиясөзді қайталаңыз',pwShow:'Құпиясөзді көрсету',pwMin:'Кемінде 8 таңба',pwSave:'Құпиясөзді сақтау',cancel:'Болдырмау',pwShort:'Құпиясөз тым қысқа — кемінде 8 таңба керек.',pwMismatch:'Құпиясөздер сәйкес емес.',pwOk:'Құпиясөз сақталды. Енді пошта мен құпиясөз арқылы кіруге болады',pwWeak:'Құпиясөз тым қарапайым. Әріптер мен сандар қосып, ұзағырақ етіңіз.',pwSame:'Бұл құпиясөз қазір де орнатылған. Басқасын ойлап табыңыз.',pwReauth:'Құпиясөзді ауыстыру үшін поштамен растау керек. «Код жіберу» батырмасын басып, хаттағы кодты енгізіп, қайта сақтаңыз.',pwSendCode:'✉️ Код жіберу',pwCode:'Хаттағы код',pwCodeSent:'Код поштаға жіберілді.',pwBadCode:'Код қате немесе ескірген. Жаңасын сұраңыз.',pwRate:'Әрекет тым көп. Бір минут күтіп, қайталап көріңіз.',pwSession:'Сессия аяқталды. Шығып, хаттағы сілтеме арқылы қайта кіріңіз.',pwNet:'Сервермен байланыс жоқ. Интернетті тексеріп, қайталап көріңіз.',pwFail:'Құпиясөзді сақтау мүмкін болмады',or:'немесе',forgot:'Құпиясөзді ұмыттыңыз ба? — хаттағы сілтеме арқылы кіріңіз',magicNoEmail:'Алдымен поштаны енгізіңіз.',showPass:'Құпиясөзді көрсету',hidePass:'Құпиясөзді жасыру',barT:'ӘКІМШІ БЕТІ',barAs:'кірдіңіз:',toSite:'← Сайтқа',docT:'🔐 Әкімші беті · Үркер',docLogin:'Әкімші бетіне кіру · Үркер',email:'Пошта (email)',pass:'Құпиясөз',signin:'Кіру',magic:'Кіру сілтемесін поштаға жіберу',
  magicSent:'Кіру сілтемесі поштаға жіберілді.',badLogin:'Пошта немесе құпиясөз қате. Құпиясөз әлі орнатылмаған болса — хаттағы сілтеме арқылы кіріңіз.',noBackend:'База қосылмаған: config.js файлын толтырыңыз (Supabase мекенжайы мен anon-кілті).',
  noAccess:'Бұл аккаунтта әкімші құқығы жоқ.',logout:'Шығу',
- tabs:{stats:'📊 Статистика',pending:'Өтінімдер',listings:'🗂 Тұрғындар хабарландырулары',claims:'✔ Иелер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
+ tabs:{stats:'📊 Статистика',pending:'Өтінімдер',cards:'🔎 Барлық карточкалар',listings:'🗂 Тұрғындар хабарландырулары',claims:'✔ Иелер',news:'📰 Жаңалықтар',reviews:'Пікірлер',reports:'Хабарламалар',specs:'Мамандар',ann:'Хабарландырулар',ads:'Жарнама'},
  approve:'Мақұлдау',reject:'Қабылдамау',save:'Сақтау',del:'Жою',hide:'Жасыру',show:'Көрсету',edit:'Өзгерту',cancel:'Болдырмау',add:'+ Қосу',
  toAnn:'→ Хабарландыру жасау',done:'Өңделді',saved:'Сақталды',deleted:'Жойылды',confirmDel:'Біржола жою керек пе?',empty:'Бос',
- needSub:'Мақұлдамас бұрын ішкі бөлімді таңдаңыз',search:'Аты, нөмірі, сипаттамасы бойынша іздеу…',
+ needSub:'Мақұлдамас бұрын ішкі бөлімді таңдаңыз',search:'Аты, нөмірі, сипаттамасы бойынша іздеу…',cardsQ:'Іздеу: аты, сипаттамасы, мекенжайы, кез келген түрдегі телефон (8 701…, +7 701…)',allSec:'Барлық бөлімдер',allSub:'Барлық ішкі бөлімдер',allSt:'Барлық мәртебелер',foundN:n=>`Табылды: ${n}`,first200:'Алғашқы 200 көрсетілді — іздеуді нақтылаңыз',src:{whatsapp_list:'алғашқы тізімнен',submission:'сайттағы өтінім',admin:'әкімші қосқан'},lq:'Іздеу: тақырып, мәтін, орны, телефон',
  f:{name:'Аты / атауы',section_id:'Бөлім',sub_id:'Ішкі бөлім',note:'Карточкадағы сипаттама',address:'Мекенжай',phone:'Телефон (8XXXXXXXXXX)',wa:'WhatsApp (7XXXXXXXXXX, бос болса — телефоннан)',
   recommended:'⭐ Чат ұсынған',is_new:'🆕 Жаңа',vip:'📌 VIP / бекітілген',vip_until:'VIP мерзімі (бос — шектеусіз)',sort_order:'Реті',status:'Мәртебесі',admin_note:'Әкімші жазбасы',verified:'✔ Тексерілген (болашақта ақылы профиль)',business_name:'Бизнес атауы',owner_name:'Иесінің аты',instagram:'Instagram (@-сыз)',gis_url:'2ГИС сілтемесі',hours:'Жұмыс уақыты',descr_ru:'Сипаттама RU (≤300)',descr_kz:'Сипаттама KZ (≤300)',
   type:'Түрі',title_ru:'Тақырыбы (RU)',title_kz:'Тақырыбы (KZ)',area_ru:'Көшелер / аудан (RU)',area_kz:'Көшелер / аудан (KZ)',source_ru:'Дереккөз (RU)',source_kz:'Дереккөз (KZ)',
@@ -108,18 +108,24 @@ async function specNames(){if(!CACHE.names){const rows=await SB.get('specialists
 // ---------- объявления жителей ----------
 const LS_T={ru:{tab:'🗂 Объявления жителей',pm:{negotiable:'договорная',free:'даром',none:''},settings:'Настройки',premod:'Премодерация (новые объявления ждут проверки)',ttl:'Срок показа, дней',ttlLost:'Потеряшки, дней',paid:'Платные «поднять/выделить» (пока выключено, оплаты нет)',
   st:{pending:'на проверке',approved:'опубликовано',closed:'закрыто',rejected:'отклонено',deleted:'удалено автором',expired:'истёк срок'},sec:{market:'🛍 Барахолка',ads:'📋 Объявления',lost:'🐾 Потеряшки'},
-  all:'Все',approve:'Одобрить',reject:'Отклонить',hl:'⭐ Выделить',unhl:'⭐ Снять выделение',bump:'⬆ Поднять',extend:'+30 дней',purge:'🧹 Удалить фото снятых объявлений',purged:n=>`Удалено фото: ${n}`,
+  all:'Все',approve:'Одобрить',reject:'Отклонить',hl:'⭐ Выделить',unhl:'⭐ Снять выделение',bump:'⬆ Поднять',extend:'+30 дней',alink:'🔑 Ссылка для автора',alinkConfirm:'Создать новую секретную ссылку для автора? Прежняя ссылка этого объявления (если была) перестанет работать.',alinkNote:'Ссылка показывается один раз. Отправьте её автору — по ней он сможет изменить, продлить, закрыть или удалить своё объявление.',alinkCopy:'📋 Скопировать',alinkWa:'💬 Отправить автору в WhatsApp',alinkCopied:'Скопировано',purge:'🧹 Удалить фото снятых объявлений',purged:n=>`Удалено фото: ${n}`,
   views:'просм.',until:'до',bumped:'поднято',noPhotos:'без фото',f:{title:'Заголовок',body:'Описание',kind:'Тип',category:'Категория',price:'Цена, ₸',price_mode:'Цена: режим',place:'Где',event_date:'Когда',phone:'Телефон (7XXXXXXXXXX)',has_wa:'Есть WhatsApp',admin_note:'Заметка админа',verified:'✔ Проверено (платный профиль в будущем)',business_name:'Название бизнеса',owner_name:'Имя владельца',instagram:'Instagram (handle без @)',gis_url:'Ссылка 2ГИС',hours:'Часы работы',descr_ru:'Описание RU (≤300)',descr_kz:'Описание KZ (≤300)',expires_at:'Показывать до',status:'Статус'}},
  kz:{tab:'🗂 Тұрғындар хабарландырулары',pm:{negotiable:'келісім бойынша',free:'тегін',none:''},settings:'Баптаулар',premod:'Алдын ала модерация (жаңа хабарландырулар тексеруді күтеді)',ttl:'Көрсету мерзімі, күн',ttlLost:'Жоғалғандар, күн',paid:'Ақылы «көтеру/ерекшелеу» (әзірге өшірулі, төлем жоқ)',
   st:{pending:'тексеруде',approved:'жарияланды',closed:'жабылды',rejected:'қабылданбады',deleted:'автор жойды',expired:'мерзімі өтті'},sec:{market:'🛍 Барахолка',ads:'📋 Хабарландырулар',lost:'🐾 Жоғалғандар'},
-  all:'Барлығы',approve:'Мақұлдау',reject:'Қабылдамау',hl:'⭐ Ерекшелеу',unhl:'⭐ Ерекшелеуді алу',bump:'⬆ Көтеру',extend:'+30 күн',purge:'🧹 Алынған хабарландырулардың фотоларын жою',purged:n=>`Жойылған фото: ${n}`,
+  all:'Барлығы',approve:'Мақұлдау',reject:'Қабылдамау',hl:'⭐ Ерекшелеу',unhl:'⭐ Ерекшелеуді алу',bump:'⬆ Көтеру',extend:'+30 күн',alink:'🔑 Авторға сілтеме',alinkConfirm:'Авторға жаңа құпия сілтеме жасау керек пе? Бұл хабарландырудың бұрынғы сілтемесі (болса) жұмыс істемейді.',alinkNote:'Сілтеме бір рет көрсетіледі. Оны авторға жіберіңіз — сол арқылы ол хабарландыруын өзгерте, ұзарта, жаба немесе жоя алады.',alinkCopy:'📋 Көшіру',alinkWa:'💬 Авторға WhatsApp-қа жіберу',alinkCopied:'Көшірілді',purge:'🧹 Алынған хабарландырулардың фотоларын жою',purged:n=>`Жойылған фото: ${n}`,
   views:'қаралым',until:'дейін',bumped:'көтерілген',noPhotos:'фотосыз',f:{title:'Тақырыбы',body:'Сипаттамасы',kind:'Түрі',category:'Санаты',price:'Бағасы, ₸',price_mode:'Баға режимі',place:'Қайда',event_date:'Қашан',phone:'Телефон (7XXXXXXXXXX)',has_wa:'WhatsApp бар',admin_note:'Әкімші жазбасы',verified:'✔ Тексерілген (болашақта ақылы профиль)',business_name:'Бизнес атауы',owner_name:'Иесінің аты',instagram:'Instagram (@-сыз)',gis_url:'2ГИС сілтемесі',hours:'Жұмыс уақыты',descr_ru:'Сипаттама RU (≤300)',descr_kz:'Сипаттама KZ (≤300)',expires_at:'Көрсету мерзімі',status:'Мәртебесі'}}};
 const LT=()=>LS_T[lang];
 const L_LBL={"ru":{"k":{"sell":"Продам","buy":"Куплю","free":"Отдам даром","rent_offer":"Сдам","rent_seek":"Сниму","job_offer":"Вакансия","job_seek":"Ищу работу","gig":"Подработка","service":"Услуги частных лиц","ride":"Попутчики","other":"Разное","lost":"Потерял","found":"Нашёл"},"c":{"market":{"kids":"Детское","clothes":"Одежда","tech":"Техника","furniture":"Мебель","home":"Для дома и дачи","auto":"Авто и запчасти","animals":"Животные и скот","build":"Стройматериалы","other":"Прочее"},"ads":{"house":"Дом","flat":"Квартира","room":"Комната","garage":"Гараж","equipment":"Техника","other":"Другое"},"lost":{"animals":"Животные","docs":"Документы","keys":"Ключи","things":"Вещи","other":"Другое"}}},"kz":{"k":{"sell":"Сатамын","buy":"Сатып аламын","free":"Тегін беремін","rent_offer":"Жалға беремін","rent_seek":"Жалға аламын","job_offer":"Бос жұмыс орны","job_seek":"Жұмыс іздеймін","gig":"Қосымша жұмыс","service":"Жеке қызметтер","ride":"Жолсеріктер","other":"Әртүрлі","lost":"Жоғалттым","found":"Таптым"},"c":{"market":{"kids":"Балаларға","clothes":"Киім","tech":"Техника","furniture":"Жиһаз","home":"Үй мен саяжайға","auto":"Көлік және бөлшектер","animals":"Жануарлар мен мал","build":"Құрылыс материалдары","other":"Басқа"},"ads":{"house":"Үй","flat":"Пәтер","room":"Бөлме","garage":"Гараж","equipment":"Техника","other":"Басқа"},"lost":{"animals":"Жануарлар","docs":"Құжаттар","keys":"Кілттер","things":"Заттар","other":"Басқа"}}}};
 const lKindT=r=>(L_LBL[lang].k||{})[r.kind]||r.kind,lCatT=r=>((L_LBL[lang].c||{})[r.section]||{})[r.category]||r.category;
 const L_KINDS={market:['sell','buy','free'],ads:['rent_offer','rent_seek','job_offer','job_seek','gig','service','ride','other'],lost:['lost','found']};
 const L_CATS={market:['kids','clothes','tech','furniture','home','auto','animals','build','other'],ads:['house','flat','room','garage','equipment','other'],lost:['animals','docs','keys','things','other']};
-let LF={status:'pending',section:''};
+let LF={status:'pending',section:'',q:''};
+const digitsOf=x=>String(x||'').replace(/\D/g,'');
+const normQ=x=>String(x||'').toLowerCase().replace(/ё/g,'е');
+function textHit(q,parts,phones){q=String(q||'').trim();if(!q)return true;const hay=normQ(parts.join(' '));
+ if(normQ(q).split(/\s+/).filter(Boolean).every(w=>hay.includes(w)))return true;
+ if(/^[\d\s+()\-]+$/.test(q)){const qd=digitsOf(q);if(qd.length<3)return false;const core=qd.length>=10?qd.slice(-10):qd;return phones.map(digitsOf).some(x=>x&&(x.includes(qd)||x.includes(core)))}
+ return false}
 const lPhoto=p=>p&&p.path?SB.publicUrl('listings',p.path):'';
 async function vListings(box){
  const L=LT();
@@ -127,14 +133,15 @@ async function vListings(box){
  let q='listings?select=*&order=created_at.desc&limit=300';
  if(LF.status==='expired')q+='&status=eq.approved&expires_at=lt.'+new Date().toISOString();else if(LF.status)q+='&status=eq.'+LF.status;
  if(LF.section)q+='&section=eq.'+LF.section;
- const rows=await SB.get(q);const now=Date.now();
+ const rows=(await SB.get(q)).filter(r=>textHit(LF.q,[r.title,r.body,r.place,r.admin_note,String(r.id)],[r.phone]));const now=Date.now();
  box.innerHTML=`<details class="row"><summary><b>⚙️ ${L.settings}</b> — ${set.premoderation?'✅':'⚠️'} ${esc(L.premod)}</summary><form class="ed" id="lset">
    <div class="full"><label class="ck"><input type="checkbox" name="premoderation" ${set.premoderation?'checked':''}> ${esc(L.premod)}</label></div>
    <div><label>${L.ttl}</label><input type="number" name="ttl_days" min="1" max="365" value="${set.ttl_days}"></div><div><label>${L.ttlLost}</label><input type="number" name="ttl_lost_days" min="1" max="365" value="${set.ttl_lost_days}"></div>
    <div class="full"><label class="ck"><input type="checkbox" name="paid_features" disabled ${set.paid_features?'checked':''}> ${esc(L.paid)}</label></div>
    <div class="full acts"><button class="b pri">${t('save')}</button> <button type="button" class="b" id="purge">${L.purge}</button></div></form></details>
   <div class="tabs">${['pending','approved','closed','expired','rejected','deleted',''].map(s=>`<button data-ls="${s}" class="${LF.status===s?'on':''}">${s?L.st[s]:L.all}</button>`).join('')}</div>
-  <div class="tabs">${['','market','ads','lost'].map(s=>`<button data-lsec="${s}" class="${LF.section===s?'on':''}">${s?L.sec[s]:L.all}</button>`).join('')}</div>`
+  <div class="tabs">${['','market','ads','lost'].map(s=>`<button data-lsec="${s}" class="${LF.section===s?'on':''}">${s?L.sec[s]:L.all}</button>`).join('')}</div>
+  <input class="filter" id="lq" placeholder="${esc(t('lq'))}" value="${esc(LF.q)}">${LF.q?`<div class="meta">${t('foundN')(rows.length)}</div>`:''}`
   +(rows.length?rows.map(r=>{const exp=new Date(r.expires_at).getTime()<now;const ph=(r.photos||[]);return `<div class="row lrow" data-id="${r.id}">
    ${ph[0]?`<img class="lthumb" src="${esc(lPhoto(ph[0]))}" alt="">`:`<div class="lthumb ph">${L.sec[r.section].split(' ')[0]}</div>`}
    <div class="lmain"><h3>${r.highlighted?'⭐ ':''}${esc(r.title)}</h3>
@@ -144,9 +151,10 @@ async function vListings(box){
    ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
    <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
     ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`:''}${['rejected','deleted','closed'].includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
-    <button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>
+    <button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
     <button class="b no" data-a="del">${t('del')}</button></div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LF.status=b.dataset.ls;vListings(box)});
+ {const lq=$('#lq');lq.oninput=()=>{LF.q=lq.value;clearTimeout(lq._t);lq._t=setTimeout(()=>vListings(box).then(()=>{const n=$('#lq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),300)}}
  box.querySelectorAll('[data-lsec]').forEach(b=>b.onclick=()=>{LF.section=b.dataset.lsec;vListings(box)});
  $('#lset').onsubmit=async ev=>{ev.preventDefault();const f=ev.target;try{await SB.update('listing_settings','id=eq.1',{premoderation:f.elements.premoderation.checked,ttl_days:+f.elements.ttl_days.value||30,ttl_lost_days:+f.elements.ttl_lost_days.value||60});toast(t('saved'));render()}catch(e){toast(e.message)}};
  $('#purge').onclick=async()=>{try{const old=await SB.get('listings?select=id,photos,status,expires_at&or=(status.in.(deleted,rejected),expires_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+',closed_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+')');
@@ -156,6 +164,11 @@ async function vListings(box){
    if(a==='hl')await SB.update('listings','id=eq.'+r.id,{highlighted:!r.highlighted});
    if(a==='bump')await SB.update('listings','id=eq.'+r.id,{bumped_at:new Date().toISOString()});
    if(a==='extend')await SB.update('listings','id=eq.'+r.id,{expires_at:new Date(Math.max(Date.now(),new Date(r.expires_at).getTime())+30*864e5).toISOString()});
+   if(a==='alink'){if(!confirm(L.alinkConfirm))return;const tok=await SB.rpc('admin_listing_author_token',{p_id:r.id});const link=location.origin+location.pathname.replace(/admin\.html$/,'')+'#/my/'+r.id+'/'+tok;
+    const msg=(r.lang==='kz'?'Сәлеметсіз бе! Сіздің «{t}» хабарландыруыңыз urker24.kz сайтында. Осы сілтеме арқылы оны өзгертуге, ұзартуға, жабуға немесе жоюға болады (сілтемені ешкімге бермеңіз): {u}':'Здравствуйте! Ваше объявление «{t}» размещено на сайте urker24.kz. По этой ссылке вы можете изменить, продлить, закрыть или удалить его (никому её не передавайте): {u}').replace('{t}',()=>r.title).replace('{u}',()=>link);
+    const slot=el.querySelector('.slot');slot.innerHTML=`<div class="ed"><div class="full"><p>🔑 ${esc(L.alinkNote)}</p><input id="al${r.id}" readonly value="${esc(link)}" style="width:100%"></div>
+     <div class="full acts"><button type="button" class="b" data-cp="1">${L.alinkCopy}</button> <a class="b ok" target="_blank" rel="noopener" href="https://api.whatsapp.com/send?phone=${esc(r.phone)}&text=${encodeURIComponent(msg)}">${L.alinkWa}</a></div></div>`;
+    slot.querySelector('[data-cp]').onclick=async()=>{const i=slot.querySelector('input');i.select();try{await navigator.clipboard.writeText(i.value)}catch(e){document.execCommand&&document.execCommand('copy')}toast(L.alinkCopied)};return}
    if(a==='del'){if(!confirm(t('confirmDel')))return;for(const p of (r.photos||[]))if(p.path)await SB.removeFile('listings',p.path).catch(()=>{});await SB.remove('listings','id=eq.'+r.id);toast(t('deleted'));return vListings(box)}
    if(a==='edit'){const slot=el.querySelector('.slot');const F=LT().f;
     const sel=(n,opts,v)=>`<div><label>${F[n]}</label><select name="${n}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
@@ -211,7 +224,7 @@ async function render(){
  const c=await counts().catch(()=>({}));
  adm.innerHTML=`<div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}${c[k]?`<span class="cnt">${c[k]}</span>`:''}</button>`).join('')}</div><div id="list">…</div>`;
  adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';render()});
- try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
+ try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,cards:vCards,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
 }
 const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
 function bindSpecEditor(box,row,onDone){
@@ -222,7 +235,7 @@ function bindSpecEditor(box,row,onDone){
   const v=collect(f,SPEC_SPEC());if(!v.wa)v.wa=normWa(v.phone);v.phone=v.phone.replace(/\D/g,'');if(!v.sub_id)v.sub_id=null;
   if(a==='approve')v.status='approved';if(a==='reject')v.status='rejected';
   if(v.status==='approved'&&!v.sub_id){toast(t('needSub'));return}
-  try{if(row.id)await SB.update('specialists','id=eq.'+row.id,v);else await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
+  try{if(row.id)await SB.update('specialists','id=eq.'+row.id,v);else await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;CACHE.allSpecs=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
 }
 async function vPending(box){
  const rows=await SB.get('specialists?select=*&status=eq.pending&order=created_at.asc');
@@ -248,6 +261,31 @@ async function vSpecs(box){
    if(a==='vis')await SB.update('specialists','id=eq.'+r.id,{status:r.status==='approved'?'hidden':'approved'});
    if(a==='del'){if(!confirm(t('confirmDel')))return;await SB.remove('specialists','id=eq.'+r.id);CACHE.names=null}
    toast(t('saved'));vSpecs(box)}catch(e){toast(e.message)}}});
+}
+let AF={q:'',sec:'',sub:'',st:''};
+async function vCards(box){
+ if(!CACHE.allSpecs)CACHE.allSpecs=await SB.get('specialists?select=*&order=section_id.asc,sort_order.asc,id.asc');
+ const rows=CACHE.allSpecs;const secOf=id=>D.sections.find(s=>s.id===id);
+ const list=rows.filter(r=>(!AF.sec||r.section_id===AF.sec)&&(!AF.sub||r.sub_id===AF.sub)&&(!AF.st||r.status===AF.st)
+  &&textHit(AF.q,[r.name,r.note,r.description,r.address,r.admin_note,subT(r.sub_id),secOf(r.section_id)?secT(secOf(r.section_id)):'','#'+r.id],[r.phone,r.wa]));
+ const opt=(v,l,cur)=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(l)}</option>`;
+ box.innerHTML=`<div class="ed" style="margin-bottom:10px"><div class="full"><input class="filter" id="aq" placeholder="${esc(t('cardsQ'))}" value="${esc(AF.q)}" style="margin:0"></div>
+  <div><select id="asec">${opt('',t('allSec'),AF.sec)}${D.sections.map(s=>opt(s.id,s.emoji+' '+secT(s),AF.sec)).join('')}</select></div>
+  <div><select id="asub">${opt('',t('allSub'),AF.sub)}${AF.sec?subs(AF.sec).map(x=>opt(x.id,x.implicit?secT(secOf(AF.sec)):(lang==='kz'?x.title_kz:x.title),AF.sub)).join(''):''}</select></div>
+  <div><select id="ast">${opt('',t('allSt'),AF.st)}${['approved','pending','hidden','rejected'].map(s=>opt(s,t('st')[s],AF.st)).join('')}</select></div></div>
+  <div class="meta" style="margin-bottom:8px">${t('foundN')(list.length)}${list.length>200?' · '+t('first200'):''}</div>`
+  +list.slice(0,200).map(r=>`<div class="row" data-id="${r.id}"><h3>${r.vip?'<span class="pill vip">VIP</span>':''}${esc(r.name||'—')} · ${esc(r.phone)}</h3>
+  <div class="meta">${pill(r.status)} #${r.id} · ${esc(secOf(r.section_id)?secT(secOf(r.section_id)):r.section_id)} → ${esc(subT(r.sub_id))} · ${esc((t('src')||{})[r.source]||r.source)}</div>
+  ${r.note?`<p>${esc(r.note)}</p>`:''}${r.address?`<p>📍 ${esc(r.address)}</p>`:''}${r.description?`<p class="meta">${esc(t('desc'))}: ${esc(r.description)}</p>`:''}
+  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b" data-a="vis">${r.status==='approved'?t('hide'):t('show')}</button><button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join('');
+ const re=(fn)=>{CACHE.allSpecs=fn?null:CACHE.allSpecs;return vCards(box)};
+ const aq=$('#aq');aq.oninput=()=>{AF.q=aq.value;clearTimeout(aq._t);aq._t=setTimeout(()=>re().then(()=>{const n=$('#aq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),250)};
+ $('#asec').onchange=e=>{AF.sec=e.target.value;AF.sub='';re()};$('#asub').onchange=e=>{AF.sub=e.target.value;re()};$('#ast').onchange=e=>{AF.st=e.target.value;re()};
+ box.querySelectorAll('.row[data-id]').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
+  try{if(a==='edit'){const slot=el.querySelector('.slot');const bind=x=>{slot.innerHTML=editor(SPEC_SPEC(),x);bindSpecEditor(slot,x,(k,nr)=>bind(nr))};bind(Object.assign({},r));return}
+   if(a==='vis')await SB.update('specialists','id=eq.'+r.id,{status:r.status==='approved'?'hidden':'approved'});
+   if(a==='del'){if(!confirm(t('confirmDel')+' «'+(r.name||r.phone)+'»'))return;await SB.remove('specialists','id=eq.'+r.id);CACHE.names=null}
+   toast(t('saved'));re(true)}catch(e){toast(e.message)}}});
 }
 async function vReviews(box){
  const [pend,appr,names]=await Promise.all([SB.get('reviews?select=*&status=eq.pending&order=created_at.asc'),SB.get('reviews?select=*&status=eq.approved&order=created_at.desc&limit=30'),specNames()]);
