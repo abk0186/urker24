@@ -80,6 +80,15 @@ function shareUrl(kind,r){
 const shareBtn=(kind,r)=>{const h=shareUrl(kind,r);return h?`<a class="b ok wa-share" target="_blank" rel="noopener" href="${esc(h)}" title="${esc(t('shareT'))}">${t('shareA')}</a>`:''};
 let JUST=null;  // только что одобренное: {kind,row} — плашка над списком с кнопкой «📲 Отправить автору»
 const t=k=>T[lang][k];
+// 14_content_safety: автометки (ссылка, мат, капс, эмодзи, правка, жалобы) и жалобы жителей
+Object.assign(T.ru.types,{complaint:'⚠️ Жалоба'});Object.assign(T.kz.types,{complaint:'⚠️ Шағым'});
+Object.assign(T.ru,{mf:{link:'ссылка',obscene:'мат',caps:'капс',emoji:'много эмодзи',edit:'изменено автором',complaints:'скрыто после жалоб'},mfT:'Автопроверка',
+ ck:{listing:'Объявление',news:'Новость',spec:'Карточка',review:'Отзыв'},cr:{offensive:'оскорбления / провокация',spam:'спам / реклама',fraud:'мошенничество',wrong:'неверные данные',other:'другое'},
+ cOpen:'↗ Открыть на сайте',cHide:'🙈 Скрыть это',cHideQ:'Скрыть с сайта? Все жалобы на это будут отмечены «обработано». Вернуть можно в «Все карточки» / «Объявления» / «Новости» / «Отзывы».',cHidden:'Скрыто',cReject:'Жалоба необоснованна',cReason:'Причина',cComment:'Комментарий',cGone:'уже скрыто или удалено'});
+Object.assign(T.kz,{mf:{link:'сілтеме',obscene:'балағат',caps:'бас әріп',emoji:'эмодзи көп',edit:'автор өзгертті',complaints:'шағымнан кейін жасырылды'},mfT:'Автотексеру',
+ ck:{listing:'Хабарландыру',news:'Жаңалық',spec:'Карточка',review:'Пікір'},cr:{offensive:'қорлау / арандату',spam:'спам / жарнама',fraud:'алаяқтық',wrong:'деректер қате',other:'басқа'},
+ cOpen:'↗ Сайтта ашу',cHide:'🙈 Жасыру',cHideQ:'Сайттан жасыру керек пе? Осыған қатысты барлық шағым «өңделді» болып белгіленеді.',cHidden:'Жасырылды',cReject:'Шағым негізсіз',cReason:'Себебі',cComment:'Пікір',cGone:'жасырылған немесе жойылған'});
+const flagChips=r=>(r&&Array.isArray(r.mod_flags)&&r.mod_flags.length)?` <span class="pill flag" title="${esc(t('mfT'))}">⚠️ ${r.mod_flags.map(f=>esc((t('mf')||{})[f]||f)).join(' · ')}</span>`:'';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt;const toast=(m,ms)=>{const e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,ms||3500)};
 const secT=s=>lang==='kz'?s.title_kz:s.title_ru;
@@ -90,6 +99,12 @@ const toLocalInput=iso=>iso?new Date(new Date(iso).getTime()+5*3600e3).toISOStri
 const fromLocalInput=v=>v?v+':00+05:00':null;
 const normWa=p=>{const d=String(p||'').replace(/\D/g,'');if(/^8\d{10}$/.test(d)&&!/^8800/.test(d))return '7'+d.slice(1);if(/^7\d{10}$/.test(d))return d;return null};
 let tab='stats',editing=null,filterQ='',CACHE={};
+// [siteO moderator] роль «модератор» (14_moderator.sql): вкладки Заявки, Объявления жителей, Новости, Отзывы, Сообщения; данные — через mod_*
+let ROLE='admin';const IS_MOD=()=>ROLE==='moderator';const MOD_TABS=['pending','listings','news','reviews','reports','ann'];const tabOk=k=>!IS_MOD()||MOD_TABS.includes(k);
+Object.assign(T.ru,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Уркер',addL:'+ Добавить объявление',newL:'Новое объявление',evDate:'Когда потеряли / нашли',photosL:'Фото (до 5)',lcreated:'✅ Объявление опубликовано',publishL:'Опубликовать',priceFixed:'цена',noPrice:'без цены',uploadingL:'Загрузка фото…',
+ lerr:{invalid_phone:'Проверьте телефон: нужен номер вида 8 701 123 45 67',bad_title:'Заголовок — не короче 3 символов',bad_price:'Укажите цену цифрами',bad_kind:'Выберите тип и категорию'}});
+Object.assign(T.kz,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Үркер',addL:'+ Хабарландыру қосу',newL:'Жаңа хабарландыру',evDate:'Қашан жоғалды / табылды',photosL:'Фото (5-ке дейін)',lcreated:'✅ Хабарландыру жарияланды',publishL:'Жариялау',priceFixed:'баға',noPrice:'бағасыз',uploadingL:'Фото жүктелуде…',
+ lerr:{invalid_phone:'Телефонды тексеріңіз: 8 701 123 45 67 түріндегі нөмір керек',bad_title:'Тақырып кемінде 3 таңба болуы керек',bad_price:'Бағаны санмен көрсетіңіз',bad_kind:'Түрі мен санатын таңдаңыз'}});
 // кнопка «🔄 Обновить»: перезагрузка с ?r=<время> и #tab=<вкладка> — после загрузки возвращаем вкладку и чистим адрес
 try{const m=/^#tab=([a-z]+)$/.exec(location.hash);if(m&&T.ru.tabs[m[1]])tab=m[1];if(m||/[?&]r=\d/.test(location.search))history.replaceState(null,'',location.pathname)}catch(e){}
 
@@ -106,7 +121,8 @@ function field(name,val,kind,opts){
 }
 function collect(form,spec){const o={};for(const [n,k] of spec){const el=form.elements[n];if(!el)continue;
  if(k==='bool')o[n]=el.checked;else if(k==='dt')o[n]=fromLocalInput(el.value);else if(k==='long')o[n]=el.value.replace(/\r/g,'').trim();else if(k==='num')o[n]=el.value===''?0:+el.value;else o[n]=el.value.trim()}return o}
-const SPEC_SPEC=()=>[['name'],['phone'],['section_id','select',D.sections.map(s=>[s.id,s.emoji+' '+secT(s)])],['sub_id','select'],['note','text'],['address',null,{full:true}],['wa'],
+const SPEC_SPEC=()=>IS_MOD()?[['name'],['phone'],['section_id','select',D.sections.map(s=>[s.id,s.emoji+' '+secT(s)])],['sub_id','select'],['note','text'],['address',null,{full:true}],['wa']]:SPEC_SPEC_FULL();  // [siteO moderator]
+const SPEC_SPEC_FULL=()=>[['name'],['phone'],['section_id','select',D.sections.map(s=>[s.id,s.emoji+' '+secT(s)])],['sub_id','select'],['note','text'],['address',null,{full:true}],['wa'],
  ['sort_order','num'],['recommended','bool'],['is_new','bool'],['vip','bool'],['vip_until','dt'],...(F_CLAIM?[['verified','bool'],['business_name'],['owner_name'],['instagram'],['gis_url',null,{full:true}],['hours'],['descr_ru','text'],['descr_kz','text']]:[]),['status','select',['pending','approved','rejected','hidden'].map(s=>[s,t('st')[s]])],['admin_note','text']];
 const ANN_SPEC=()=>[['type','select',Object.keys(T.ru.types).map(k=>[k,t('types')[k]])],['status','select',['draft','published','archived'].map(s=>[s,t('st')[s]])],
  ['title_ru',null,{full:true}],['title_kz',null,{full:true}],['area_ru'],['area_kz'],['source_ru'],['source_kz'],['start_at','dt'],['end_at','dt'],['urgent','bool']];
@@ -120,9 +136,10 @@ function editor(spec,row,extraBtns){
 
 // ---------- data ----------
 const NB_KEYS=['pending','listings','claims','news','reviews','reports'];
-const nbKeys=()=>NB_KEYS.filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM));
+const nbKeys=()=>NB_KEYS.filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)&&tabOk(k));
 let NB_RPC=true;
 async function counts(){
+ if(IS_MOD()){const o=await SB.rpc('mod_counts',{});const c={};for(const k of nbKeys())c[k]=+(o&&o[k])||0;return c}  // [siteO moderator]
  if(NB_RPC){try{const o=await SB.rpc('admin_counts',{});if(o&&typeof o==='object'){const c={};for(const k of nbKeys())c[k]=+o[k]||0;return c}}catch(e){if(e&&(e.errorCode==='PGRST202'||e.status===404||/could not find the function/i.test(String(e.message))))NB_RPC=false;else throw e}}  // 13_admin_counts.sql ещё не запущен — считаем по таблицам
  const [p,r,m,n]=await Promise.all([SB.get('specialists?select=id&status=eq.pending'),SB.get('reviews?select=id&status=eq.pending'),SB.get('reports?select=id&status=eq.pending'),
   SB.get('news_suggestions?select=id&status=eq.pending').catch(()=>[])]);
@@ -133,11 +150,11 @@ async function specNames(){if(!CACHE.names){const rows=await SB.get('specialists
 
 // ---------- views ----------
 // ---------- объявления жителей ----------
-const LS_T={ru:{tab:'🗂 Объявления жителей',pm:{negotiable:'договорная',free:'даром',none:''},settings:'Настройки',premod:'Премодерация (новые объявления ждут проверки)',ttl:'Срок показа, дней',ttlLost:'Потеряшки, дней',paid:'Платные «поднять/выделить» (пока выключено, оплаты нет)',
+const LS_T={ru:{tab:'🗂 Объявления жителей',pm:{negotiable:'договорная',free:'даром',none:''},settings:'Настройки',premod:'Премодерация всегда включена: новые и изменённые объявления ждут проверки',ttl:'Срок показа, дней',ttlLost:'Потеряшки, дней',paid:'Платные «поднять/выделить» (пока выключено, оплаты нет)',
   st:{pending:'на проверке',approved:'опубликовано',closed:'закрыто',rejected:'отклонено',deleted:'удалено автором',expired:'истёк срок'},sec:{market:'🛍 Барахолка',ads:'📋 Объявления',lost:'🐾 Потеряшки'},
   all:'Все',approve:'Одобрить',reject:'Отклонить',hl:'⭐ Выделить',unhl:'⭐ Снять выделение',bump:'⬆ Поднять',extend:'+30 дней',alink:'🔑 Ссылка для автора',alinkConfirm:'Создать новую секретную ссылку для автора? Прежняя ссылка этого объявления (если была) перестанет работать.',alinkNote:'Ссылка показывается один раз. Отправьте её автору — по ней он сможет изменить, продлить, закрыть или удалить своё объявление.',alinkCopy:'📋 Скопировать',alinkWa:'💬 Отправить автору в WhatsApp',alinkCopied:'Скопировано',purge:'🧹 Удалить фото снятых объявлений',purged:n=>`Удалено фото: ${n}`,
   views:'просм.',until:'до',bumped:'поднято',noPhotos:'без фото',f:{title:'Заголовок',body:'Описание',kind:'Тип',category:'Категория',price:'Цена, ₸',price_mode:'Цена: режим',place:'Где',event_date:'Когда',phone:'Телефон (7XXXXXXXXXX)',has_wa:'Есть WhatsApp',admin_note:'Заметка админа',verified:'✔ Проверено (платный профиль в будущем)',business_name:'Название бизнеса',owner_name:'Имя владельца',instagram:'Instagram (handle без @)',gis_url:'Ссылка 2ГИС',hours:'Часы работы',descr_ru:'Описание RU (≤300)',descr_kz:'Описание KZ (≤300)',expires_at:'Показывать до',status:'Статус'}},
- kz:{tab:'🗂 Тұрғындар хабарландырулары',pm:{negotiable:'келісім бойынша',free:'тегін',none:''},settings:'Баптаулар',premod:'Алдын ала модерация (жаңа хабарландырулар тексеруді күтеді)',ttl:'Көрсету мерзімі, күн',ttlLost:'Жоғалғандар, күн',paid:'Ақылы «көтеру/ерекшелеу» (әзірге өшірулі, төлем жоқ)',
+ kz:{tab:'🗂 Тұрғындар хабарландырулары',pm:{negotiable:'келісім бойынша',free:'тегін',none:''},settings:'Баптаулар',premod:'Алдын ала модерация әрдайым қосулы: жаңа және өзгертілген хабарландырулар тексеруді күтеді',ttl:'Көрсету мерзімі, күн',ttlLost:'Жоғалғандар, күн',paid:'Ақылы «көтеру/ерекшелеу» (әзірге өшірулі, төлем жоқ)',
   st:{pending:'тексеруде',approved:'жарияланды',closed:'жабылды',rejected:'қабылданбады',deleted:'автор жойды',expired:'мерзімі өтті'},sec:{market:'🛍 Барахолка',ads:'📋 Хабарландырулар',lost:'🐾 Жоғалғандар'},
   all:'Барлығы',approve:'Мақұлдау',reject:'Қабылдамау',hl:'⭐ Ерекшелеу',unhl:'⭐ Ерекшелеуді алу',bump:'⬆ Көтеру',extend:'+30 күн',alink:'🔑 Авторға сілтеме',alinkConfirm:'Авторға жаңа құпия сілтеме жасау керек пе? Бұл хабарландырудың бұрынғы сілтемесі (болса) жұмыс істемейді.',alinkNote:'Сілтеме бір рет көрсетіледі. Оны авторға жіберіңіз — сол арқылы ол хабарландыруын өзгерте, ұзарта, жаба немесе жоя алады.',alinkCopy:'📋 Көшіру',alinkWa:'💬 Авторға WhatsApp-қа жіберу',alinkCopied:'Көшірілді',purge:'🧹 Алынған хабарландырулардың фотоларын жою',purged:n=>`Жойылған фото: ${n}`,
   views:'қаралым',until:'дейін',bumped:'көтерілген',noPhotos:'фотосыз',f:{title:'Тақырыбы',body:'Сипаттамасы',kind:'Түрі',category:'Санаты',price:'Бағасы, ₸',price_mode:'Баға режимі',place:'Қайда',event_date:'Қашан',phone:'Телефон (7XXXXXXXXXX)',has_wa:'WhatsApp бар',admin_note:'Әкімші жазбасы',verified:'✔ Тексерілген (болашақта ақылы профиль)',business_name:'Бизнес атауы',owner_name:'Иесінің аты',instagram:'Instagram (@-сыз)',gis_url:'2ГИС сілтемесі',hours:'Жұмыс уақыты',descr_ru:'Сипаттама RU (≤300)',descr_kz:'Сипаттама KZ (≤300)',expires_at:'Көрсету мерзімі',status:'Мәртебесі'}}};
@@ -156,38 +173,39 @@ function textHit(q,parts,phones){q=String(q||'').trim();if(!q)return true;const 
 const lPhoto=p=>p&&p.path?SB.publicUrl('listings',p.path):'';
 async function vListings(box){
  const L=LT();
- const [set]=await SB.get('listing_settings?select=*');
+ const MOD=IS_MOD();const [set]=MOD?[{}]:await SB.get('listing_settings?select=*');
  let q='listings?select=*&order=created_at.desc&limit=300';
  if(LF.status==='expired')q+='&status=eq.approved&expires_at=lt.'+new Date().toISOString();else if(LF.status)q+='&status=eq.'+LF.status;
  if(LF.section)q+='&section=eq.'+LF.section;
- const rows=(await SB.get(q)).filter(r=>textHit(LF.q,[r.title,r.body,r.place,r.admin_note,String(r.id)],[r.phone]));const now=Date.now();
- box.innerHTML=`<details class="row"><summary><b>⚙️ ${L.settings}</b> — ${set.premoderation?'✅':'⚠️'} ${esc(L.premod)}</summary><form class="ed" id="lset">
-   <div class="full"><label class="ck"><input type="checkbox" name="premoderation" ${set.premoderation?'checked':''}> ${esc(L.premod)}</label></div>
+ const rows=(MOD?await SB.rpc('mod_listings',{p_status:LF.status,p_section:LF.section}):await SB.get(q)).filter(r=>textHit(LF.q,[r.title,r.body,r.place,r.admin_note,String(r.id)],[r.phone]));const now=Date.now();
+ box.innerHTML=(MOD?'':`<details class="row"><summary><b>⚙️ ${L.settings}</b> — ${set.premoderation?'✅':'⚠️'} ${esc(L.premod)}</summary><form class="ed" id="lset">
+   <div class="full"><label class="ck"><input type="checkbox" name="premoderation" checked disabled> ${esc(L.premod)}</label></div>
    <div><label>${L.ttl}</label><input type="number" name="ttl_days" min="1" max="365" value="${set.ttl_days}"></div><div><label>${L.ttlLost}</label><input type="number" name="ttl_lost_days" min="1" max="365" value="${set.ttl_lost_days}"></div>
    <div class="full"><label class="ck"><input type="checkbox" name="paid_features" disabled ${set.paid_features?'checked':''}> ${esc(L.paid)}</label></div>
-   <div class="full acts"><button class="b pri">${t('save')}</button> <button type="button" class="b" id="purge">${L.purge}</button></div></form></details>
+   <div class="full acts"><button class="b pri">${t('save')}</button> <button type="button" class="b" id="purge">${L.purge}</button></div></form></details>`)+`<button class="b pri" id="addL" type="button" style="margin:0 0 10px">${esc(t('addL'))}</button><div id="newL"></div>
   <div class="tabs">${['pending','approved','closed','expired','rejected','deleted',''].map(s=>`<button data-ls="${s}" class="${LF.status===s?'on':''}">${s?L.st[s]:L.all}</button>`).join('')}</div>
   <div class="tabs">${['','market','ads','lost'].map(s=>`<button data-lsec="${s}" class="${LF.section===s?'on':''}">${s?L.sec[s]:L.all}</button>`).join('')}</div>
   <input class="filter" id="lq" placeholder="${esc(t('lq'))}" value="${esc(LF.q)}">${LF.q?`<div class="meta">${t('foundN')(rows.length)}</div>`:''}`
   +(rows.length?rows.map(r=>{const exp=new Date(r.expires_at).getTime()<now;const ph=(r.photos||[]);return `<div class="row lrow" data-id="${r.id}">
    ${ph[0]?`<img class="lthumb" src="${esc(lPhoto(ph[0]))}" alt="">`:`<div class="lthumb ph">${L.sec[r.section].split(' ')[0]}</div>`}
    <div class="lmain"><h3>${r.highlighted?'⭐ ':''}${esc(r.title)}</h3>
-   <div class="meta">${pill(r.status)}${exp&&r.status==='approved'?`<span class="pill rejected">${L.st.expired}</span>`:''} ${esc(L.sec[r.section])} · ${esc(lKindT(r))} · ${esc(lCatT(r))} · ${r.price_mode==='fixed'?esc(Number(r.price).toLocaleString('ru-RU').replace(/\s/g,' '))+' ₸ · ':(L.pm[r.price_mode]?esc(L.pm[r.price_mode])+' · ':'')}📞 ${esc(r.phone)}${r.has_wa?' (WA)':''}
+   <div class="meta">${pill(r.status)}${flagChips(r)}${exp&&r.status==='approved'?`<span class="pill rejected">${L.st.expired}</span>`:''} ${esc(L.sec[r.section])} · ${esc(lKindT(r))} · ${esc(lCatT(r))} · ${r.price_mode==='fixed'?esc(Number(r.price).toLocaleString('ru-RU').replace(/\s/g,' '))+' ₸ · ':(L.pm[r.price_mode]?esc(L.pm[r.price_mode])+' · ':'')}📞 ${esc(r.phone)}${r.has_wa?' (WA)':''}
     · ${fmtDT(r.created_at)} · ${L.until} ${fmtDT(r.expires_at)} · 👁 ${r.views} · 🖼 ${ph.length||L.noPhotos}${r.bumped_at?` · ⬆ ${L.bumped} ${fmtDT(r.bumped_at)}`:''}${r.device_id?` · ${t('device')}: ${esc(String(r.device_id).slice(0,8))}`:''}</div>
    ${r.body?`<p class="pre">${esc(r.body)}</p>`:''}${r.place?`<p>📍 ${esc(r.place)}${r.event_date?' · 🗓 '+esc(r.event_date):''}</p>`:''}
    ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
    <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
-    ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`+shareBtn('l',r):''}${['rejected','deleted','closed'].includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
-    <button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
-    <button class="b no" data-a="del">${t('del')}</button></div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
+    ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`+shareBtn('l',r):''}${(MOD?['rejected']:['rejected','deleted','closed']).includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
+    ${MOD?(['pending','approved','rejected'].includes(r.status)?`<button class="b" data-a="edit">${t('edit')}</button>`:''):`<button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
+    <button class="b no" data-a="del">${t('del')}</button>`}</div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LF.status=b.dataset.ls;vListings(box)});
  {const lq=$('#lq');lq.oninput=()=>{LF.q=lq.value;clearTimeout(lq._t);lq._t=setTimeout(()=>vListings(box).then(()=>{const n=$('#lq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),300)}}
  box.querySelectorAll('[data-lsec]').forEach(b=>b.onclick=()=>{LF.section=b.dataset.lsec;vListings(box)});
- $('#lset').onsubmit=async ev=>{ev.preventDefault();const f=ev.target;try{await SB.update('listing_settings','id=eq.1',{premoderation:f.elements.premoderation.checked,ttl_days:+f.elements.ttl_days.value||30,ttl_lost_days:+f.elements.ttl_lost_days.value||60});toast(t('saved'));render()}catch(e){toast(e.message)}};
- $('#purge').onclick=async()=>{try{const old=await SB.get('listings?select=id,photos,status,expires_at&or=(status.in.(deleted,rejected),expires_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+',closed_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+')');
+ $('#addL').onclick=()=>newListingForm($('#newL'));  // [siteO moderator]
+ if(!MOD)$('#lset').onsubmit=async ev=>{ev.preventDefault();const f=ev.target;try{await SB.update('listing_settings','id=eq.1',{premoderation:true,ttl_days:+f.elements.ttl_days.value||30,ttl_lost_days:+f.elements.ttl_lost_days.value||60});toast(t('saved'));render()}catch(e){toast(e.message)}};
+ if(!MOD)$('#purge').onclick=async()=>{try{const old=await SB.get('listings?select=id,photos,status,expires_at&or=(status.in.(deleted,rejected),expires_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+',closed_at.lt.'+new Date(Date.now()-30*864e5).toISOString()+')');
    let n=0;for(const r of old){if(!(r.photos||[]).length)continue;for(const p of r.photos){if(p.path){await SB.removeFile('listings',p.path).catch(()=>{});n++}}await SB.update('listings','id=eq.'+r.id,{photos:[]})}toast(LT().purged(n));vListings(box)}catch(e){toast(e.message)}};
  box.querySelectorAll('.lrow').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
-  try{if(a==='approved'||a==='rejected'){await SB.update('listings','id=eq.'+r.id,{status:a});JUST=a==='approved'?{kind:'l',row:Object.assign({},r,{status:'approved'})}:null}
+  try{if(a==='approved'||a==='rejected'){if(MOD)await SB.rpc('mod_listing_set_status',{p_id:r.id,p_status:a});else await SB.update('listings','id=eq.'+r.id,{status:a});JUST=a==='approved'?{kind:'l',row:Object.assign({},r,{status:'approved'})}:null}
    if(a==='hl')await SB.update('listings','id=eq.'+r.id,{highlighted:!r.highlighted});
    if(a==='bump')await SB.update('listings','id=eq.'+r.id,{bumped_at:new Date().toISOString()});
    if(a==='extend')await SB.update('listings','id=eq.'+r.id,{expires_at:new Date(Math.max(Date.now(),new Date(r.expires_at).getTime())+30*864e5).toISOString()});
@@ -202,13 +220,52 @@ async function vListings(box){
     slot.innerHTML=`<form class="ed"><div class="full"><label>${F.title}</label><input name="title" value="${esc(r.title)}"></div><div class="full"><label>${F.body}</label><textarea name="body" rows="4">${esc(r.body)}</textarea></div>
      ${sel('kind',L_KINDS[r.section],r.kind)}${sel('category',L_CATS[r.section],r.category)}${sel('price_mode',['fixed','negotiable','free','none'],r.price_mode)}<div><label>${F.price}</label><input name="price" type="number" value="${r.price??''}"></div>
      <div><label>${F.place}</label><input name="place" value="${esc(r.place)}"></div><div><label>${F.phone}</label><input name="phone" value="${esc(r.phone)}"></div>
-     <div><label class="ck"><input type="checkbox" name="has_wa" ${r.has_wa?'checked':''}> ${F.has_wa}</label></div><div class="full"><label>${F.admin_note}</label><input name="admin_note" value="${esc(r.admin_note)}"></div>
+     <div><label class="ck"><input type="checkbox" name="has_wa" ${r.has_wa?'checked':''}> ${F.has_wa}</label></div>${MOD?'':`<div class="full"><label>${F.admin_note}</label><input name="admin_note" value="${esc(r.admin_note)}"></div>`}
      <div class="full acts"><button class="b pri">${t('save')}</button><button type="button" class="b" data-x>${t('cancel')}</button></div></form>`;
     const f=slot.querySelector('form');f.querySelector('[data-x]').onclick=()=>{slot.innerHTML=''};
-    f.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(['title','body','kind','category','price_mode','place','phone','admin_note'].map(n=>[n,f.elements[n].value.trim()]));
+    f.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(['title','body','kind','category','price_mode','place','phone','admin_note'].filter(n=>f.elements[n]).map(n=>[n,f.elements[n].value.trim()]));
      v.price=v.price_mode==='fixed'&&f.elements.price.value!==''?+f.elements.price.value:null;v.has_wa=f.elements.has_wa.checked;
-     try{await SB.update('listings','id=eq.'+r.id,v);toast(t('saved'));vListings(box)}catch(err){toast(err.message)}};return}
+     try{if(MOD)await SB.rpc('mod_listing_update',{p_id:r.id,p:v});else await SB.update('listings','id=eq.'+r.id,v);toast(t('saved'));vListings(box)}catch(err){toast(err.message)}};return}
    toast(t('saved'));render()}catch(e){toast(e.message)}}});
+}
+// [siteO moderator] «+ Добавить объявление»: публикуется сразу (mod_listing_create), фото — по билету в бакет listings
+function newListingForm(slot){
+ if(!slot)return;const L=LT(),F=L.f,X=L_LBL[lang];let st={section:'market',kind:'sell',category:'other',price_mode:'fixed',has_wa:true};
+ const opt=(v,l,cur)=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(l)}</option>`;
+ const read=()=>{const f=slot.querySelector('form');if(!f)return;for(const n of ['section','kind','category','title','body','price_mode','price','place','event_date','phone'])if(f.elements[n])st[n]=f.elements[n].value;st.has_wa=f.elements.has_wa.checked};
+ const draw=()=>{if(!L_KINDS[st.section].includes(st.kind))st.kind=L_KINDS[st.section][0];if(!L_CATS[st.section].includes(st.category))st.category='other';
+  const pm={fixed:t('priceFixed'),negotiable:L.pm.negotiable,free:L.pm.free,none:t('noPrice')};
+  slot.innerHTML=`<form class="ed nl-form" novalidate><h3 class="full" style="margin:0">📝 ${esc(t('newL'))}</h3>
+   <div><label>${esc(t('f').section_id)}</label><select name="section">${['market','ads','lost'].map(s=>opt(s,L.sec[s],st.section)).join('')}</select></div>
+   <div><label>${esc(F.kind)}</label><select name="kind">${L_KINDS[st.section].map(k=>opt(k,X.k[k]||k,st.kind)).join('')}</select></div>
+   <div><label>${esc(F.category)}</label><select name="category">${L_CATS[st.section].map(c=>opt(c,(X.c[st.section]||{})[c]||c,st.category)).join('')}</select></div>
+   <div><label>${esc(F.price_mode)}</label><select name="price_mode">${['fixed','negotiable','free','none'].map(m=>opt(m,pm[m],st.price_mode)).join('')}</select></div>
+   <div class="full"><label>${esc(F.title)}</label><input name="title" maxlength="120" required value="${esc(st.title||'')}"></div>
+   <div class="full"><label>${esc(F.body)}</label><textarea name="body" rows="4" maxlength="3000">${esc(st.body||'')}</textarea></div>
+   <div><label>${esc(F.price)}</label><input name="price" type="number" min="0" inputmode="numeric" value="${esc(st.price||'')}"></div>
+   <div><label>${esc(F.phone)}</label><input name="phone" type="tel" inputmode="tel" required value="${esc(st.phone||'')}" placeholder="8 701 123 45 67"></div>
+   <div><label>${esc(F.place)}</label><input name="place" maxlength="120" value="${esc(st.place||'')}"></div>
+   ${st.section==='lost'?`<div><label>${esc(t('evDate'))}</label><input name="event_date" type="date" value="${esc(st.event_date||'')}"></div>`:''}
+   <div class="full"><label class="ck"><input type="checkbox" name="has_wa" ${st.has_wa?'checked':''}> ${esc(F.has_wa)}</label></div>
+   <div class="full"><label>${esc(t('photosL'))}</label><input type="file" accept="image/*" multiple id="nlp" class="vh-file"><label for="nlp" class="b sec upl">${esc(t('n').addPhotos)}</label> <span class="meta" id="nlps"></span></div>
+   <div class="full acts"><button class="b pri" type="submit">${esc(t('publishL'))}</button><button type="button" class="b" data-x>${esc(t('cancel'))}</button></div></form>`;
+  const f=slot.querySelector('form');
+  f.elements.section.onchange=()=>{read();draw()};
+  f.querySelector('[data-x]').onclick=()=>{slot.innerHTML=''};
+  const files=()=>[...(f.querySelector('#nlp').files||[])].slice(0,5);
+  f.querySelector('#nlp').onchange=()=>{const n=files().length;f.querySelector('#nlps').textContent=n?'🖼 '+n:''};
+  f.onsubmit=async ev=>{ev.preventDefault();read();const btn=f.querySelector('[type=submit]');
+   const p={section:st.section,kind:st.kind,category:st.category,title:(st.title||'').trim(),body:(st.body||'').trim(),price_mode:st.price_mode,price:st.price_mode==='fixed'?String(st.price||''):null,
+    place:(st.place||'').trim(),event_date:st.section==='lost'&&st.event_date?st.event_date:null,phone:st.phone||'',has_wa:st.has_wa,lang};
+   if(p.title.length<3){toast(t('lerr').bad_title);return}
+   btn.disabled=true;
+   try{const res=await SB.rpc('mod_listing_create',{p});let row=res.row;const list=files(),paths=[];
+    for(let i=0;i<list.length;i++){f.querySelector('#nlps').textContent=`${t('uploadingL')} ${i+1}/${list.length}`;
+     try{let b=await compress(list[i],1280,0.8);if(b.size>1.4e6)b=await compress(list[i],1024,0.6);const path=`${res.id}/${res.ticket}/${rnd()}.jpg`;await SB.upload('listings',path,b,'image/jpeg');paths.push(path)}catch(e){toast(t('n').photoErr+': '+e.message)}}
+    if(paths.length)row=await SB.rpc('mod_listing_set_photos',{p_id:res.id,p_paths:paths});
+    JUST={kind:'l',row};LF={status:'approved',section:'',q:''};slot.innerHTML='';toast(t('lcreated'));render()}
+   catch(e){const m=String(e&&e.message||'');const k=Object.keys(t('lerr')).find(c=>m.includes(c));toast(k?t('lerr')[k]:m,6000);btn.disabled=false}}};
+ draw();slot.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 // ---------- заявки владельцев («Это ваш бизнес?») ----------
 const CL_T={ru:{tab:'✔ Владельцы',settings:'Платные функции профиля (на будущее)',photosFree:'Фото работ бесплатно (сейчас — да)',paid:'Платные профили «✔ Проверено» (оплаты пока нет)',
@@ -265,7 +322,7 @@ async function refreshCounts(){clearTimeout(NB_TIMER);const my=++NB_SEQ;try{cons
 const countsSoon=()=>{clearTimeout(NB_TIMER);NB_TIMER=setTimeout(refreshCounts,350)};
 // после любого изменения в базе (одобрить/отклонить/удалить/сохранить) — пересчитать
 for(const m of ['insert','update','remove']){const f=SB[m];SB[m]=(...a)=>f(...a).then(r=>{countsSoon();return r})}
-{const f=SB.rpc;SB.rpc=(fn,...a)=>f(fn,...a).then(r=>{if(/^admin_apply/.test(fn))countsSoon();return r})}
+{const f=SB.rpc;SB.rpc=(fn,...a)=>f(fn,...a).then(r=>{if(/^(admin_apply|mod_(hide_target|specialist_save|listing_set_status|listing_update|listing_create|news_suggestion_set|review_set|report_set))/.test(fn))countsSoon();return r})}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&$('#nbox'))refreshCounts()});
 function goTo(k){tab=k;editing=null;filterQ='';JUST=null;
  if(k==='listings')LF={status:'pending',section:'',q:''};if(k==='claims')CLF='pending';
@@ -273,7 +330,7 @@ function goTo(k){tab=k;editing=null;filterQ='';JUST=null;
 async function render(){
  clearTimeout(NB_TIMER);const my=++NB_SEQ;
  const c=await counts().catch(()=>null);
- adm.innerHTML=`<section id="nbox" class="nbox" aria-live="polite"></section><div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}</button>`).join('')}</div>${JUST&&shareUrl(JUST.kind,JUST.row)?`<div class="row just" id="just"><div><b>${JUST.kind==='l'?t('approvedL'):t('approvedC')}</b>: ${esc(JUST.kind==='l'?JUST.row.title:(JUST.row.name||JUST.row.phone))}</div><div class="acts">${shareBtn(JUST.kind,JUST.row)}<button type="button" class="b" id="justX">${t('closeX')}</button></div></div>`:''}<div id="list">…</div>`;
+ adm.innerHTML=`<section id="nbox" class="nbox" aria-live="polite"></section><div class="tabs">${Object.keys(T.ru.tabs).filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)&&tabOk(k)).map(k=>`<button data-tab="${k}" class="${tab===k?'on':''}">${t('tabs')[k]}</button>`).join('')}</div>${JUST&&shareUrl(JUST.kind,JUST.row)?`<div class="row just" id="just"><div><b>${JUST.kind==='l'?t('approvedL'):t('approvedC')}</b>: ${esc(JUST.kind==='l'?JUST.row.title:(JUST.row.name||JUST.row.phone))}</div><div class="acts">${shareBtn(JUST.kind,JUST.row)}<button type="button" class="b" id="justX">${t('closeX')}</button></div></div>`:''}<div id="list">…</div>`;
  {const x=$('#justX');if(x)x.onclick=()=>{JUST=null;$('#just').remove()}}
  if(my===NB_SEQ)applyCounts(c);else applyCounts(NB_C);
  {const tb=adm.querySelector('.tabs'),on=tb&&tb.querySelector('button.on');if(on&&(on.offsetLeft+on.offsetWidth>tb.scrollLeft+tb.clientWidth||on.offsetLeft<tb.scrollLeft))tb.scrollLeft=Math.max(0,on.offsetLeft-12)}
@@ -289,13 +346,13 @@ function bindSpecEditor(box,row,onDone){
   const v=collect(f,SPEC_SPEC());if(!v.wa)v.wa=normWa(v.phone);v.phone=v.phone.replace(/\D/g,'');if(!v.sub_id)v.sub_id=null;
   if(a==='approve')v.status='approved';if(a==='reject')v.status='rejected';
   if(v.status==='approved'&&!v.sub_id){toast(t('needSub'));return}
-  try{let saved;if(row.id)saved=await SB.update('specialists','id=eq.'+row.id,v);else saved=await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;
-   if(a==='approve'){const sr=Array.isArray(saved)&&saved[0]?saved[0]:Object.assign({},row,v);JUST={kind:'c',row:sr}}CACHE.allSpecs=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
+  try{let saved;if(IS_MOD())saved=await SB.rpc('mod_specialist_save',{p_id:row.id,p:v,p_status:a==='approve'?'approved':a==='reject'?'rejected':'pending'});else if(row.id)saved=await SB.update('specialists','id=eq.'+row.id,v);else saved=await SB.insert('specialists',Object.assign(v,{source:'admin'}));CACHE.names=null;
+   if(a==='approve'){const sr=Array.isArray(saved)&&saved[0]?saved[0]:(saved&&saved.id?saved:Object.assign({},row,v));JUST={kind:'c',row:sr}}CACHE.allSpecs=null;editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
 }
 async function vPending(box){
- const rows=await SB.get('specialists?select=*&status=eq.pending&order=created_at.asc');
+ const rows=IS_MOD()?await SB.rpc('mod_pending_specialists',{}):await SB.get('specialists?select=*&status=eq.pending&order=created_at.asc');
  box.innerHTML=rows.length?rows.map(r=>`<div class="row" data-id="${r.id}"><h3>${esc(r.name)} · ${esc(r.phone)}</h3>
-  <div class="meta">${fmtDT(r.created_at)} · ${esc(secT(D.sections.find(s=>s.id===r.section_id)||{title_ru:r.section_id,title_kz:r.section_id}))}${r.wants_vip?' · <span class="pill vip">'+t('wantsVip')+'</span>':''}${r.consent?' · ✅ '+t('consent'):''}</div>
+  <div class="meta">${fmtDT(r.created_at)} · ${esc(secT(D.sections.find(s=>s.id===r.section_id)||{title_ru:r.section_id,title_kz:r.section_id}))}${r.wants_vip?' · <span class="pill vip">'+t('wantsVip')+'</span>':''}${r.consent?' · ✅ '+t('consent'):''}${flagChips(r)}</div>
   <p><b>${t('desc')}:</b> ${esc(r.description)}<br>${r.address?'📍 '+esc(r.address):''}</p>
   <div class="slot">${editor(SPEC_SPEC(),r,`<button class="b ok" data-act="approve">${t('approve')}</button><button class="b no" data-act="reject">${t('reject')}</button>`)}</div></div>`).join(''):`<div class="row">${t('empty')}</div>`;
  rows.forEach(r=>{const slot=box.querySelector(`[data-id="${r.id}"] .slot`);const bind=(x)=>bindSpecEditor(slot,x,(k,nr)=>{slot.innerHTML=editor(SPEC_SPEC(),nr,`<button class="b ok" data-act="approve">${t('approve')}</button><button class="b no" data-act="reject">${t('reject')}</button>`);bind(nr)});bind(r)});
@@ -343,36 +400,49 @@ async function vCards(box){
    toast(t('saved'));re(true)}catch(e){toast(e.message)}}});
 }
 async function vReviews(box){
- const [pend,appr,names]=await Promise.all([SB.get('reviews?select=*&status=eq.pending&order=created_at.asc'),SB.get('reviews?select=*&status=eq.approved&order=created_at.desc&limit=30'),specNames()]);
+ const MR=IS_MOD()?await SB.rpc('mod_reviews',{}):null;  // [siteO moderator] без телефона и устройства автора
+ const [pend,appr,names]=MR?[MR.filter(r=>r.status==='pending'),MR.filter(r=>r.status==='approved'),Object.fromEntries(MR.map(r=>[r.specialist_id,{name:r.spec_name,sub_id:r.spec_sub_id}]))]:await Promise.all([SB.get('reviews?select=*&status=eq.pending&order=created_at.asc'),SB.get('reviews?select=*&status=eq.approved&order=created_at.desc&limit=30'),specNames()]);
  const card=(r,btns)=>{const s=names[r.specialist_id]||{};return `<div class="row" data-id="${r.id}"><h3>${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)} · ${esc(s.name||s.phone||('#'+r.specialist_id))} <small>(${esc(subT(s.sub_id))})</small></h3>
-  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)} · ${esc(r.author_name)} ${r.phone?'· '+esc(r.phone):''} · ${t('device')}: ${esc(String(r.device_id).slice(0,8))}</div><p>${esc(r.text)}</p><div class="acts">${btns}</div></div>`};
+  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)} · ${esc(r.author_name)} ${r.phone?'· '+esc(r.phone):''}${r.device_id?' · '+t('device')+': '+esc(String(r.device_id).slice(0,8)):''}${flagChips(r)}</div><p>${esc(r.text)}</p><div class="acts">${btns}</div></div>`};
  box.innerHTML=(pend.length?pend.map(r=>card(r,`<button class="b ok" data-a="approved">${t('approve')}</button><button class="b no" data-a="rejected">${t('reject')}</button>`)).join(''):`<div class="row">${t('empty')}</div>`)
   +(appr.length?`<h2>${t('st').approved}</h2>`+appr.map(r=>card(r,`<button class="b" data-a="rejected">${t('hide')}</button>`)).join(''):'');
- box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;try{await SB.update('reviews','id=eq.'+el.closest('.row').dataset.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
+ box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;try{if(IS_MOD())await SB.rpc('mod_review_set',{p_id:+el.closest('.row').dataset.id,p_status:a});else await SB.update('reviews','id=eq.'+el.closest('.row').dataset.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
 }
 async function vReports(box){
- const rows=(await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=100')).sort((a,b)=>(b.status==='pending')-(a.status==='pending'));
- box.innerHTML=rows.length?rows.map(r=>`<div class="row" data-id="${r.id}"><h3>${esc(t('types')[r.type]||r.type)} · ${esc(r.title)}</h3>
-  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}</div><p>📍 ${esc(r.area)}<br>🕒 ${esc(r.when_text)}<br>ℹ️ ${esc(r.source)} ${r.contact?'<br>📞 '+esc(r.contact):''}</p>
+ const rows=(IS_MOD()?await SB.rpc('mod_reports',{}):await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=200')).sort((a,b)=>(b.status==='pending')-(a.status==='pending'));
+ const names=rows.some(r=>r.type==='complaint')?(IS_MOD()?Object.fromEntries((await SB.get('specialists_public?select=id,name,sub_id').catch(()=>[])).map(x=>[x.id,x])):await specNames().catch(()=>({}))):{};  // [siteO moderator]
+ const tgtLink=r=>{const k=r.target_kind,id=+r.target_id;if(k==='listing')return './#/item/'+id;if(k==='news')return './#/news/'+id;
+  if(k==='spec'){const s=names[id];return s&&s.sub_id?'./#/c/'+s.sub_id.split('-')[0]+'/'+s.sub_id+'/'+id:''}return ''};
+ const crow=r=>`<div class="row cmp" data-id="${r.id}"><h3>${esc(t('types').complaint)} · ${esc((t('ck')||{})[r.target_kind]||r.target_kind)} #${+r.target_id}</h3>
+  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${r.device_id?' · '+t('device')+': '+esc(String(r.device_id).slice(0,8)):''}${flagChips(r)}</div>
+  <p>«${esc(String(r.title||'').replace(/^[a-z]+ #\d+: /,''))}»<br><b>${t('cReason')}:</b> ${esc((t('cr')||{})[r.reason]||r.reason||'')}${r.source?`<br><b>${t('cComment')}:</b> ${esc(r.source)}`:''}</p>
+  <div class="acts">${tgtLink(r)?`<a class="b" href="${esc(tgtLink(r))}" target="_blank" rel="noopener">${t('cOpen')}</a>`:''}${r.status==='pending'?`${IS_MOD()&&r.target_kind==='spec'?'':`<button class="b no" data-a="hidetgt">${t('cHide')}</button>`}<button class="b" data-a="done">${t('done')}</button><button class="b" data-a="rejected">${t('cReject')}</button>`:''}</div></div>`;
+ box.innerHTML=rows.length?rows.map(r=>r.type==='complaint'?crow(r):`<div class="row" data-id="${r.id}"><h3>${esc(t('types')[r.type]||r.type)} · ${esc(r.title)}</h3>
+  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${flagChips(r)}</div><p>📍 ${esc(r.area)}<br>🕒 ${esc(r.when_text)}<br>ℹ️ ${esc(r.source)} ${r.contact?'<br>📞 '+esc(r.contact):''}</p>
   <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="ann">${t('toAnn')}</button><button class="b" data-a="done">${t('done')}</button><button class="b no" data-a="rejected">${t('reject')}</button>`:''}</div></div>`).join(''):`<div class="row">${t('empty')}</div>`;
+ const HIDE={spec:['specialists','hidden'],listing:['listings','rejected'],news:['news','draft'],review:['reviews','rejected']};
  box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;const r=rows.find(x=>x.id==el.closest('.row').dataset.id);
   try{if(a==='ann'){tab='ann';editing={type:r.type,title_ru:r.title,area_ru:r.area,source_ru:r.source,status:'draft',report_id:r.id,start_at:r.when_text&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(r.when_text)?r.when_text+':00+05:00':null};return render()}
-   await SB.update('reports','id=eq.'+r.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
+   if(a==='hidetgt'&&IS_MOD()){if(!HIDE[r.target_kind]||!confirm(t('cHideQ')))return;const res=await SB.rpc('mod_hide_target',{p_kind:r.target_kind,p_id:+r.target_id});toast(res==='hidden'?t('cHidden'):t('cGone'));return render()}  // [siteO moderator]
+   if(a==='hidetgt'){const h=HIDE[r.target_kind];if(!h||!confirm(t('cHideQ')))return;const res=await SB.update(h[0],'id=eq.'+(+r.target_id),{status:h[1]});
+    await SB.update('reports','type=eq.complaint&status=eq.pending&target_kind=eq.'+r.target_kind+'&target_id=eq.'+(+r.target_id),{status:'done'});CACHE.names=null;CACHE.allSpecs=null;
+    toast(Array.isArray(res)&&res.length?t('cHidden'):t('cGone'));return render()}
+   if(IS_MOD())await SB.rpc('mod_report_set',{p_id:r.id,p_status:a});else await SB.update('reports','id=eq.'+r.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
 }
 function crud(table,spec,rowsHtml){return async function(box){
  const rows=await SB.get(table+'?select=*&order=created_at.desc&limit=200');
  box.innerHTML=`<button class="b pri" id="addRow" style="margin-bottom:10px">${t('add')}</button><div id="edSlot"></div>`+(rows.length?rows.map(r=>`<div class="row" data-id="${r.id}">${rowsHtml(r)}
-  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button><button class="b no" data-a="del">${t('del')}</button></div><div class="slot"></div></div>`).join(''):`<div class="row">${t('empty')}</div>`);
+  <div class="acts"><button class="b" data-a="edit">${t('edit')}</button>${IS_MOD()?'':`<button class="b no" data-a="del">${t('del')}</button>`}</div><div class="slot"></div></div>`).join(''):`<div class="row">${t('empty')}</div>`);
  const open=(slot,row)=>{slot.innerHTML=editor(spec(),row);const f=slot.querySelector('[data-ed]');f.onclick=async ev=>{const a=ev.target.dataset.act;if(!a)return;ev.preventDefault();
    if(a==='cancel'){editing=null;return render()}
    const v=collect(f,spec());if('wa' in v)v.wa=normWa(v.wa);
-   try{if(row.id)await SB.update(table,'id=eq.'+row.id,v);else{if(row.report_id)v.report_id=row.report_id;await SB.insert(table,v);if(row.report_id)await SB.update('reports','id=eq.'+row.report_id,{status:'done'})}
+   try{if(row.id)await SB.update(table,'id=eq.'+row.id,v);else{if(row.report_id)v.report_id=row.report_id;await SB.insert(table,v);if(row.report_id)await (IS_MOD()?SB.rpc('mod_report_set',{p_id:row.report_id,p_status:'done'}):SB.update('reports','id=eq.'+row.report_id,{status:'done'}))}
     editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}}};
  $('#addRow').onclick=()=>open($('#edSlot'),{});
  if(editing){open($('#edSlot'),editing);editing=null}
  box.querySelectorAll('.row[data-id]').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
   if(a==='edit')return open(el.querySelector('.slot'),r);
-  if(a==='del'&&confirm(t('confirmDel'))){try{await SB.remove(table,'id=eq.'+r.id);toast(t('deleted'));render()}catch(e){toast(e.message)}}}});
+  if(a==='del'&&!IS_MOD()&&confirm(t('confirmDel'))){try{await SB.remove(table,'id=eq.'+r.id);toast(t('deleted'));render()}catch(e){toast(e.message)}}}});
 }}
 const vAnn=crud('announcements',ANN_SPEC,r=>`<h3>${r.urgent?'❗ ':''}${esc(t('types')[r.type])} · ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${fmtDT(r.start_at)} — ${fmtDT(r.end_at)} · ${esc(r.area_ru)}</div>`);
 const vAds=crud('ads',AD_SPEC,r=>`<h3>${esc(r.emoji)} ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${r.active?'<span class="pill approved">ON</span>':'<span class="pill">OFF</span>'} ${fmtDT(r.starts_at)} — ${fmtDT(r.ends_at)} · ${esc(r.link_url||r.wa||'')}</div>`);
@@ -415,17 +485,17 @@ function newsEditor(slot,row,onDone){
   const v=collect(f,NEWS_SPEC());if(!v.title_ru&&!v.title_kz){toast(N.needTitle);return}
   if(!v.publish_at)delete v.publish_at;v.photos=st.photos.map(p=>({url:p.url,path:p.path||''}));v.cover_url=coverOf();
   try{if(row.id)await SB.update('news','id=eq.'+row.id,Object.assign(v,{updated_at:new Date().toISOString()}));
-   else{if(row.suggestion_id)v.suggestion_id=row.suggestion_id;await SB.insert('news',v);if(row.suggestion_id)await SB.update('news_suggestions','id=eq.'+row.suggestion_id,{status:'accepted'})}
+   else{if(row.suggestion_id)v.suggestion_id=row.suggestion_id;await SB.insert('news',v);if(row.suggestion_id){if(IS_MOD())await SB.rpc('mod_news_suggestion_set',{p_id:row.suggestion_id,p_status:'accepted'});else await SB.update('news_suggestions','id=eq.'+row.suggestion_id,{status:'accepted'})}}
    for(const p of st.removed)SB.removeFile('news',p).catch(()=>{});
    editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}};
 }
 async function vNews(box){
  const N=t('n');
- const [sug,rows,top]=await Promise.all([SB.get('news_suggestions?select=*&status=eq.pending&order=created_at.asc'),SB.get('news?select=*&order=pinned.desc,publish_at.desc&limit=300'),
-  SB.rpc('admin_top_news',{p_days:30}).catch(()=>[])]);
+ const [sug,rows,top]=await Promise.all([(IS_MOD()?SB.rpc('mod_news_suggestions',{}):SB.get('news_suggestions?select=*&status=eq.pending&order=created_at.asc')),SB.get('news?select=*&order=pinned.desc,publish_at.desc&limit=300'),
+  IS_MOD()?[]:SB.rpc('admin_top_news',{p_days:30}).catch(()=>[])]);
  const views=Object.fromEntries((top||[]).map(x=>[x.news_id,x.views]));const now=Date.now();
  box.innerHTML=(sug.length?`<h2>✍️ ${N.sugg} <span class="cnt">${sug.length}</span></h2>`+sug.map(s=>`<div class="row" data-sid="${s.id}"><h3>${esc(s.title)}</h3>
-   <div class="meta">${fmtDT(s.created_at)}${s.contact?' · 📞 '+esc(s.contact):''} · ${t('device')}: ${esc(String(s.device_id||'').slice(0,8))}</div><p class="pre">${esc(s.text)}</p>
+   <div class="meta">${fmtDT(s.created_at)}${s.contact?' · 📞 '+esc(s.contact):''}${s.device_id?' · '+t('device')+': '+esc(String(s.device_id).slice(0,8)):''}${flagChips(s)}</div><p class="pre">${esc(s.text)}</p>
    ${(s.photos||[]).length?`<div class="pgrid sm">${s.photos.map(u=>/^data:image\/(jpeg|webp);base64,/.test(u)?`<div class="ph"><img src="${esc(u)}" alt=""></div>`:'').join('')}</div>`:''}
    <div class="acts"><button class="b ok" data-a="tonews">${N.toNews}</button><button class="b no" data-a="rejected">${t('reject')}</button></div></div>`).join(''):'')
   +`<button class="b pri" id="addNews" style="margin:6px 0 10px">${N.addNews}</button><div id="edSlot"></div><h2>${N.list}</h2>`
@@ -435,12 +505,12 @@ async function vNews(box){
    <div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${esc(t('cats')[r.category]||'')} · ${sch?`<b class="sched">${N.scheduled} ${fmtDT(r.publish_at)}</b>`:fmtDT(r.publish_at)}
     ${(r.photos||[]).length?' · 🖼 '+r.photos.length:''}${r.video_url?' · ▶️':''}${views[r.id]?` · 👁 ${views[r.id]} ${N.views}`:''}${!r.title_kz||!r.title_ru?` · <span class="pill">${r.title_kz?'KZ':'RU'} only</span>`:''}</div>
    <div class="acts"><button class="b" data-a="edit">${t('edit')}</button>${r.status==='published'?`<button class="b" data-a="unpub">${N.unpublish}</button>`:`<button class="b ok" data-a="pub">${N.publish}</button>`}
-   <button class="b sec" data-a="pin">${r.pinned?N.unpin:N.pin}</button><button class="b no" data-a="del">${t('del')}</button></div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
+   <button class="b sec" data-a="pin">${r.pinned?N.unpin:N.pin}</button>${IS_MOD()?'':`<button class="b no" data-a="del">${t('del')}</button>`}</div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
  $('#addNews').onclick=()=>newsEditor($('#edSlot'),{});
  if(editing&&editing._news){const e=editing;editing=null;newsEditor($('#edSlot'),e)}
  box.querySelectorAll('.row[data-sid] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;const s=sug.find(x=>x.id==el.closest('.row').dataset.sid);
   try{if(a==='tonews'){newsEditor($('#edSlot'),{title_ru:s.title,body_ru:s.text,status:'draft',category:'other',suggestion_id:s.id,_sugPhotos:(s.photos||[]).filter(u=>/^data:image\//.test(u))});$('#edSlot').scrollIntoView({behavior:'smooth'});return}
-   await SB.update('news_suggestions','id=eq.'+s.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
+   if(IS_MOD())await SB.rpc('mod_news_suggestion_set',{p_id:s.id,p_status:a});else await SB.update('news_suggestions','id=eq.'+s.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
  box.querySelectorAll('.nrow').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
   try{if(a==='edit')return newsEditor(el.querySelector('.slot'),Object.assign({},r));
    if(a==='pub')await SB.update('news','id=eq.'+r.id,{status:'published'});
@@ -544,8 +614,8 @@ function openPw(){
 // заметная полоса «🔐 АДМИНКА · вы вошли как …» — только когда вошёл администратор
 function adminBar(on){const bar=$('#admbar');document.body.classList.toggle('in',!!on);
  if(!on){bar.hidden=true;bar.innerHTML='';document.title=t('docLogin');return}
- bar.innerHTML=`<b class="ab-t">🔐 ${t('barT')}</b><a class="ab-s" href="./">${t('toSite')}</a><button class="ab-lo" id="lo" type="button">${t('logout')}</button><button class="ab-pw" id="pwb" type="button" aria-haspopup="dialog">${t('pwBtn')}</button><button class="ab-rf" id="rfb" type="button" title="${t('refreshT')}" aria-label="${t('refreshT')}"><span aria-hidden="true">🔄</span><span class="ab-rt"> ${t('refresh')}</span></button><span class="ab-u"><span class="sep">· </span>${t('barAs')} <span class="ab-e" title="${esc(SB.email()||'')}">${esc(SB.email()||'')}</span></span>`;
- bar.hidden=false;document.title=t('docT');$('#hUser').textContent=SB.email()||'';  // полный email ещё и в шапке: в полосе на узком экране он может обрезаться
+ bar.innerHTML=`<b class="ab-t">${IS_MOD()?'🛡 '+t('barTM'):'🔐 '+t('barT')}</b><a class="ab-s" href="./">${t('toSite')}</a><button class="ab-lo" id="lo" type="button">${t('logout')}</button><button class="ab-pw" id="pwb" type="button" aria-haspopup="dialog">${t('pwBtn')}</button><button class="ab-rf" id="rfb" type="button" title="${t('refreshT')}" aria-label="${t('refreshT')}"><span aria-hidden="true">🔄</span><span class="ab-rt"> ${t('refresh')}</span></button><span class="ab-u"><span class="sep">· </span>${t('barAs')} <span class="ab-e" title="${esc(SB.email()||'')}">${esc(SB.email()||'')}</span></span>`;
+ bar.hidden=false;document.title=IS_MOD()?t('docTM'):t('docT');document.body.classList.toggle('mod',IS_MOD());$('#hUser').textContent=SB.email()||'';  // полный email ещё и в шапке: в полосе на узком экране он может обрезаться
 $('#lo').onclick=async()=>{await SB.signOut();boot()};$('#pwb').onclick=openPw;$('#rfb').onclick=()=>{const b=$('#rfb');b.disabled=true;location.replace(location.pathname+'?r='+Date.now()+'#tab='+tab)}}
 async function boot(){
  document.documentElement.lang=lang==='kz'?'kk':'ru';$('#hTitle').textContent=t('title');document.title=t('docLogin');
@@ -554,6 +624,8 @@ async function boot(){
  SB.handleRedirect();
  if(!SB.session()){$('#hUser').textContent='';adminBar(false);return vLogin()}
  let isAdm=false;try{isAdm=await SB.rpc('is_admin',{})}catch(e){}
+ ROLE='admin';if(!isAdm&&SB.session()){try{if(await SB.rpc('my_role',{})==='moderator'){isAdm=true;ROLE='moderator'}}catch(e){}}  // [siteO moderator] модератор тоже входит
+ if(!tabOk(tab))tab='pending';
  if(!SB.session()){adminBar(false);return vLogin()}
  $('#hUser').textContent=SB.email();
  if(!isAdm){adminBar(false);adm.innerHTML=`<div class="row">⛔ ${t('noAccess')}</div><button class="b" id="lo2">${t('logout')}</button>`;$('#lo2').onclick=async()=>{await SB.signOut();boot()};return}

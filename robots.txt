@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+
+User-agent: Yandex
+Allow: /
+Disallow: /admin.html
+Clean-param: source&lang /
+
 Sitemap: https://urker24.kz/sitemap.xml

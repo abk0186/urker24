@@ -7,7 +7,8 @@ const ADS_ON=!!(((window.URKER_CONFIG||{}).features||{}).ads);
 const D=window.URKER_DATA, SYN=window.URKER_SYNONYMS||{};
 const $=(s,r=document)=>r.querySelector(s);
 const app=$('#app');
-const detectLang=()=>{const s=localStorage.getItem('urker_lang');if(s==='kz'||s==='ru')return s;try{const l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);return l.some(x=>/^(kk|kz)\b/i.test(String(x)))?'kz':'ru'}catch(e){return 'ru'}};
+const detectLang=()=>{try{const u=new URL(location.href),q=u.searchParams.get('lang');if(q==='kz'||q==='ru'){localStorage.setItem('urker_lang',q);u.searchParams.delete('lang');history.replaceState(history.state,'',u.pathname+u.search+u.hash);return q}}catch(e){}  // ?lang=kz из статических страниц /kz/…
+ const s=localStorage.getItem('urker_lang');if(s==='kz'||s==='ru')return s;try{const l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);return l.some(x=>/^(kk|kz)\b/i.test(String(x)))?'kz':'ru'}catch(e){return 'ru'}};
 let lang=detectLang();
 
 const T={
@@ -488,8 +489,8 @@ function openReview(id){
  m.hidden=false;
  m.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{pick=+b.dataset.s;m.querySelectorAll('[data-s]').forEach(c=>c.classList.toggle('on',+c.dataset.s<=pick))});
  $('#rvc').onclick=()=>{m.hidden=true};m.onclick=ev=>{if(ev.target===m)m.hidden=true};
- if(LIVE)SB.get(`reviews_public?select=stars,text,author_name,created_at&specialist_id=eq.${+id}&order=created_at.desc&limit=30`).then(rows=>{
-   const rl=$('#rvlist');if(!rl)return;rl.innerHTML=rows.length?rows.map(v=>`<div class="rev">${stars(v.stars)} <b>${esc(v.author_name||'')}</b> ${esc(v.text||'')}</div>`).join(''):`<div class="rev">${t('noReviews')}</div>`})
+ if(LIVE)SB.get(`reviews_public?select=id,stars,text,author_name,created_at&specialist_id=eq.${+id}&order=created_at.desc&limit=30`).then(rows=>{
+   const rl=$('#rvlist');if(!rl)return;rl.innerHTML=rows.length?rows.map(v=>`<div class="rev" data-rid="${+v.id}">${stars(v.stars)} <b>${esc(v.author_name||'')}</b> ${esc(v.text||'')}</div>`).join(''):`<div class="rev">${t('noReviews')}</div>`})
   .catch(()=>{const rl=$('#rvlist');if(rl)rl.innerHTML=''});
  $('#rvf').onsubmit=ev=>{ev.preventDefault();if(!pick){toast(t('rvPick'));return}
   if(OFFLINE){toast(t('offlineForm'));return}

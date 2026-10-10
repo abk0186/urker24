@@ -131,3 +131,12 @@ body.admin.in .top{padding-top:8px;background:linear-gradient(135deg,#2c4f7c,#1e
 a.b.wa-share{display:inline-flex;align-items:center;text-decoration:none;min-height:44px;box-sizing:border-box}
 .row.just{background:#f2fbf5;border-color:#cfe9d8}
 .row.just .acts{margin-top:8px}
+/* 14_content_safety: автометки и жалобы */
+.pill.flag{background:#fff1e0;color:#9a4a00;border:1px solid #f3c48f;white-space:normal}
+.row.cmp{border-left:4px solid #e0a040}
+.row.cmp .acts a.b{text-decoration:none;display:inline-flex;align-items:center}
+/* [siteO moderator] полоса модератора — зелёная, чтобы не путать с админкой; форма «+ Добавить объявление» */
+body.mod .admbar{background:#1d5c45}
+body.mod .admbar button{color:#1d5c45}
+body.mod .admbar .ab-pw,body.mod .admbar .ab-rf{color:#fff}
+.nl-form{margin-bottom:12px}
