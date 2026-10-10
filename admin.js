@@ -1,5 +1,7 @@
 (function(){
 'use strict';
+// Защита от «кликджекинга»: админку нельзя открыть внутри чужой страницы (GitHub Pages не даёт поставить заголовок X-Frame-Options)
+if(window.top!==window.self){document.documentElement.style.display='none';try{window.top.location.replace(window.location.href)}catch(e){}return}
 const SB=window.SBCreate({auth:true}), D=window.URKER_DATA;
 // Выключатели разделов (config.js → features): вкладки и поля появляются после запуска 06 / 08 SQL
 // подсказки браузера при проверке форм — по-русски / по-казахски (а не на языке браузера)

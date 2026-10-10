@@ -155,7 +155,7 @@ const DEVICE=(matchMedia('(pointer:coarse)').matches||/Mobi|Android|iPhone|iPad/
 let firstView=true,lastPath='',lastSearch='',searchTimer=0;
 function track(kind,extra){if(!SB.enabled||STATS_OFF||OFFLINE)return;
  SB.beacon('track',Object.assign({p_kind:kind,p_visitor_id:visitorId(),p_lang:lang,p_device:DEVICE},extra||{}))}
-function trackView(){const path=(location.hash||'#/').replace(/^#/,'').split('?')[0].slice(0,120)||'/';if(path===lastPath)return;lastPath=path;
+function trackView(){const path=((location.hash||'#/').replace(/^#/,'').split('?')[0].replace(/^\/my\/.*/,'/my')).slice(0,120)||'/';if(path===lastPath)return;lastPath=path;
  let ref=null;if(firstView){try{const h=document.referrer?new URL(document.referrer).hostname:'';if(h&&h!==location.hostname)ref=h}catch(e){}firstView=false}
  track('view',{p_path:path,p_referrer:ref})}
 function trackSearch(q,n){clearTimeout(searchTimer);const qq=String(q||'').trim().toLowerCase();if(qq.length<2)return;
