@@ -175,3 +175,11 @@ body.mod .admbar .ab-pw,body.mod .admbar .ab-rf{color:#fff}
  body.ap-printing #apPrint{display:block}
  #apPrint .apx-t{min-width:0;font-size:10pt}#apPrint .apx-t tr{page-break-inside:avoid}#apPrint h3{page-break-after:avoid}
 }
+/* [siteT growth] «📞 Телефоны», «🗞 Уркер за неделю» */
+.row.hint{background:#f7fbff;border-left:4px solid #2f6fdb;font-size:14.5px;line-height:1.45}
+.dg-ctl{display:flex;flex-wrap:wrap;gap:10px 22px}.dg-ctl>div{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}.dg-ctl b{font-size:14px;margin-right:2px}
+.dg-o{display:inline-flex;align-items:center;gap:5px;min-height:40px;font-size:15px;cursor:pointer}
+.dg textarea{width:100%;min-height:340px;font:14.5px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;border:2px solid var(--line);border-radius:12px;padding:10px;resize:vertical;box-sizing:border-box}
+.dg-f{margin:4px 2px 8px;color:var(--muted)}
+.dg-acts{display:flex;flex-wrap:wrap;gap:8px}.dg-acts .b{min-height:46px;display:inline-flex;align-items:center;text-decoration:none}
+.row .meta small{overflow-wrap:anywhere;word-break:break-word}

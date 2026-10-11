@@ -83,7 +83,7 @@ const stBadge=s=>`<span class="ap-st st-${esc(s)}">${esc(t('apSt')[s]||s)}</span
 const catChip=c=>`<span class="ap-cat">${CE[c]||'📌'} ${esc(t('apCat')[c]||c)}</span>`;
 const supBtn=a=>{const on=supped(a.id),open=a.status!=='resolved';
  return `<button type="button" class="ap-sup ${on?'on':''}" data-sup="${a.id}" ${open?'':'disabled'} aria-pressed="${on}"><span>${on?t('apSupped'):t('apSup')}</span><b class="ap-sn">${+a.supports||0}</b></button>`};
-const shareHref=a=>{const link='https://urker24.kz/#/appeal/'+a.id;const d=String(a.description||'');
+const shareHref=a=>{const link='https://urker24.kz/a/'+a.id+'/';/* [siteT] страница с превью */const d=String(a.description||'');
  return 'https://wa.me/?text='+encodeURIComponent(`📢 ${t('apShareMsg')}: ${CE[a.category]||''} ${t('apCat')[a.category]||''} — ${addrTxt(a)}\n«${d.length>140?d.slice(0,140)+'…':d}»\n${link}`)};
 function apCard(a){const ph=(a.photos||[])[0];
  return `<article class="apc" id="ap${a.id}"><div class="apc-h">${catChip(a.category)}${stBadge(a.status)}</div>

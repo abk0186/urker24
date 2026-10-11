@@ -103,7 +103,7 @@ function viewList(sec){
  A.app.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{F.kind=b.dataset.lk;if(sec==='ads'&&!RENT(F.kind))F.cat='';viewList(sec)});
  A.app.querySelectorAll('[data-lc]').forEach(b=>b.onclick=()=>{F.cat=b.dataset.lc;viewList(sec)});
 }
-function contactBtns(l){const name=l.title;const wa=l.has_wa?`https://api.whatsapp.com/send?phone=${l.phone}&text=${encodeURIComponent(t('waGreetL').replace('{t}',()=>l.title).replace('{u}',()=>'https://urker24.kz/#/item/'+l.id))}`:'';
+function contactBtns(l){const name=l.title;const wa=l.has_wa?`https://api.whatsapp.com/send?phone=${l.phone}&text=${encodeURIComponent(t('waGreetL').replace('{t}',()=>l.title).replace('{u}',()=>'https://urker24.kz/i/'+l.id+'/'))}`:'';
  return `<div class="actions lact"><a class="btn wa ${wa?'':'off'}" ${wa?`href="${wa}" target="_blank" rel="noopener"`:'aria-disabled="true"'} aria-label="${esc(t('wa'))}">${A.WA_SVG}<span>${t('waS')}</span></a>
   <a class="btn call" href="tel:+${esc(l.phone)}" aria-label="${esc(t('call'))}: ${esc(fmtPhone(l.phone))}">📞 <span>${t('callS')}</span></a></div>`}
 async function viewItem(id){
@@ -111,7 +111,7 @@ async function viewItem(id){
  if(!l&&SB.enabled){try{const r=await SB.get(`listings?select=${COLS}&id=eq.${encodeURIComponent(id)}`,6000);l=r&&r[0]}catch(e){}}
  if(!l){A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="history.length>1?history.back():location.hash='#/'">←</button><h1>🗂</h1></div><div class="empty"><h2>${t('lNotFound')}</h2><a class="btn primary" href="#/bazar">${t('lSec').market}</a></div>`;return}
  const S=SECT[l.section];const photos=(l.photos||[]).map(photoUrl).filter(Boolean);const pr=fmtPrice(l);const closed=l.status==='closed';
- const link=location.origin+location.pathname+'#/item/'+l.id;
+ const link='https://urker24.kz/i/'+l.id+'/';  // [siteT] страница с превью для WhatsApp
  A.setMeta(l.title+' — '+t('lSec')[l.section]+' · Уркер 24',(l.body||'').slice(0,150));
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/${ROUTE[l.section]}'" aria-label="${t('back')}">←</button><h1 class="sm">${S.e} ${t('lSec')[l.section]}</h1></div>
  <article class="article litem">
@@ -250,7 +250,7 @@ function viewMy(){A.setMeta(t('pMy')+' — Уркер 24','');const a=my();
    const m=my().find(x=>x.id===s.id);if(m&&m.title!==s.title){ch=true;row.querySelector('b').textContent=s.title}});
   if(ch)saveMy(my().map(x=>{const r=res.find(y=>y.id===x.id&&!y.gone);return r?Object.assign(x,{title:r.title}):x}))}).catch(()=>{})}
 function viewMenu(){A.setMeta(t('menuTitle')+' — Уркер 24','');
- const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(window.URKER_AP?[['#/appeals','📢',t('apTitle'),t('apMenuD')]]:[]),...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
+ const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(window.URKER_AP?[['#/appeals','📢',t('apTitle'),t('apMenuD')]]:[]),...(window.URKER_PH?[['#/phones','📞',t('phTitle'),t('phMenuD')]]:[]),...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
   ['#/news','📰',t('menuNews'),t('menuNewsD')],['#/ann','⚠️',t('menuAlerts'),t('menuAlertsD')],...(ON?[['#/my','🔑',t('pMy'),'']]:[]),['#/add','➕',t('menuAddBiz'),''],['#/report','📣',t('repTitle'),''],['#/install','📲',t('pwaMenu')||'',''],['#/search','🔍',t('navSearch'),'']];
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>☰ ${t('menuTitle')}</h1></div>
  <div class="mlist">${items.map(([h,e,ti,d])=>`<a class="mrow" href="${h}"><span>${e}</span><b>${esc(ti)}</b>${d?`<small>${esc(d)}</small>`:''}</a>`).join('')}</div>`}

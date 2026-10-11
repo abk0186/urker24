@@ -265,7 +265,7 @@ const searchBox=(q='')=>`<section class="hero"><h2>${t('searchTitle')}</h2><div 
 function renderResults(q){
  const box=$('#results'),home=$('#homeBody');const r=search(q);
  if(!r){clearTimeout(searchTimer);box.innerHTML='';if(home)home.hidden=false;return}
- const ls0=window.URKER_L?URKER_L.searchHtml(q):{n:0,html:''},ap0=window.URKER_AP?URKER_AP.searchHtml(q):{n:0,html:''};const ls={n:ls0.n+ap0.n,html:ap0.html+ls0.html};  // [siteQ appeals]
+ const ls0=window.URKER_L?URKER_L.searchHtml(q):{n:0,html:''},ap0=window.URKER_AP?URKER_AP.searchHtml(q):{n:0,html:''},ph0=window.URKER_PH?URKER_PH.searchHtml(q):{n:0,html:''};const ls={n:ls0.n+ap0.n+ph0.n,html:ph0.html+ap0.html+ls0.html};  // [siteT phones]  // [siteQ appeals]
  trackSearch(q,r.list.length+annSearch(q).length+newsSearch(q).length+ls.n);
  if(home)home.hidden=true;
  const nw=newsSearch(q);const newsHtml=nw.length?`<div class="sugg-l">📰 ${t('newsFound')}: ${nw.length}</div>${nw.slice(0,3).map(n=>newsCard(n,true)).join('')}`:'';
@@ -321,7 +321,7 @@ function viewAnn(focusId){
  const list=annSorted().filter(a=>!annFilter||a.type===annFilter);
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>📣 ${t('annTitle')}</h1></div>
  <div class="chips"><button class="${annFilter?'':'on'}" data-af="">${t('all')}</button>${Object.entries(ANN_TYPES).map(([k,v])=>`<button class="${annFilter===k?'on':''}" data-af="${k}">${v.ic} ${t('annTypes')[k]}</button>`).join('')}</div>
- ${list.length?list.map(a=>`<div id="a${a.id}">${annCard(a,false)}</div>`).join(''):annEmpty()}
+ ${list.length?list.map((a,i)=>`${!annActive(a)&&(i===0||annActive(list[i-1]))?`<h2 class="ann-done-h">${t('annDoneH')}</h2>`:''}<div id="a${a.id}">${annCard(a,false)}</div>`).join(''):annEmpty()}
  <a class="btn primary" style="margin:8px 0 6px" href="#/report">${t('annReport')}</a>`;
  app.querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{annFilter=b.dataset.af;viewAnn()});
  if(focusId&&ANN.some(a=>String(a.id)===String(focusId)))countView('ann',focusId);
@@ -388,7 +388,7 @@ function viewArticle(id){
  countView('news',n.id);
  const ti=LT(n.title),le=LT(n.lead),bo=LT(n.body),fb=ti.fb||bo.fb||le.fb;
  const photos=(n.photos||[]).filter(Boolean);
- const link=location.origin+location.pathname+'#/news/'+n.id;
+ const link='https://urker24.kz/n/'+n.id+'/';  // [siteT] страница с превью для WhatsApp
  const msg=`📰 ${ti.text}\n${le.text?le.text+'\n':''}${link}`;
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/news'" aria-label="${t('back')}">←</button><h1 class="sm">📰 ${t('newsTitle')}</h1></div>
  <article class="article">
@@ -429,9 +429,20 @@ function viewSuggest(){
 }
 
 // ---------- views ----------
+// [siteT] «⚠️ Отключения»: на главной только актуальные (идут сейчас или начнутся в ближайшие 2 суток); после окончания исчезают сами
+const OUT_SOON=48*3600e3;
+function outList(){const now=Date.now();return annSorted().filter(a=>annActive(a)&&a.start&&annDate(a.start).getTime()-now<OUT_SOON)}
+const outNow=a=>annDate(a.start).getTime()<=Date.now();
+function outAlert(){const l=outList();if(!l.length)return '';
+ return `<section class="out-alert" aria-labelledby="outH"><div class="out-h"><h2 id="outH">⚠️ ${t('outHead')}</h2><a href="#/ann">${t('outAll')}</a></div>
+ ${l.slice(0,3).map(a=>{const ty=ANN_TYPES[a.type]||ANN_TYPES.other;const nw=outNow(a);return `<a class="out-r ${a.urgent?'urg':''}" href="#/ann/${a.id}" style="--tc:${ty.c}"><span class="out-ic" aria-hidden="true">${ty.ic}</span><span class="out-b"><b>${esc(L(a.title))}</b><small>🕒 ${esc(annWhen(a))}</small><small class="out-a">📍 ${esc(L(a.area))}</small></span><span class="out-st ${nw?'now':''}">${nw?'● '+t('outNow'):t('outSoon')}</span></a>`}).join('')}
+ ${l.length>3?`<a class="out-more" href="#/ann">+ ${l.length-3}</a>`:''}</section>`}
+function pinRow(){const l=outList(),n=l.filter(outNow).length,m=l.length-n;
+ return `<div class="pin2"><a class="pin-t pin-o ${n||m?'on':''}" href="#/ann"><span class="pin-i" aria-hidden="true">⚠️</span><span class="pin-b"><b>${t('outT')}</b><small>${n?t('outN')(n):m?t('outSoonN')(m):'✅ '+t('outNone')}</small></span></a>
+ <a class="pin-t pin-p" href="#/phones"><span class="pin-i" aria-hidden="true">📞</span><span class="pin-b"><b>${t('phTitle')}</b><small>${t('phHome')}</small></span></a></div>`}
 function viewHome(q=''){
  app.innerHTML=`${searchBox(q)}<div id="results"></div>
- <div id="homeBody">${window.URKER_AP?URKER_AP.homeBlock():''}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${annBlock()}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
+ <div id="homeBody">${outAlert()}${window.URKER_AP?URKER_AP.homeBlock():''}${pinRow()}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
   return `<a class="tile" href="#/c/${s.id}"><span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}</div></div>`;
  bindSearch();
 }
@@ -570,6 +581,7 @@ function route(){setMeta();setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trac
  else if(h.startsWith('#/search')){const q=decodeURIComponent((h.split('q=')[1]||''));viewHome(q);nav='home';const i=$('#q');if(i&&!q)i.focus()}
  else if(h.startsWith('#/install')&&window.URKER_PWA){URKER_PWA.view();nav='menu'}
  else if(window.URKER_AP&&URKER_AP.route(h)){nav='home'}  // [siteQ appeals] #/appeals, #/appeals/new, #/appeal/<id>
+ else if(window.URKER_PH&&URKER_PH.route(h)){nav='menu'}  // [siteT phones] #/phones
  else{const ln=window.URKER_L&&URKER_L.route(h);if(ln)nav=ln;else viewHome()}
  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav));
  if(!h.startsWith('#/search'))window.scrollTo(0,0);
@@ -606,7 +618,7 @@ async function loadBackend(){
    get('ads?select=*&order=sort_order.asc',15000).catch(()=>null),
    get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',15000).catch(()=>null),
    SB.rpc('content_view_counts',{},10000).catch(()=>null)]);
-  await Promise.all([window.URKER_L?URKER_L.load().catch(e=>console.warn('listings',e&&e.message)):null,window.URKER_AP?URKER_AP.load().catch(()=>{}):null]);  // [siteQ appeals]
+  await Promise.all([window.URKER_L?URKER_L.load().catch(e=>console.warn('listings',e&&e.message)):null,window.URKER_AP?URKER_AP.load().catch(()=>{}):null,window.URKER_PH?URKER_PH.load().catch(()=>{}):null]);  // [siteQ appeals] [siteT phones]
   if(!Array.isArray(sp)||!sp.length)throw new Error('empty');
   D.entries=sp.filter(r=>subById[r.sub_id]).map(mapSpec);
   ANN=Array.isArray(an)?an.filter(r=>!r.is_demo).map(mapAnn):[];ADS=Array.isArray(ad)?ad:[];NEWS=Array.isArray(nw)?nw.filter(r=>!r.is_demo).map(mapNews):[];

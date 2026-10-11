@@ -67,7 +67,7 @@ Object.assign(T.ru,{shareA:'📲 Отправить автору',shareT:'Отп
 Object.assign(T.kz,{shareA:'📲 Авторға жіберу',shareT:'Авторға сілтемені WhatsApp-қа жіберу',approvedL:'✅ Хабарландыру мақұлданды',approvedC:'✅ Карточка мақұлданды',closeX:'Жабу'});
 // «📲 Отправить автору»: поздравление KZ + RU со ссылкой на опубликованное (без секретного токена автора)
 const PUB='https://urker24.kz/';
-const pubLink=(kind,r)=>kind==='l'?PUB+'#/item/'+r.id:PUB+'#/c/'+encodeURIComponent(r.section_id)+'/'+encodeURIComponent(r.sub_id)+'/'+r.id;
+const pubLink=(kind,r)=>kind==='l'?PUB+'i/'+r.id+'/':PUB+'#/c/'+encodeURIComponent(r.section_id)+'/'+encodeURIComponent(r.sub_id)+'/'+r.id;
 function shareUrl(kind,r){
  if(!r||r.status!=='approved')return '';
  const ph=kind==='l'?(/^7\d{10}$/.test(String(r.phone||''))?String(r.phone):null):(normWa(r.wa)||normWa(r.phone));
@@ -100,7 +100,7 @@ const fromLocalInput=v=>v?v+':00+05:00':null;
 const normWa=p=>{const d=String(p||'').replace(/\D/g,'');if(/^8\d{10}$/.test(d)&&!/^8800/.test(d))return '7'+d.slice(1);if(/^7\d{10}$/.test(d))return d;return null};
 let tab='stats',editing=null,filterQ='',CACHE={};
 // [siteO moderator] роль «модератор» (14_moderator.sql): вкладки Заявки, Объявления жителей, Новости, Отзывы, Сообщения; данные — через mod_*
-let ROLE='admin';const IS_MOD=()=>ROLE==='moderator';const MOD_TABS=['pending','appeals','listings','news','reviews','reports','ann'];const tabOk=k=>!IS_MOD()||MOD_TABS.includes(k);
+let ROLE='admin';const IS_MOD=()=>ROLE==='moderator';const MOD_TABS=['pending','appeals','listings','news','reviews','reports','ann','phones','digest'];const tabOk=k=>!IS_MOD()||MOD_TABS.includes(k);
 Object.assign(T.ru,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Уркер',addL:'+ Добавить объявление',newL:'Новое объявление',evDate:'Когда потеряли / нашли',photosL:'Фото (до 5)',lcreated:'✅ Объявление опубликовано',publishL:'Опубликовать',priceFixed:'цена',noPrice:'без цены',uploadingL:'Загрузка фото…',
  lerr:{invalid_phone:'Проверьте телефон: нужен номер вида 8 701 123 45 67',bad_title:'Заголовок — не короче 3 символов',bad_price:'Укажите цену цифрами',bad_kind:'Выберите тип и категорию'}});
 Object.assign(T.kz,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Үркер',addL:'+ Хабарландыру қосу',newL:'Жаңа хабарландыру',evDate:'Қашан жоғалды / табылды',photosL:'Фото (5-ке дейін)',lcreated:'✅ Хабарландыру жарияланды',publishL:'Жариялау',priceFixed:'баға',noPrice:'бағасыз',uploadingL:'Фото жүктелуде…',
@@ -115,6 +115,9 @@ Object.assign(T.kz,{lEdit:'✏️ Өңдеу',lEditT:'Хабарландыруд
 // [siteQ appeals] «📢 Обращения жителей»: вкладка для админа и модератора (20_appeals.sql, функции mod_appeal_*)
 {const ins=(o,v)=>{const r={};for(const [a,b] of Object.entries(o)){r[a]=b;if(a==='pending')r.appeals=v}if(!r.appeals)r.appeals=v;return r};
  T.ru.tabs=ins(T.ru.tabs,'📢 Обращения');T.kz.tabs=ins(T.kz.tabs,'📢 Өтініштер');T.ru.nb.appeals='Обращения жителей';T.kz.nb.appeals='Тұрғындар өтініштері'}
+// [siteT growth] «Объявления» (announcements) теперь «⚠️ Отключения»; новые вкладки «📞 Телефоны» и «🗞 Уркер за неделю»
+{const ins=(o,v)=>{const r={};for(const [a,b] of Object.entries(o)){r[a]=b;if(a==='ann')Object.assign(r,v)}if(!('phones' in r))Object.assign(r,v);return r};
+ T.ru.tabs=ins(Object.assign(T.ru.tabs,{ann:'⚠️ Отключения'}),{phones:'📞 Телефоны',digest:'🗞 Уркер за неделю'});T.kz.tabs=ins(Object.assign(T.kz.tabs,{ann:'⚠️ Өшірулер'}),{phones:'📞 Телефондар',digest:'🗞 Апта қорытындысы'})}
 const AP_T={ru:{st:{pending:'на проверке',new:'опубликовано · новое',sent:'передано в акимат',in_work:'в работе',resolved:'решено',rejected:'отклонено'},
   stF:{pending:'На проверке',new:'Новые',sent:'В акимате',in_work:'В работе',resolved:'Решено',rejected:'Отклонено','':'Все'},
   cat:{light:'Освещение',trash:'Мусор и вывоз',roads:'Дороги и ямы',water:'Вода и канализация',heat:'Отопление и газ',yard:'Благоустройство, дворы, детские площадки',dogs:'Бездомные собаки',safety:'Безопасность',transport:'Транспорт',other:'Другое'},
@@ -448,7 +451,7 @@ async function render(){
  if(my===NB_SEQ)applyCounts(c);else applyCounts(NB_C);
  {const tb=adm.querySelector('.tabs'),on=tb&&tb.querySelector('button.on');if(on&&(on.offsetLeft+on.offsetWidth>tb.scrollLeft+tb.clientWidth||on.offsetLeft<tb.scrollLeft))tb.scrollLeft=Math.max(0,on.offsetLeft-12)}
  adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';JUST=null;render()});
- try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,cards:vCards,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims,appeals:vAppeals})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
+ try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,cards:vCards,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims,appeals:vAppeals,phones:vPhones,digest:vDigest})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
 }
 const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
 function bindSpecEditor(box,row,onDone){
@@ -542,22 +545,88 @@ async function vReports(box){
     toast(Array.isArray(res)&&res.length?t('cHidden'):t('cGone'));return render()}
    if(IS_MOD())await SB.rpc('mod_report_set',{p_id:r.id,p_status:a});else await SB.update('reports','id=eq.'+r.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
 }
-function crud(table,spec,rowsHtml){return async function(box){
- const rows=await SB.get(table+'?select=*&order=created_at.desc&limit=200');
+function crud(table,spec,rowsHtml,opt){opt=opt||{};return async function(box){  // [siteT] opt: order, defaults, prep
+ const rows=await SB.get(table+'?select=*&order='+(opt.order||'created_at.desc')+'&limit=200');
  box.innerHTML=`<button class="b pri" id="addRow" style="margin-bottom:10px">${t('add')}</button><div id="edSlot"></div>`+(rows.length?rows.map(r=>`<div class="row" data-id="${r.id}">${rowsHtml(r)}
   <div class="acts"><button class="b" data-a="edit">${t('edit')}</button>${IS_MOD()?'':`<button class="b no" data-a="del">${t('del')}</button>`}</div><div class="slot"></div></div>`).join(''):`<div class="row">${t('empty')}</div>`);
  const open=(slot,row)=>{slot.innerHTML=editor(spec(),row);const f=slot.querySelector('[data-ed]');f.onclick=async ev=>{const a=ev.target.dataset.act;if(!a)return;ev.preventDefault();
    if(a==='cancel'){editing=null;return render()}
-   const v=collect(f,spec());if('wa' in v)v.wa=normWa(v.wa);
-   try{if(row.id)await SB.update(table,'id=eq.'+row.id,v);else{if(row.report_id)v.report_id=row.report_id;await SB.insert(table,v);if(row.report_id)await (IS_MOD()?SB.rpc('mod_report_set',{p_id:row.report_id,p_status:'done'}):SB.update('reports','id=eq.'+row.report_id,{status:'done'}))}
+   let v=collect(f,spec());if('wa' in v)v.wa=normWa(v.wa);
+   try{if(opt.prep)v=opt.prep(v);if(row.id)await SB.update(table,'id=eq.'+row.id,v);else{if(row.report_id)v.report_id=row.report_id;await SB.insert(table,v);if(row.report_id)await (IS_MOD()?SB.rpc('mod_report_set',{p_id:row.report_id,p_status:'done'}):SB.update('reports','id=eq.'+row.report_id,{status:'done'}))}
     editing=null;toast(t('saved'));render()}catch(e){toast(e.message)}}};
- $('#addRow').onclick=()=>open($('#edSlot'),{});
+ $('#addRow').onclick=()=>open($('#edSlot'),Object.assign({},opt.defaults));
  if(editing){open($('#edSlot'),editing);editing=null}
  box.querySelectorAll('.row[data-id]').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;
   if(a==='edit')return open(el.querySelector('.slot'),r);
   if(a==='del'&&!IS_MOD()&&confirm(t('confirmDel'))){try{await SB.remove(table,'id=eq.'+r.id);toast(t('deleted'));render()}catch(e){toast(e.message)}}}});
 }}
-const vAnn=crud('announcements',ANN_SPEC,r=>`<h3>${r.urgent?'❗ ':''}${esc(t('types')[r.type])} · ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${fmtDT(r.start_at)} — ${fmtDT(r.end_at)} · ${esc(r.area_ru)}</div>`);
+const vAnn=crud('announcements',ANN_SPEC,r=>`<h3>${r.urgent?'❗ ':''}${esc(t('types')[r.type])} · ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${fmtDT(r.start_at)} — ${fmtDT(r.end_at)} · ${esc(r.area_ru)}</div>`,{defaults:{status:'published',type:'power'}});
+// ---------- [siteT growth] «📞 Телефоны» и «🗞 Уркер за неделю» (21_growth.sql) ----------
+Object.assign(T.ru.f,{grp:'Группа',note_ru:'Пояснение (RU)',note_kz:'Пояснение (KZ)',phone2:'Второй номер (необязательно)',active:'✅ Показывать на сайте',source_url:'Откуда номер (ссылка на официальный источник)'});
+Object.assign(T.kz.f,{grp:'Топ',note_ru:'Түсініктеме (RU)',note_kz:'Түсініктеме (KZ)',phone2:'Екінші нөмір (міндетті емес)',active:'✅ Сайтта көрсету',source_url:'Нөмір қайдан алынды (ресми дереккөзге сілтеме)'});
+const PH_T={ru:{grp:{emergency:'🚨 Экстренные службы',utility:'🔧 Коммунальные и аварийные',police:'👮 Участковый',akimat:'🏛 Акимат',osi:'🏘 ОСИ / КСК',con:'📄 ЦОН и госуслуги',clinic:'🏥 Поликлиника',school:'🏫 Школа',kindergarten:'🧸 Детские сады',other:'📌 Другое'},
+  hint:'Номера видны на сайте в разделе «📞 Полезные телефоны». Добавляйте только номера с официальных сайтов или проверенные лично. Телефон — только цифры: 112, 87172620438 или 87012681101. Чтобы убрать номер с сайта, снимите галочку «Показывать на сайте».',
+  off:'скрыт',bad:'Проверьте номер: только цифры, от 3 до 11 (например 112 или 87012681101)',badT:'Укажите название (RU)'},
+ kz:{grp:{emergency:'🚨 Шұғыл қызметтер',utility:'🔧 Коммуналдық және апаттық',police:'👮 Учаскелік',akimat:'🏛 Әкімдік',osi:'🏘 ПИК / ТҮБ',con:'📄 ХҚКО және мемлекеттік қызметтер',clinic:'🏥 Емхана',school:'🏫 Мектеп',kindergarten:'🧸 Балабақшалар',other:'📌 Басқа'},
+  hint:'Нөмірлер сайттағы «📞 Пайдалы телефондар» бөлімінде көрінеді. Тек ресми сайттардағы немесе өзіңіз тексерген нөмірлерді қосыңыз. Телефон — тек цифрлар: 112, 87172620438 немесе 87012681101. Нөмірді сайттан алу үшін «Сайтта көрсету» белгісін алып тастаңыз.',
+  off:'жасырылған',bad:'Нөмірді тексеріңіз: тек цифрлар, 3-тен 11-ге дейін (мысалы 112 немесе 87012681101)',badT:'Атауын көрсетіңіз (RU)'}};
+const PT=()=>PH_T[lang];
+const PHONE_SPEC=()=>[['grp','select',Object.keys(PH_T.ru.grp).map(k=>[k,PT().grp[k]])],['active','bool'],['title_ru',null,{full:true}],['title_kz',null,{full:true}],['note_ru','text'],['note_kz','text'],
+ ['phone'],['phone2'],['wa'],['sort_order','num'],['source_url',null,{full:true}]];
+const fmtPh=p=>{p=String(p||'');return p.length===11?p.replace(/^(\d)(\d{3})(\d{3})(\d{2})(\d{2})$/,'$1 $2 $3 $4 $5'):p};
+const vPhonesList=crud('phones',PHONE_SPEC,r=>`<h3>${esc(PT().grp[r.grp]||r.grp)} · ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${r.active?'':`<span class="pill hidden">${esc(PT().off)}</span> `}📞 ${esc(fmtPh(r.phone))}${r.phone2?' · '+esc(fmtPh(r.phone2)):''}${r.wa?' · WhatsApp':''} · ${esc(t('f').sort_order)}: ${+r.sort_order||0}${r.source_url?`<br><small>${esc(r.source_url)}</small>`:''}</div>`,
+ {order:'grp.asc,sort_order.asc,id.asc',defaults:{active:true,grp:'utility',sort_order:100},prep:v=>{v.phone=String(v.phone||'').replace(/\D/g,'');v.phone2=String(v.phone2||'').replace(/\D/g,'');v.wa=v.wa||'';if(!v.wa&&/^87\d{9}$/.test(v.phone))v.wa='7'+v.phone.slice(1);
+   if(!/^\d{3,11}$/.test(v.phone)||(v.phone2&&!/^\d{3,11}$/.test(v.phone2)))throw new Error(PT().bad);if(!String(v.title_ru||'').trim())throw new Error(PT().badT);for(const k of ['title_kz','note_ru','note_kz','source_url'])v[k]=String(v[k]||'').trim();v.title_ru=String(v.title_ru).trim();return v}});
+async function vPhones(box){await vPhonesList(box);box.insertAdjacentHTML('afterbegin',`<div class="row hint">${esc(PT().hint)}</div>`)}
+
+// «🗞 Уркер за неделю / Апта қорытындысы»: текст для чатов района из mod_digest()
+const DG_T={ru:{intro:'Короткая сводка для чатов района: новые мастера, лучшие объявления, новости, отключения и обращения. Проверьте текст, при желании поправьте — и отправьте в WhatsApp.',
+  per:'Период',d7:'7 дней',d14:'14 дней',lng:'Язык',both:'RU + KZ',ru:'Только RU',kz:'Только KZ',top:'Объявлений из раздела',make:'🔄 Собрать заново',copy:'📋 Скопировать',wa:'💬 Открыть WhatsApp',copied:'Скопировано',chars:n=>`${n} символов`,
+  long:'Длинный текст хуже читают в чатах — можно отправить RU и KZ отдельными сообщениями',empty:'За этот период ничего нового — попробуйте 14 дней'},
+ kz:{intro:'Аудан чаттарына арналған қысқа шолу: жаңа шеберлер, үздік хабарландырулар, жаңалықтар, өшірулер және өтініштер. Мәтінді тексеріп, қажет болса түзетіңіз — содан кейін WhatsApp-қа жіберіңіз.',
+  per:'Кезең',d7:'7 күн',d14:'14 күн',lng:'Тіл',both:'RU + KZ',ru:'Тек RU',kz:'Тек KZ',top:'Әр бөлімнен хабарландыру',make:'🔄 Қайта жинау',copy:'📋 Көшіру',wa:'💬 WhatsApp ашу',copied:'Көшірілді',chars:n=>`${n} таңба`,
+  long:'Ұзын мәтінді чатта нашар оқиды — RU және KZ нұсқаларын бөлек жіберуге болады',empty:'Бұл кезеңде жаңалық жоқ — 14 күнді қолданып көріңіз'}};
+const DGX={
+ ru:{h:(a,b)=>`🗞 Уркер за неделю (${a} — ${b})`,h14:(a,b)=>`🗞 Уркер за две недели (${a} — ${b})`,spec:n=>`🧰 Новые мастера на сайте: ${n}`,sec:{market:'🛍 Барахолка',ads:'📋 Объявления',lost:'🐾 Потеряшки'},more:n=>`…и ещё ${n}`,
+  news:'📰 Новости района',ann:'⚠️ Отключения и важное',ap:'📢 Обращения жителей',apL:(n,t,r,rp)=>`новых: ${n} · всего: ${t} · решено: ${r}${rp?` (за период: ${rp})`:''}`,apS:n=>`поддержали соседи: ${n} раз`,
+  free:'даром',neg:'договорная',cta:'👉 Мастера, барахолка, новости и отключения района Уркер — в одном месте:',cta2:'Подать объявление или сообщить о проблеме — бесплатно. Сохраните сайт на главный экран 📲',months:['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']},
+ kz:{h:(a,b)=>`🗞 Үркер: апта қорытындысы (${a} — ${b})`,h14:(a,b)=>`🗞 Үркер: екі апта қорытындысы (${a} — ${b})`,spec:n=>`🧰 Сайттағы жаңа шеберлер: ${n}`,sec:{market:'🛍 Барахолка',ads:'📋 Хабарландырулар',lost:'🐾 Жоғалғандар'},more:n=>`…тағы ${n}`,
+  news:'📰 Аудан жаңалықтары',ann:'⚠️ Өшірулер және маңызды',ap:'📢 Тұрғындар өтініштері',apL:(n,t,r,rp)=>`жаңа: ${n} · барлығы: ${t} · шешілді: ${r}${rp?` (кезеңде: ${rp})`:''}`,apS:n=>`көршілер ${n} рет қолдады`,
+  free:'тегін',neg:'келісім бойынша',cta:'👉 Үркер ауданының шеберлері, барахолка, жаңалықтар мен өшірулер — бір жерде:',cta2:'Хабарландыру беру немесе мәселе туралы хабарлау — тегін. Сайтты басты экранға сақтаңыз 📲',months:['қаңтар','ақпан','наурыз','сәуір','мамыр','маусым','шілде','тамыз','қыркүйек','қазан','қараша','желтоқсан']}};
+let DG={days:7,lng:'both',top:3,data:null};
+const almaty=iso=>{const d=new Date(new Date(iso).getTime()+5*3600e3);return {y:d.getUTCFullYear(),m:d.getUTCMonth(),d:d.getUTCDate(),hm:d.toISOString().slice(11,16)}};
+function digestText(o,lg,top){const X=DGX[lg],out=[],day=iso=>{const a=almaty(iso);return `${a.d} ${X.months[a.m]}`};
+ const nm=(ru,kz)=>lg==='kz'?(kz||ru):(ru||kz);
+ out.push((DG.days>7?X.h14:X.h)(day(o.since),day(o.now)));
+ const sp=o.specialists||[];if(sp.length){out.push('',X.spec(sp.length));
+  sp.filter(s=>String(s.name||'').trim()).slice(0,5).forEach(s=>{const sec=D.sections.find(x=>x.id===s.section_id),sub=subs(s.section_id).find(x=>x.id===s.sub_id);const st=sub&&!sub.implicit?(lg==='kz'?sub.title_kz:sub.title):(sec?(lg==='kz'?sec.title_kz:sec.title_ru):'');out.push(`• ${s.name}${st?' — '+st:''}`)});
+  if(sp.length>5)out.push(X.more(sp.length-5))}
+ const pr=l=>l.price_mode==='free'?X.free:l.price_mode==='negotiable'?X.neg:(l.price?Number(l.price).toLocaleString('ru-RU').replace(/\u00a0/g,' ')+' ₸':'');
+ for(const sec of ['market','ads','lost']){const ls=(o.listings||[]).filter(l=>l.section===sec);if(!ls.length)continue;out.push('',X.sec[sec]+(ls.length>top?` (${ls.length})`:''));
+  ls.slice(0,top).forEach(l=>{let p=pr(l);if(p&&/\d[\d\s]*₸/.test(l.title))p='';out.push(`• ${l.title}${p?' — '+p:''}`,`  ${PUB}i/${l.id}/`)})}
+ const nw=o.news||[];if(nw.length){out.push('',X.news);nw.slice(0,5).forEach(n=>out.push(`• ${nm(n.title_ru,n.title_kz)}`,`  ${PUB}n/${n.id}/`))}
+ const an=(o.ann||[]).filter(a=>!a.end_at||new Date(a.end_at)>new Date());if(an.length){out.push('',X.ann);an.slice(0,5).forEach(a=>{const ic={power:'⚡',water:'💧',gas:'🔥',repair:'🚧'}[a.type]||'📌';let w='';
+   if(a.start_at){const s=almaty(a.start_at),e=a.end_at?almaty(a.end_at):null;w=`${s.d} ${X.months[s.m]}, ${s.hm}`+(e?(e.d===s.d&&e.m===s.m?`–${e.hm}`:` — ${e.d} ${X.months[e.m]}, ${e.hm}`):'')}
+   const tt=nm(a.title_ru,a.title_kz);if(/\d{1,2}:\d{2}/.test(tt))w='';out.push(`• ${ic} ${tt}${w?' — '+w:''}`)});out.push(`  ${PUB}#/ann`)}
+ const ap=o.appeals||{};if(+ap.total||+ap.new_period){out.push('',X.ap,X.apL(+ap.new_period||0,+ap.total||0,+ap.resolved_total||0,+ap.resolved_period||0));if(+ap.supports_period)out.push(X.apS(+ap.supports_period));out.push(`  ${PUB}#/appeals`)}
+ out.push('',X.cta,PUB,X.cta2);return out.join('\n')}
+const dgEmpty=o=>!((o.specialists||[]).length||(o.listings||[]).length||(o.news||[]).length||(o.ann||[]).length||+(o.appeals||{}).new_period);
+async function vDigest(box){const G=DG_T[lang];
+ if(!DG.data||DG.data._days!==DG.days){DG.data=await SB.rpc('mod_digest',{p_days:DG.days});DG.data._days=DG.days}
+ const o=DG.data;const txt=DG.lng==='both'?digestText(o,'ru',DG.top)+'\n\n— — —\n\n'+digestText(o,'kz',DG.top):digestText(o,DG.lng,DG.top);
+ const opt=(n,v,l)=>`<label class="dg-o"><input type="radio" name="${n}" value="${v}" ${String(DG[n])===String(v)?'checked':''}> ${esc(l)}</label>`;
+ box.innerHTML=`<div class="row hint">${esc(G.intro)}</div>
+ <div class="row dg-ctl"><div><b>${esc(G.per)}</b>${opt('days',7,G.d7)}${opt('days',14,G.d14)}</div><div><b>${esc(G.lng)}</b>${opt('lng','both',G.both)}${opt('lng','ru',G.ru)}${opt('lng','kz',G.kz)}</div>
+  <div><b>${esc(G.top)}</b>${opt('top',3,'3')}${opt('top',5,'5')}</div></div>
+ ${dgEmpty(o)?`<div class="row">ℹ️ ${esc(G.empty)}</div>`:''}
+ <div class="row dg"><textarea id="dgText" rows="18" spellcheck="false" aria-label="${esc(t('tabs').digest)}">${esc(txt)}</textarea>
+  <div class="dg-f"><small id="dgN"></small></div>
+  <div class="acts dg-acts"><button class="b pri" id="dgCopy">${esc(G.copy)}</button><a class="b ok" id="dgWa" target="_blank" rel="noopener" href="#">${esc(G.wa)}</a><button class="b" id="dgRe">${esc(G.make)}</button></div></div>`;
+ const ta=$('#dgText'),upd=()=>{const v=ta.value;$('#dgN').textContent=G.chars(v.length)+(v.length>3500?' · '+G.long:'');$('#dgWa').href='https://api.whatsapp.com/send?text='+encodeURIComponent(v)};upd();ta.oninput=upd;
+ box.querySelectorAll('.dg-ctl input').forEach(i=>i.onchange=()=>{DG[i.name]=i.name==='lng'?i.value:+i.value;render()});
+ $('#dgCopy').onclick=async()=>{try{await navigator.clipboard.writeText(ta.value)}catch(e){ta.select();document.execCommand&&document.execCommand('copy')}toast(G.copied)};
+ $('#dgRe').onclick=()=>{DG.data=null;render()}}
+
 const vAds=crud('ads',AD_SPEC,r=>`<h3>${esc(r.emoji)} ${esc(lang==='kz'&&r.title_kz?r.title_kz:r.title_ru)}</h3><div class="meta">${r.active?'<span class="pill approved">ON</span>':'<span class="pill">OFF</span>'} ${fmtDT(r.starts_at)} — ${fmtDT(r.ends_at)} · ${esc(r.link_url||r.wa||'')}</div>`);
 
 // ---------- новости ----------
@@ -730,7 +799,7 @@ const AP_CATS=[['light','💡'],['trash','🗑'],['roads','🛣'],['water','🚰
 const AP_PREF=/^(мкр|микрорайон|мкрн|пер\.?|переулок|пр\.?|проспект|ш\.?|шоссе|тупик|ж\.?\s?м|тұйық|даңғыл|шағын)/i;
 const apAddr=(r,L)=>{L=L||APT();return AP_PREF.test(r.street||'')?(r.street+(r.house?', '+r.house:'')):L.addr(r.street,r.house)};
 const apPhoto=p=>p&&p.path?SB.publicUrl('appeals',p.path):'';
-const apLink=r=>PUB+'#/appeal/'+r.id;
+const apLink=r=>PUB+'a/'+r.id+'/';  // [siteT] страница с превью
 const apDay=iso=>iso?new Date(iso).toLocaleDateString('ru-RU',{timeZone:'Asia/Almaty',day:'2-digit',month:'2-digit',year:'numeric'}):'';
 const apToday=()=>new Date(Date.now()+5*3600e3).toISOString().slice(0,10);
 const apErrT=e=>{const m=String(e&&e.message||e||'');const E=APT().err;const k=Object.keys(E).find(c=>m.includes(c));return k?E[k]:m};

@@ -37,3 +37,13 @@ footer{font-size:14px;color:var(--muted);border-top:1px solid var(--line);paddin
 @media (min-width:700px){.cards{grid-template-columns:1fr 1fr}.tiles{grid-template-columns:repeat(3,1fr)}.cta{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:360px){.ac{grid-template-columns:1fr}.tiles{grid-template-columns:1fr}}
 @media (max-width:340px){.lb span{display:none}.lb{justify-content:center}}
+/* [siteT] страницы объявлений, новостей и обращений (/i/, /n/, /a/) */
+.it .pic{display:block;margin:6px 0 10px;border-radius:var(--r);overflow:hidden;background:#f3e7da;border:1px solid var(--line)}
+.it .pic img{display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;background:#f3e7da}
+.it .cs{font-size:14px;color:var(--muted)}.it h1{margin-top:4px}
+.it .pr{font-size:24px;font-weight:800;color:var(--accent);margin:2px 0 8px}
+.it .pl,.it .dt{color:#4a3b2e;font-size:16px;margin:6px 0}.it .dt{color:var(--muted);font-size:14px}
+.it .tag{display:inline-block;background:#e9f7ef;color:#1d7a46;border-radius:999px;padding:4px 12px;font-weight:700;margin:4px 0}
+.it .kzt{font-size:18px;color:#4a3b2e;margin:10px 0}.it p{overflow-wrap:anywhere}
+.it .cta{grid-template-columns:1fr;margin:16px 0}
+@media (min-width:700px){.it .cta{grid-template-columns:1fr 1fr}}
