@@ -105,6 +105,13 @@ Object.assign(T.ru,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор ·
  lerr:{invalid_phone:'Проверьте телефон: нужен номер вида 8 701 123 45 67',bad_title:'Заголовок — не короче 3 символов',bad_price:'Укажите цену цифрами',bad_kind:'Выберите тип и категорию'}});
 Object.assign(T.kz,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Үркер',addL:'+ Хабарландыру қосу',newL:'Жаңа хабарландыру',evDate:'Қашан жоғалды / табылды',photosL:'Фото (5-ке дейін)',lcreated:'✅ Хабарландыру жарияланды',publishL:'Жариялау',priceFixed:'баға',noPrice:'бағасыз',uploadingL:'Фото жүктелуде…',
  lerr:{invalid_phone:'Телефонды тексеріңіз: 8 701 123 45 67 түріндегі нөмір керек',bad_title:'Тақырып кемінде 3 таңба болуы керек',bad_price:'Бағаны санмен көрсетіңіз',bad_kind:'Түрі мен санатын таңдаңыз'}});
+// [siteP mod-edit] тексты: правка объявления с фото
+Object.assign(T.ru,{lEdit:'✏️ Редактировать',lEditT:'Редактирование объявления',lPhotos:'Фото (до 5): первое — главное',lMain:'Главное',lAddPh:'📷 Добавить фото',lNoPh:'Фото нет',
+ lMax:'Не больше 5 фото',lHeic:'Это фото не открывается (формат HEIC). Выберите фото в формате JPEG или сделайте скриншот фото',lPhSaved:'✅ Сохранено',lPhWait:'Подождите, фото ещё загружаются',
+ lPhPart:n=>`Объявление опубликовано, но фото не загрузились: ${n}. Нажмите «✏️ Редактировать» и добавьте их ещё раз`,lLeft:'◀',lRight:'▶',lRm:'✕',lRmT:'Убрать фото',lLeftT:'Левее',lRightT:'Правее'});
+Object.assign(T.kz,{lEdit:'✏️ Өңдеу',lEditT:'Хабарландыруды өңдеу',lPhotos:'Фото (5-ке дейін): біріншісі — басты',lMain:'Басты',lAddPh:'📷 Фото қосу',lNoPh:'Фото жоқ',
+ lMax:'5 фотодан артық болмайды',lHeic:'Бұл фото ашылмайды (HEIC форматы). JPEG форматындағы фотоны таңдаңыз немесе фотоның скриншотын жасаңыз',lPhSaved:'✅ Сақталды',lPhWait:'Күте тұрыңыз, фото әлі жүктелуде',
+ lPhPart:n=>`Хабарландыру жарияланды, бірақ фото жүктелмеді: ${n}. «✏️ Өңдеу» батырмасын басып, қайта қосыңыз`,lLeft:'◀',lRight:'▶',lRm:'✕',lRmT:'Фотоны алып тастау',lLeftT:'Солға',lRightT:'Оңға'});
 // кнопка «🔄 Обновить»: перезагрузка с ?r=<время> и #tab=<вкладка> — после загрузки возвращаем вкладку и чистим адрес
 try{const m=/^#tab=([a-z]+)$/.exec(location.hash);if(m&&T.ru.tabs[m[1]])tab=m[1];if(m||/[?&]r=\d/.test(location.search))history.replaceState(null,'',location.pathname)}catch(e){}
 
@@ -171,6 +178,56 @@ function textHit(q,parts,phones){q=String(q||'').trim();if(!q)return true;const 
  if(/^[\d\s+()\-]+$/.test(q)){const qd=digitsOf(q);if(qd.length<3)return false;const core=qd.length>=10?qd.slice(-10):qd;return phones.map(digitsOf).some(x=>x&&(x.includes(qd)||x.includes(core)))}
  return false}
 const lPhoto=p=>p&&p.path?SB.publicUrl('listings',p.path):'';
+// [siteP mod-edit] фото объявления: сжатие на телефоне (до 1280 px, JPEG, без EXIF), до 5 шт., порядок, удаление.
+// Файлы модератора/админа кладутся в listings/<id>/m/<имя>.jpg (19_mod_listing_photos.sql).
+// live=true  — объявление уже есть: фото загружаются сразу при выборе; save(id) сохраняет список и удаляет убранные файлы.
+// live=false — новое объявление: фото ждут в памяти, upload(id) загружает их после создания.
+async function lCompress(file){let b;
+ try{b=await compress(file,1280,0.82);if(b.size>1.4e6)b=await compress(file,1024,0.65)}
+ catch(e){if(window.createImageBitmap){try{const bm=await createImageBitmap(file);const c=document.createElement('canvas');const k=Math.min(1,1280/Math.max(bm.width,bm.height));c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);
+   const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(bm,0,0,c.width,c.height);b=await new Promise((res,rej)=>c.toBlob(x=>x?res(x):rej(new Error('encode')),'image/jpeg',0.8))}catch(e2){}}
+  if(!b)throw new Error(t('lHeic'))}
+ return b}
+function lPhotoBox(slot,photos,id,live){
+ const st={items:(photos||[]).filter(p=>p&&p.path).map(p=>({path:p.path,url:lPhoto(p),orig:true})),busy:0,uploaded:[],removed:[]};
+ const startKey=JSON.stringify(st.items.map(p=>p.path));
+ slot.innerHTML=`<label>${esc(t('lPhotos'))}</label><div class="pgrid lpg"></div><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*" multiple class="vh-file" id="lpf${id||'new'}">
+  <label for="lpf${id||'new'}" class="b sec upl">${esc(t('lAddPh'))}</label> <span class="meta lpst"></span>`;
+ const pg=slot.querySelector('.lpg'),pst=slot.querySelector('.lpst'),inp=slot.querySelector('input[type=file]');
+ const draw=()=>{pg.innerHTML=st.items.length?st.items.map((p,i)=>`<div class="ph ${i===0?'cv':''}"><img src="${esc(p.url)}" alt="">${i===0?`<span class="cvb">${esc(t('lMain'))}</span>`:''}
+   <div class="pb"><button type="button" data-p="l" data-i="${i}" title="${esc(t('lLeftT'))}" aria-label="${esc(t('lLeftT'))}" ${i===0?'disabled':''}>${t('lLeft')}</button><button type="button" data-p="r" data-i="${i}" title="${esc(t('lRightT'))}" aria-label="${esc(t('lRightT'))}" ${i===st.items.length-1?'disabled':''}>${t('lRight')}</button><button type="button" data-p="rm" data-i="${i}" class="no" title="${esc(t('lRmT'))}" aria-label="${esc(t('lRmT'))}">${t('lRm')}</button></div></div>`).join(''):`<div class="meta lnoph">🖼 ${esc(t('lNoPh'))}</div>`;
+  slot.querySelector('label.upl').style.display=st.items.length>=5?'none':''};
+ pg.onclick=ev=>{const b=ev.target.closest('[data-p]');if(!b)return;ev.preventDefault();const i=+b.dataset.i,a=b.dataset.p,P=st.items;
+  if(a==='l'&&i>0)[P[i-1],P[i]]=[P[i],P[i-1]];if(a==='r'&&i<P.length-1)[P[i+1],P[i]]=[P[i],P[i+1]];
+  if(a==='rm'){const [x]=P.splice(i,1);if(x.path)st.removed.push(x.path);if(x.blob)URL.revokeObjectURL(x.url)}draw()};
+ const name=()=>rnd()+'.jpg';
+ inp.onchange=async()=>{let list=[...(inp.files||[])];inp.value='';const free=5-st.items.length;if(list.length>free){toast(t('lMax'));list=list.slice(0,Math.max(0,free))}
+  let k=0;st.busy++;
+  try{for(const f of list){pst.textContent=`${t('uploadingL')} ${++k}/${list.length}`;
+   try{const b=await lCompress(f);
+    if(live){const path=`${id}/m/${name()}`;await SB.upload('listings',path,b,'image/jpeg');st.uploaded.push(path);st.items.push({path,url:lPhoto({path})})}
+    else st.items.push({blob:b,url:URL.createObjectURL(b)});
+    draw()}catch(e){toast(t('n').photoErr+': '+(e.message||e),6000)}}}
+  finally{st.busy--;pst.textContent=''}};
+ draw();
+ return{
+  busy:()=>st.busy>0,
+  changed:()=>JSON.stringify(st.items.map(p=>p.path))!==startKey,
+  paths:()=>st.items.map(p=>p.path).filter(Boolean),
+  // сохранить список фото существующего объявления, потом удалить файлы, которые больше не прикреплены
+  async save(){if(JSON.stringify(st.items.map(p=>p.path))===startKey)return null;const paths=st.items.map(p=>p.path);let row;
+   if(IS_MOD())row=await SB.rpc('mod_listing_set_photos',{p_id:id,p_paths:paths});else row=(await SB.update('listings','id=eq.'+id,{photos:paths.map(path=>({path}))}))[0];
+   const keep=new Set(paths);for(const p of [...st.removed,...st.uploaded])if(!keep.has(p))await SB.removeFile('listings',p).catch(()=>{});return row},
+  // отмена правки: убрать только что загруженные и не сохранённые файлы
+  cancel(){for(const p of st.uploaded)SB.removeFile('listings',p).catch(()=>{});for(const x of st.items)if(x.blob)URL.revokeObjectURL(x.url)},
+  // новое объявление: загрузить фото после создания; возвращает {row, failed}
+  async upload(newId){const paths=[];let failed=0,k=0;const list=st.items.filter(x=>x.blob);
+   for(const x of list){pst.textContent=`${t('uploadingL')} ${++k}/${list.length}`;const path=`${newId}/m/${name()}`;
+    try{await SB.upload('listings',path,x.blob,'image/jpeg');paths.push(path)}catch(e){failed++}}
+   pst.textContent='';let row=null;
+   if(paths.length){try{row=await SB.rpc('mod_listing_set_photos',{p_id:newId,p_paths:paths})}catch(e){failed+=paths.length;for(const p of paths)SB.removeFile('listings',p).catch(()=>{})}}
+   for(const x of st.items)if(x.blob)URL.revokeObjectURL(x.url);return{row,failed}}
+ }}
 async function vListings(box){
  const L=LT();
  const MOD=IS_MOD();const [set]=MOD?[{}]:await SB.get('listing_settings?select=*');
@@ -195,7 +252,7 @@ async function vListings(box){
    ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
    <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
     ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`+shareBtn('l',r):''}${(MOD?['rejected']:['rejected','deleted','closed']).includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
-    ${MOD?(['pending','approved','rejected'].includes(r.status)?`<button class="b" data-a="edit">${t('edit')}</button>`:''):`<button class="b" data-a="edit">${t('edit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
+    ${MOD?(['pending','approved','rejected'].includes(r.status)?`<button class="b" data-a="edit">${t('lEdit')}</button>`:''):`<button class="b" data-a="edit">${t('lEdit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
     <button class="b no" data-a="del">${t('del')}</button>`}</div></div><div class="slot full"></div></div>`}).join(''):`<div class="row">${t('empty')}</div>`);
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LF.status=b.dataset.ls;vListings(box)});
  {const lq=$('#lq');lq.oninput=()=>{LF.q=lq.value;clearTimeout(lq._t);lq._t=setTimeout(()=>vListings(box).then(()=>{const n=$('#lq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}),300)}}
@@ -215,22 +272,31 @@ async function vListings(box){
      <div class="full acts"><button type="button" class="b" data-cp="1">${L.alinkCopy}</button> <a class="b ok" target="_blank" rel="noopener" href="https://api.whatsapp.com/send?phone=${esc(r.phone)}&text=${encodeURIComponent(msg)}">${L.alinkWa}</a></div></div>`;
     slot.querySelector('[data-cp]').onclick=async()=>{const i=slot.querySelector('input');i.select();try{await navigator.clipboard.writeText(i.value)}catch(e){document.execCommand&&document.execCommand('copy')}toast(L.alinkCopied)};return}
    if(a==='del'){if(!confirm(t('confirmDel')))return;for(const p of (r.photos||[]))if(p.path)await SB.removeFile('listings',p.path).catch(()=>{});await SB.remove('listings','id=eq.'+r.id);toast(t('deleted'));return vListings(box)}
-   if(a==='edit'){const slot=el.querySelector('.slot');const F=LT().f;
-    const sel=(n,opts,v)=>`<div><label>${F[n]}</label><select name="${n}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
-    slot.innerHTML=`<form class="ed"><div class="full"><label>${F.title}</label><input name="title" value="${esc(r.title)}"></div><div class="full"><label>${F.body}</label><textarea name="body" rows="4">${esc(r.body)}</textarea></div>
-     ${sel('kind',L_KINDS[r.section],r.kind)}${sel('category',L_CATS[r.section],r.category)}${sel('price_mode',['fixed','negotiable','free','none'],r.price_mode)}<div><label>${F.price}</label><input name="price" type="number" value="${r.price??''}"></div>
-     <div><label>${F.place}</label><input name="place" value="${esc(r.place)}"></div><div><label>${F.phone}</label><input name="phone" value="${esc(r.phone)}"></div>
-     <div><label class="ck"><input type="checkbox" name="has_wa" ${r.has_wa?'checked':''}> ${F.has_wa}</label></div>${MOD?'':`<div class="full"><label>${F.admin_note}</label><input name="admin_note" value="${esc(r.admin_note)}"></div>`}
-     <div class="full acts"><button class="b pri">${t('save')}</button><button type="button" class="b" data-x>${t('cancel')}</button></div></form>`;
-    const f=slot.querySelector('form');f.querySelector('[data-x]').onclick=()=>{slot.innerHTML=''};
-    f.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(['title','body','kind','category','price_mode','place','phone','admin_note'].filter(n=>f.elements[n]).map(n=>[n,f.elements[n].value.trim()]));
+   if(a==='edit'){const slot=el.querySelector('.slot');if(slot.querySelector('form.lform'))return;const F=LT().f,X=L_LBL[lang];  // [siteP mod-edit]
+    const pmL={fixed:t('priceFixed'),negotiable:L.pm.negotiable,free:L.pm.free,none:t('noPrice')};
+    const sel=(n,opts,v,lab)=>`<div><label>${esc(F[n])}</label><select name="${n}">${opts.map(o=>`<option value="${esc(o)}" ${o===v?'selected':''}>${esc(lab(o))}</option>`).join('')}</select></div>`;
+    slot.innerHTML=`<form class="ed lform" novalidate><h3 class="full" style="margin:0">✏️ ${esc(t('lEditT'))} #${r.id}</h3><div class="full"><label>${esc(F.title)}</label><input name="title" maxlength="120" value="${esc(r.title)}"></div><div class="full"><label>${esc(F.body)}</label><textarea name="body" rows="4" maxlength="3000">${esc(r.body)}</textarea></div>
+     ${sel('kind',L_KINDS[r.section],r.kind,k=>X.k[k]||k)}${sel('category',L_CATS[r.section],r.category,c=>(X.c[r.section]||{})[c]||c)}${sel('price_mode',['fixed','negotiable','free','none'],r.price_mode,m=>pmL[m]||m)}<div><label>${esc(F.price)}</label><input name="price" type="number" min="0" inputmode="numeric" value="${r.price??''}"></div>
+     <div><label>${esc(F.place)}</label><input name="place" maxlength="120" value="${esc(r.place)}"></div><div><label>${esc(F.phone)}</label><input name="phone" type="tel" inputmode="tel" value="${esc(r.phone)}"></div>
+     <div><label class="ck"><input type="checkbox" name="has_wa" ${r.has_wa?'checked':''}> ${esc(F.has_wa)}</label></div>${MOD?'':`<div class="full"><label>${esc(F.admin_note)}</label><input name="admin_note" value="${esc(r.admin_note)}"></div>`}
+     <div class="full lphotos"></div>
+     <div class="full acts"><button class="b pri" type="submit">${t('save')}</button><button type="button" class="b" data-x>${t('cancel')}</button></div></form>`;
+    const f=slot.querySelector('form');const PB=lPhotoBox(f.querySelector('.lphotos'),r.photos,r.id,true);
+    f.querySelector('[data-x]').onclick=()=>{PB.cancel();slot.innerHTML=''};
+    f.onsubmit=async e=>{e.preventDefault();if(PB.busy()){toast(t('lPhWait'));return}const btn=f.querySelector('[type=submit]');
+     const v=Object.fromEntries(['title','body','kind','category','price_mode','place','phone','admin_note'].filter(n=>f.elements[n]).map(n=>[n,f.elements[n].value.trim()]));
      v.price=v.price_mode==='fixed'&&f.elements.price.value!==''?+f.elements.price.value:null;v.has_wa=f.elements.has_wa.checked;
-     try{if(MOD)await SB.rpc('mod_listing_update',{p_id:r.id,p:v});else await SB.update('listings','id=eq.'+r.id,v);toast(t('saved'));vListings(box)}catch(err){toast(err.message)}};return}
+     if(v.title.length<3){toast(t('lerr').bad_title);return}
+     btn.disabled=true;
+     try{if(MOD)await SB.rpc('mod_listing_update',{p_id:r.id,p:v});else await SB.update('listings','id=eq.'+r.id,v);
+      await PB.save();toast(t('lPhSaved'));vListings(box)}
+     catch(err){const m=String(err&&err.message||'');const k=Object.keys(t('lerr')).find(c=>m.includes(c));toast(k?t('lerr')[k]:m,6000);btn.disabled=false}};
+    slot.scrollIntoView({behavior:'smooth',block:'nearest'});return}
    toast(t('saved'));render()}catch(e){toast(e.message)}}});
 }
 // [siteO moderator] «+ Добавить объявление»: публикуется сразу (mod_listing_create), фото — по билету в бакет listings
 function newListingForm(slot){
- if(!slot)return;const L=LT(),F=L.f,X=L_LBL[lang];let st={section:'market',kind:'sell',category:'other',price_mode:'fixed',has_wa:true};
+ if(!slot)return;const L=LT(),F=L.f,X=L_LBL[lang];let st={section:'market',kind:'sell',category:'other',price_mode:'fixed',has_wa:true};let PBOX=null;
  const opt=(v,l,cur)=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(l)}</option>`;
  const read=()=>{const f=slot.querySelector('form');if(!f)return;for(const n of ['section','kind','category','title','body','price_mode','price','place','event_date','phone'])if(f.elements[n])st[n]=f.elements[n].value;st.has_wa=f.elements.has_wa.checked};
  const draw=()=>{if(!L_KINDS[st.section].includes(st.kind))st.kind=L_KINDS[st.section][0];if(!L_CATS[st.section].includes(st.category))st.category='other';
@@ -247,23 +313,22 @@ function newListingForm(slot){
    <div><label>${esc(F.place)}</label><input name="place" maxlength="120" value="${esc(st.place||'')}"></div>
    ${st.section==='lost'?`<div><label>${esc(t('evDate'))}</label><input name="event_date" type="date" value="${esc(st.event_date||'')}"></div>`:''}
    <div class="full"><label class="ck"><input type="checkbox" name="has_wa" ${st.has_wa?'checked':''}> ${esc(F.has_wa)}</label></div>
-   <div class="full"><label>${esc(t('photosL'))}</label><input type="file" accept="image/*" multiple id="nlp" class="vh-file"><label for="nlp" class="b sec upl">${esc(t('n').addPhotos)}</label> <span class="meta" id="nlps"></span></div>
+   <div class="full lphotos"></div>
    <div class="full acts"><button class="b pri" type="submit">${esc(t('publishL'))}</button><button type="button" class="b" data-x>${esc(t('cancel'))}</button></div></form>`;
   const f=slot.querySelector('form');
+  // [siteP mod-edit] фото с превью, порядком и удалением; при смене раздела выбранные фото сохраняются
+  const ph=f.querySelector('.lphotos');if(PBOX&&PBOX.el)ph.replaceWith(PBOX.el);else{PBOX={el:ph,box:lPhotoBox(ph,[],0,false)}}
   f.elements.section.onchange=()=>{read();draw()};
-  f.querySelector('[data-x]').onclick=()=>{slot.innerHTML=''};
-  const files=()=>[...(f.querySelector('#nlp').files||[])].slice(0,5);
-  f.querySelector('#nlp').onchange=()=>{const n=files().length;f.querySelector('#nlps').textContent=n?'🖼 '+n:''};
+  f.querySelector('[data-x]').onclick=()=>{PBOX.box.cancel();slot.innerHTML=''};
   f.onsubmit=async ev=>{ev.preventDefault();read();const btn=f.querySelector('[type=submit]');
    const p={section:st.section,kind:st.kind,category:st.category,title:(st.title||'').trim(),body:(st.body||'').trim(),price_mode:st.price_mode,price:st.price_mode==='fixed'?String(st.price||''):null,
     place:(st.place||'').trim(),event_date:st.section==='lost'&&st.event_date?st.event_date:null,phone:st.phone||'',has_wa:st.has_wa,lang};
    if(p.title.length<3){toast(t('lerr').bad_title);return}
+   if(PBOX.box.busy()){toast(t('lPhWait'));return}
    btn.disabled=true;
-   try{const res=await SB.rpc('mod_listing_create',{p});let row=res.row;const list=files(),paths=[];
-    for(let i=0;i<list.length;i++){f.querySelector('#nlps').textContent=`${t('uploadingL')} ${i+1}/${list.length}`;
-     try{let b=await compress(list[i],1280,0.8);if(b.size>1.4e6)b=await compress(list[i],1024,0.6);const path=`${res.id}/${res.ticket}/${rnd()}.jpg`;await SB.upload('listings',path,b,'image/jpeg');paths.push(path)}catch(e){toast(t('n').photoErr+': '+e.message)}}
-    if(paths.length)row=await SB.rpc('mod_listing_set_photos',{p_id:res.id,p_paths:paths});
-    JUST={kind:'l',row};LF={status:'approved',section:'',q:''};slot.innerHTML='';toast(t('lcreated'));render()}
+   try{const res=await SB.rpc('mod_listing_create',{p});let row=res.row;const up=await PBOX.box.upload(res.id);if(up.row)row=up.row;
+    JUST={kind:'l',row};LF={status:'approved',section:'',q:''};slot.innerHTML='';
+    if(up.failed)toast(t('lPhPart')(up.failed),9000);else toast(t('lcreated'));render()}
    catch(e){const m=String(e&&e.message||'');const k=Object.keys(t('lerr')).find(c=>m.includes(c));toast(k?t('lerr')[k]:m,6000);btn.disabled=false}}};
  draw();slot.scrollIntoView({behavior:'smooth',block:'nearest'});
 }

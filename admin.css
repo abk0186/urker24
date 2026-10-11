@@ -140,3 +140,10 @@ body.mod .admbar{background:#1d5c45}
 body.mod .admbar button{color:#1d5c45}
 body.mod .admbar .ab-pw,body.mod .admbar .ab-rf{color:#fff}
 .nl-form{margin-bottom:12px}
+/* [siteP mod-edit] правка объявления с фото */
+.lform{margin-top:8px;border:2px solid #e8603c33;border-radius:14px;padding:12px;background:#fffaf7}
+.lphotos .pgrid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+.lphotos .pb button:disabled{opacity:.35;cursor:default}
+.lphotos .lnoph{grid-column:1/-1;padding:14px;border:1px dashed #ccc;border-radius:12px;text-align:center}
+.lphotos .upl{margin-top:4px}
+.lphotos label.upl{display:inline-flex;align-items:center;justify-content:center;width:auto;padding:0 18px}
