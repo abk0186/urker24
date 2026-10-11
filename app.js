@@ -265,7 +265,7 @@ const searchBox=(q='')=>`<section class="hero"><h2>${t('searchTitle')}</h2><div 
 function renderResults(q){
  const box=$('#results'),home=$('#homeBody');const r=search(q);
  if(!r){clearTimeout(searchTimer);box.innerHTML='';if(home)home.hidden=false;return}
- const ls=window.URKER_L?URKER_L.searchHtml(q):{n:0,html:''};
+ const ls0=window.URKER_L?URKER_L.searchHtml(q):{n:0,html:''},ap0=window.URKER_AP?URKER_AP.searchHtml(q):{n:0,html:''};const ls={n:ls0.n+ap0.n,html:ap0.html+ls0.html};  // [siteQ appeals]
  trackSearch(q,r.list.length+annSearch(q).length+newsSearch(q).length+ls.n);
  if(home)home.hidden=true;
  const nw=newsSearch(q);const newsHtml=nw.length?`<div class="sugg-l">📰 ${t('newsFound')}: ${nw.length}</div>${nw.slice(0,3).map(n=>newsCard(n,true)).join('')}`:'';
@@ -431,7 +431,7 @@ function viewSuggest(){
 // ---------- views ----------
 function viewHome(q=''){
  app.innerHTML=`${searchBox(q)}<div id="results"></div>
- <div id="homeBody">${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${annBlock()}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
+ <div id="homeBody">${window.URKER_AP?URKER_AP.homeBlock():''}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${annBlock()}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
   return `<a class="tile" href="#/c/${s.id}"><span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}</div></div>`;
  bindSearch();
 }
@@ -569,6 +569,7 @@ function route(){setMeta();setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trac
  else if(h.startsWith('#/report')){viewReport();nav='menu'}
  else if(h.startsWith('#/search')){const q=decodeURIComponent((h.split('q=')[1]||''));viewHome(q);nav='home';const i=$('#q');if(i&&!q)i.focus()}
  else if(h.startsWith('#/install')&&window.URKER_PWA){URKER_PWA.view();nav='menu'}
+ else if(window.URKER_AP&&URKER_AP.route(h)){nav='home'}  // [siteQ appeals] #/appeals, #/appeals/new, #/appeal/<id>
  else{const ln=window.URKER_L&&URKER_L.route(h);if(ln)nav=ln;else viewHome()}
  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav));
  if(!h.startsWith('#/search'))window.scrollTo(0,0);
@@ -605,7 +606,7 @@ async function loadBackend(){
    get('ads?select=*&order=sort_order.asc',15000).catch(()=>null),
    get('news?select=*&order=pinned.desc,publish_at.desc&limit=200',15000).catch(()=>null),
    SB.rpc('content_view_counts',{},10000).catch(()=>null)]);
-  if(window.URKER_L)await URKER_L.load().catch(e=>console.warn('listings',e&&e.message));
+  await Promise.all([window.URKER_L?URKER_L.load().catch(e=>console.warn('listings',e&&e.message)):null,window.URKER_AP?URKER_AP.load().catch(()=>{}):null]);  // [siteQ appeals]
   if(!Array.isArray(sp)||!sp.length)throw new Error('empty');
   D.entries=sp.filter(r=>subById[r.sub_id]).map(mapSpec);
   ANN=Array.isArray(an)?an.filter(r=>!r.is_demo).map(mapAnn):[];ADS=Array.isArray(ad)?ad:[];NEWS=Array.isArray(nw)?nw.filter(r=>!r.is_demo).map(mapNews):[];

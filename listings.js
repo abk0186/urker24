@@ -16,7 +16,7 @@ A.addDict({
   lost:{animals:'Животные',docs:'Документы',keys:'Ключи',things:'Вещи',other:'Другое'}},
  lPrice:{free:'Даром',negotiable:'Договорная',none:''},lAll:'Все',lAllCats:'Все категории',
  lEmpty:'Пока объявлений нет',lEmptyS:'Подайте первое — это бесплатно. После проверки оно появится здесь.',lPostBtn:'➕ Подать объявление',
- lFresh:'Свежие объявления жителей',lFreshAll:'Все →',lFreshEmpty:'Пока объявлений нет — подайте первое',
+ lFresh:'Свежие объявления',lFreshAll:'Все объявления →',lFreshEmpty:'Пока объявлений нет — подайте первое',
  lClosed:{market:'Продано',ads:'Неактуально',lost:'Нашлось'},lViews:n=>`👁 ${n}`,lPosted:'Опубликовано',lWhere:'Где',lWhen:'Когда',lShare:'Поделиться в WhatsApp',
  lHighlight:'Выделено',lNotFound:'Объявление не найдено или снято',lExpires:'Активно до',
  pTitle:'Подать объявление',pChoose:'Где разместить?',pKind:'Тип',pCat:'Категория',pTitleF:'Заголовок',pTitlePh:'Например: детская коляска, почти новая',
@@ -46,7 +46,7 @@ A.addDict({
   lost:{animals:'Жануарлар',docs:'Құжаттар',keys:'Кілттер',things:'Заттар',other:'Басқа'}},
  lPrice:{free:'Тегін',negotiable:'Келісімді',none:''},lAll:'Барлығы',lAllCats:'Барлық санат',
  lEmpty:'Әзірге хабарландыру жоқ',lEmptyS:'Біріншісін беріңіз — бұл тегін. Тексеруден кейін осында шығады.',lPostBtn:'➕ Хабарландыру беру',
- lFresh:'Тұрғындардың жаңа хабарландырулары',lFreshAll:'Барлығы →',lFreshEmpty:'Әзірге хабарландыру жоқ — біріншісін беріңіз',
+ lFresh:'Жаңа хабарландырулар',lFreshAll:'Барлық хабарландырулар →',lFreshEmpty:'Әзірге хабарландыру жоқ — біріншісін беріңіз',
  lClosed:{market:'Сатылды',ads:'Өзекті емес',lost:'Табылды'},lViews:n=>`👁 ${n}`,lPosted:'Жарияланды',lWhere:'Қайда',lWhen:'Қашан',lShare:'WhatsApp-та бөлісу',
  lHighlight:'Ерекшеленген',lNotFound:'Хабарландыру табылмады немесе алынып тасталды',lExpires:'Белсенді мерзімі',
  pTitle:'Хабарландыру беру',pChoose:'Қай бөлімге?',pKind:'Түрі',pCat:'Санаты',pTitleF:'Тақырыбы',pTitlePh:'Мысалы: балалар арбасы, жаңа дерлік',
@@ -250,14 +250,14 @@ function viewMy(){A.setMeta(t('pMy')+' — Уркер 24','');const a=my();
    const m=my().find(x=>x.id===s.id);if(m&&m.title!==s.title){ch=true;row.querySelector('b').textContent=s.title}});
   if(ch)saveMy(my().map(x=>{const r=res.find(y=>y.id===x.id&&!y.gone);return r?Object.assign(x,{title:r.title}):x}))}).catch(()=>{})}
 function viewMenu(){A.setMeta(t('menuTitle')+' — Уркер 24','');
- const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
+ const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(window.URKER_AP?[['#/appeals','📢',t('apTitle'),t('apMenuD')]]:[]),...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
   ['#/news','📰',t('menuNews'),t('menuNewsD')],['#/ann','⚠️',t('menuAlerts'),t('menuAlertsD')],...(ON?[['#/my','🔑',t('pMy'),'']]:[]),['#/add','➕',t('menuAddBiz'),''],['#/report','📣',t('repTitle'),''],['#/install','📲',t('pwaMenu')||'',''],['#/search','🔍',t('navSearch'),'']];
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>☰ ${t('menuTitle')}</h1></div>
  <div class="mlist">${items.map(([h,e,ti,d])=>`<a class="mrow" href="${h}"><span>${e}</span><b>${esc(ti)}</b>${d?`<small>${esc(d)}</small>`:''}</a>`).join('')}</div>`}
 // главная: полоса свежих объявлений и плитки разделов
-function homeStrip(){if(!ON)return '';const l=visible().filter(x=>x.status==='approved').slice(0,10);
- return `<section class="ann-block"><div class="ann-h"><h2>🗂 ${t('lFresh')}</h2><a href="#/bazar">${t('lFreshAll')}</a></div>
- ${l.length?`<div class="lstrip">${l.map(x=>lcard(x,true)).join('')}</div>`:`<a class="ann-empty lnk-empty" href="#/post"><span>${t('lFreshEmpty')}</span><b>${t('lPostBtn')}</b></a>`}</section>`}
+function homeStrip(){if(!ON)return '';const l=visible().filter(x=>x.status==='approved').slice(0,8);
+ return `<section class="ann-block lfresh"><div class="ann-h"><h2>🗂 ${t('lFresh')}</h2><a href="#/bazar">${t('lFreshAll')}</a></div>
+ ${l.length?`<div class="lcards lhome">${l.map(x=>lcard(x,true)).join('')}</div>`:`<a class="ann-empty lnk-empty" href="#/post"><span>${t('lFreshEmpty')}</span><b>${t('lPostBtn')}</b></a>`}</section>`}
 function homeTiles(){if(!ON)return '';const it=[['#/bazar','🛍',t('lSec').market],['#/ads','📋',t('lSec').ads],['#/lost','🐾',t('lSec').lost],['#/news','📰',t('navNews')],['#/ann','⚠️',t('menuAlerts')],['#/post','➕',t('navPost')]];
  return `<div class="stiles">${it.map(([h,e,n])=>`<a class="stile" href="${h}"><span>${e}</span><b>${esc(n)}</b></a>`).join('')}</div>`}
 function searchHtml(q){if(!ON)return {n:0,html:''};const qs=A.norm(q).split(' ').filter(w=>w.length>=3);if(!qs.length)return {n:0,html:''};
