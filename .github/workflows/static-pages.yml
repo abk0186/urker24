@@ -1,0 +1,66 @@
+# Urker 24: auto-rebuild of static pages (WhatsApp link previews + SEO pages).
+# Every 30 min (and on Run workflow) reads PUBLIC site data via anon key from config.js
+# and commits to main only changed files: i/, n/, a/, s/, kz/, sitemap.xml. No secrets needed.
+name: Static pages (i/ n/ a/ s/ kz/)
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: static-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build pages from public data (read-only)
+        run: python3 .github/scripts/build_static.py --root .
+
+      - name: Only allowed paths changed?
+        id: check
+        run: |
+          for p in i n a s kz sitemap.xml; do if [ -e "$p" ]; then git add -A -- "$p"; fi; done
+          CHANGED=$(git diff --cached --name-only)
+          OTHER=$(git status --porcelain --untracked-files=all | grep -vE '^(M |A |D |R  )' || true)
+          if [ -n "$OTHER" ]; then echo "Unexpected changes outside staged set:"; echo "$OTHER"; exit 1; fi
+          BAD=$(echo "$CHANGED" | grep -vE '^((i|n|a)/[0-9]+/index\.html|s/[a-z]+/([a-z]+-[0-9]+/)?index\.html|kz/index\.html|kz/s/[a-z]+/([a-z]+-[0-9]+/)?index\.html|sitemap\.xml)$' | grep -v '^$' || true)
+          if [ -n "$BAD" ]; then echo "Refusing to commit:"; echo "$BAD"; exit 1; fi
+          N=$(echo "$CHANGED" | grep -c . || true)
+          echo "changed=$N" >> "$GITHUB_OUTPUT"
+          echo "Changed files: $N"; echo "$CHANGED" | head -50
+
+      - name: Commit and push
+        if: steps.check.outputs.changed != '0'
+        run: |
+          git config user.name "urker24-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Static pages: ${{ steps.check.outputs.changed }} file(s) updated"
+          for i in 1 2 3; do
+            git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Ask GitHub Pages to rebuild (safety net)
+        if: steps.check.outputs.changed != '0'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" --silent || true
