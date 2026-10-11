@@ -415,13 +415,26 @@ form .chk{min-height:44px;align-items:center}
 .ap-sheet h2{margin:4px 0 6px;font-size:20px}.ap-sq{color:var(--muted);font-size:14.5px;margin:0 0 10px;overflow-wrap:anywhere}
 .ap-sheet .btn.ghost{margin-top:8px}
 @media (min-width:560px){.ap-cats{grid-template-columns:repeat(3,minmax(0,1fr))}}
-/* [siteQ tiles] «Свежие объявления» на главной — плиткой: 2 колонки на телефоне, 3 на широком экране */
-.lcards.lhome{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:6px}
-/* 6 tiles: 2 cols on phones, 3 on tablets / landscape; 8 tiles in 4 cols on wide screens */
-.lcards.lhome>:nth-child(n+7){display:none}
-@media(min-width:560px){.lcards.lhome{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(min-width:900px){.lcards.lhome{grid-template-columns:repeat(4,minmax(0,1fr))}.lcards.lhome>:nth-child(n+7){display:flex}}
-.lcards.lhome .lc-p{font-size:14.5px}
+/* [siteR tiles] «Свежие объявления» на главной — мелкая плитка:
+   телефон 3 колонки × 3 ряда (9); узкий Fold-экран <330px — 2 × 4 (8);
+   560–759px (телефон боком, Fold, планшет) — 4 × 3 (12); 760–899px — 5 × 2 (10); от 900px — 6 × 2 (12). */
+.lcards.lhome{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:6px}
+.lcards.lhome>:nth-child(n+10){display:none}
+.lcards.lhome .lcard{border-radius:11px}
+.lcards.lhome .lc-img{aspect-ratio:1/1}
+.lcards.lhome .lc-img>span:not(.lc-vw){font-size:26px}
+.lcards.lhome .lc-img em{left:4px;top:4px;font-size:10.5px;padding:1px 6px}
+.lcards.lhome .lc-img .lc-vw{top:4px;right:4px;padding:1px 5px;font-size:10.5px}
+.lcards.lhome .lc-b{padding:5px 7px 7px;gap:1px}
+.lcards.lhome .lc-k{font-size:10.5px}
+.lcards.lhome .lc-t{font-size:12.5px;line-height:1.22;font-weight:600}
+.lcards.lhome .lc-p{font-size:12.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:329px){.lcards.lhome{grid-template-columns:repeat(2,minmax(0,1fr))}.lcards.lhome>:nth-child(9){display:none}}
+@media(min-width:560px){.lcards.lhome{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.lcards.lhome>:nth-child(n+10){display:flex}
+ .lcards.lhome .lc-t{font-size:13px}.lcards.lhome .lc-p{font-size:13px}.lcards.lhome .lc-k{font-size:11px}}
+@media(min-width:760px){.lcards.lhome{grid-template-columns:repeat(5,minmax(0,1fr))}.lcards.lhome>:nth-child(n+11){display:none}}
+@media(min-width:900px){.lcards.lhome{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.lcards.lhome>:nth-child(n+11){display:flex}
+ .lcards.lhome .lc-t{font-size:13.5px}.lcards.lhome .lc-p{font-size:13.5px}}
 
 /* «Свежие объявления» heading: never break a word; the link moves to the next line on narrow phones */
 .lfresh .ann-h{flex-wrap:wrap;row-gap:2px}.lfresh .ann-h h2{overflow-wrap:normal;word-break:normal;hyphens:manual}.lfresh .ann-h a{white-space:nowrap}

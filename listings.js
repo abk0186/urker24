@@ -255,7 +255,7 @@ function viewMenu(){A.setMeta(t('menuTitle')+' — Уркер 24','');
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>☰ ${t('menuTitle')}</h1></div>
  <div class="mlist">${items.map(([h,e,ti,d])=>`<a class="mrow" href="${h}"><span>${e}</span><b>${esc(ti)}</b>${d?`<small>${esc(d)}</small>`:''}</a>`).join('')}</div>`}
 // главная: полоса свежих объявлений и плитки разделов
-function homeStrip(){if(!ON)return '';const l=visible().filter(x=>x.status==='approved').slice(0,8);
+function homeStrip(){if(!ON)return '';const l=visible().filter(x=>x.status==='approved').slice(0,12);
  return `<section class="ann-block lfresh"><div class="ann-h"><h2>🗂 ${t('lFresh')}</h2><a href="#/bazar">${t('lFreshAll')}</a></div>
  ${l.length?`<div class="lcards lhome">${l.map(x=>lcard(x,true)).join('')}</div>`:`<a class="ann-empty lnk-empty" href="#/post"><span>${t('lFreshEmpty')}</span><b>${t('lPostBtn')}</b></a>`}</section>`}
 function homeTiles(){if(!ON)return '';const it=[['#/bazar','🛍',t('lSec').market],['#/ads','📋',t('lSec').ads],['#/lost','🐾',t('lSec').lost],['#/news','📰',t('navNews')],['#/ann','⚠️',t('menuAlerts')],['#/post','➕',t('navPost')]];
