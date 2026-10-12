@@ -11,14 +11,18 @@
   a/<id>/index.html      обращения жителей
   s/**/index.html, kz/index.html, kz/s/**/index.html   разделы мастеров (как build_seo.py)
   sitemap.xml
+  t/<hash>.jpg, t/<hash>f.jpg  [siteU] копии фото объявлений/новостей/обращений: 480 px для плиток и 1280 px для галереи —
+                 чтобы фото грузились с GitHub Pages, а не тратили трафик Supabase (бесплатно 5 ГБ/мес).
+                 Пишутся, только если workflow разрешает путь t/ (иначе шаг проверки отклонил бы коммит) или задан --thumbs.
 Файлы сайта (index.html, app.js, styles.css, s/seo.css, s/og/*.jpg, 404.html …) не трогает: запись в другие пути запрещена (WRITE_OK).
 Пишет файл, только если его содержимое изменилось, — поэтому коммит в репозиторий бывает только при реальных изменениях.
 --data-dir: взять JSON из папки (spec.json, listings.json, news.json, appeals.json) вместо запросов — для тестов.
 """
-import argparse, datetime, html, json, os, re, sys, urllib.parse, urllib.request
+import argparse, datetime, html, io, json, os, re, subprocess, sys, urllib.parse, urllib.request
 
 SITE = 'https://urker24.kz'
 E = lambda s: html.escape(str(s or ''), quote=True)
+THUMB_OK = re.compile(r'^t/[0-9a-f]{16}f?\.jpg$')
 WRITE_OK = re.compile(r'^(?:(?:i|n|a)/\d+/index\.html|s/(?:[a-z]+/)(?:[a-z]+-\d+/)?index\.html|kz/index\.html|kz/s/(?:[a-z]+/)(?:[a-z]+-\d+/)?index\.html|sitemap\.xml)$')
 
 def load_js_json(path):
@@ -232,6 +236,12 @@ def gone_page(path, ru, kz, home_route, home_ru, home_kz):
             f'<div class="cta">{open_btns(home_route, home_ru, home_kz)}<a class="b gh" href="/">🏡 Уркер 24 · Үркер 24</a></div></div>')
     return small_page(path, f'{ru} · {kz} — Уркер 24', f'{ru}. Свежие объявления, мастера и новости района Уркер — на urker24.kz', None, None, body, noindex=True)
 
+MIRROR = {}
+def og_img(key, sb_url):
+    fn = thumb_name(key, True)
+    if MIRROR.get('root') and os.path.exists(os.path.join(MIRROR['root'], fn)): return SITE + '/' + fn
+    return f'{sb_url}/storage/v1/object/public/' + '/'.join(urllib.parse.quote(p) for p in key.split('/'))
+
 def listing_page(l, sb_url):
     lid = int(l['id']); path = f'/i/{lid}/'; route = f'/#/item/{lid}'
     sec = l.get('section') if l.get('section') in L_SEC else 'market'
@@ -240,7 +250,7 @@ def listing_page(l, sb_url):
     closed = l.get('status') == 'closed'
     pr = money(l); title_txt = clip(l.get('title'), 110)
     photos = [p.get('path') for p in (l.get('photos') or []) if isinstance(p, dict) and p.get('path')]
-    img = f'{sb_url}/storage/v1/object/public/listings/{urllib.parse.quote(photos[0])}' if photos else None
+    img = og_img('listings/' + photos[0], sb_url) if photos else None
     title = (f'✅ {L_CLOSED[sec]}: ' if closed else '') + title_txt + (f' — {pr}' if pr and not closed and not re.search(r'\d[\d\s]*₸', title_txt) else '')
     meta = ' · '.join(x for x in [kind, cat] if x)
     desc = clip(' · '.join(x for x in [(f'💰 {pr}' if pr else ''), meta, (f'📍 {l["place"]}' if l.get('place') else '')] if x) +
@@ -262,6 +272,8 @@ def news_page(n):
     ph = [(p if isinstance(p, str) else (p or {}).get('url')) for p in (n.get('photos') or [])]
     img = n.get('cover_url') or next((u for u in ph if u), None)
     img = img if img and re.match(r'^https://', img) else None
+    if img and key_from_url(img) and MIRROR.get('root') and os.path.exists(os.path.join(MIRROR['root'], thumb_name(key_from_url(img), True))):
+        img = SITE + '/' + thumb_name(key_from_url(img), True)
     cat = NEWS_CAT.get(n.get('category'), '📰 Новости')
     desc = clip(lead or ti, 190) or 'Новости района Уркер'
     body = ((f'<a class="pic" href="{route}"><img src="{E(img)}" alt="{E(ti)}" width="640" height="420"></a>' if img else '') +
@@ -277,7 +289,7 @@ def appeal_page(a, sb_url):
     addr = street_txt(a.get('street')) + (f', д. {a["house"]}' if a.get('house') else '')
     st = AP_ST.get(a.get('status'), ''); sup = int(a.get('supports') or 0)
     photos = [p.get('path') for p in (a.get('photos') or []) if isinstance(p, dict) and p.get('path')]
-    img = f'{sb_url}/storage/v1/object/public/appeals/{urllib.parse.quote(photos[0])}' if photos else None
+    img = og_img('appeals/' + photos[0], sb_url) if photos else None
     title = f'📢 {cat} — {addr}'
     desc = clip(f'«{clip(a.get("description"), 120)}» · Статус: {st} · Поддержали: {sup}. Поддержите обращение жителей Уркера', 200)
     body = ((f'<a class="pic" href="{route}"><img src="{E(img)}" alt="{E(cat)}" width="640" height="480"></a>' if img else '') +
@@ -285,6 +297,69 @@ def appeal_page(a, sb_url):
             f'<p>{E(clip(a.get("description"), 600))}</p><p class="dt">👍 Поддержали: {sup} · {E(ru_date(a.get("published_at")))}</p>'
             f'<div class="cta">{open_btns(route, "Поддержать обращение", "Өтінішті қолдау")}</div>')
     return path, small_page(path, title + ' | Уркер 24', desc, img, route, body, img_alt=cat)
+
+# ---------------------------------------------------------------- [siteU] копии фото на GitHub Pages
+THUMB_W, FULL_W = 480, 1280
+def fnv(b, h):
+    for x in b: h = ((h ^ x) * 16777619) & 0xffffffff
+    return h
+def thumb_name(key, full=False):  # key = 'bucket/путь'; то же самое считает URKER_IMG в sb.js
+    b = key.encode('utf-8'); return f't/{fnv(b, 2166136261):08x}{fnv(b, 84696351):08x}{"f" if full else ""}.jpg'
+def key_from_url(u):
+    m = re.search(r'/storage/v1/object/public/([^?#]+)', u or '')
+    return urllib.parse.unquote(m.group(1)) if m else None
+
+def get_pil():
+    try:
+        from PIL import Image; return Image
+    except ImportError: pass
+    try:
+        subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', '--disable-pip-version-check', 'pillow'], check=True, timeout=180,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        import importlib; importlib.invalidate_caches(); from PIL import Image; return Image
+    except Exception as ex:
+        print('thumbs: Pillow unavailable —', ex); return None
+
+def make_jpeg(Image, raw, maxw, q):
+    from PIL import ImageOps
+    im = Image.open(io.BytesIO(raw)); im = ImageOps.exif_transpose(im)
+    if im.mode not in ('RGB', 'L'):
+        bg = Image.new('RGB', im.size, (255, 255, 255)); im = im.convert('RGBA'); bg.paste(im, mask=im.split()[3]); im = bg
+    im = im.convert('RGB'); im.thumbnail((maxw, maxw), Image.LANCZOS)
+    out = io.BytesIO(); im.save(out, 'JPEG', quality=q, optimize=True, progressive=True); return out.getvalue()
+
+def build_thumbs(root, sb_url, keys, prune, limit=150):
+    """keys: множество 'bucket/путь'. Скачивает (публичный GET) только то, чего ещё нет. Возвращает список изменённых файлов."""
+    os.makedirs(os.path.join(root, 't'), exist_ok=True); changed = []; Image = None; done = 0
+    want = set()
+    for k in sorted(keys):
+        tn, fn = thumb_name(k), thumb_name(k, True); want |= {tn, fn}
+        if os.path.exists(os.path.join(root, tn)) and os.path.exists(os.path.join(root, fn)): continue
+        if done >= limit: continue
+        Image = Image or get_pil()
+        if not Image: break
+        try:
+            url = sb_url + '/storage/v1/object/public/' + '/'.join(urllib.parse.quote(p) for p in k.split('/'))
+            with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'urker24-static'}), timeout=30) as r: raw = r.read()
+            small = make_jpeg(Image, raw, THUMB_W, 72); big = make_jpeg(Image, raw, FULL_W, 80)
+            if len(big) > len(raw) and raw[:3] == b'\xff\xd8\xff': big = raw   # оригинал уже лёгкий
+        except Exception as ex:
+            print('thumbs: skip', k, ex); continue
+        for rel, data in ((tn, small), (fn, big)):
+            assert THUMB_OK.match(rel)
+            open(os.path.join(root, rel), 'wb').write(data); changed.append(rel)
+        done += 1
+    if prune:
+        for f in os.listdir(os.path.join(root, 't')):
+            rel = 't/' + f
+            if THUMB_OK.match(rel) and rel not in want: os.remove(os.path.join(root, rel)); changed.append(rel)
+    print(f'thumbs: {len(keys)} photos, {done} new, {len(changed)} files changed')
+    return changed
+
+def thumbs_allowed(root):
+    try: y = open(os.path.join(root, '.github', 'workflows', 'static-pages.yml'), encoding='utf-8').read()
+    except OSError: return False
+    return bool(re.search(r'for p in [^;\n]*\bt\b', y)) and 't/[0-9a-f]' in y
 
 # ---------------------------------------------------------------- запуск
 class Writer:
@@ -318,6 +393,8 @@ def is_stub(root, rel):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--root', default='.'); ap.add_argument('--data-dir'); ap.add_argument('--today')
+    ap.add_argument('--thumbs', action='store_true', help='писать t/ даже если workflow его ещё не разрешает (для тестов)')
+    ap.add_argument('--no-thumbs', action='store_true')
     a = ap.parse_args(); root = os.path.abspath(a.root)
     D = load_js_json(os.path.join(root, 'data.js'))
     cfg = open(os.path.join(root, 'config.js'), encoding='utf-8').read()
@@ -338,6 +415,26 @@ def main():
     live_i = [x for x in (ls or []) if x.get('status') in ('approved', 'closed')]
     if old_i and len([i for i in old_i if not is_stub(root, f'i/{i}/index.html')]) >= 5 and not live_i:
         raise SystemExit('listings: 0 rows while pages exist — abort, nothing written')
+    # [siteU] копии фото — до страниц, чтобы og:image уже указывал на копию
+    thumbs_changed = []
+    if not a.no_thumbs and (a.thumbs or thumbs_allowed(root)):
+        keys = set()
+        for x in live_i:
+            for p in (x.get('photos') or []):
+                if isinstance(p, dict) and p.get('path'): keys.add('listings/' + p['path'])
+        for n in (nw or []):
+            if n.get('is_demo'): continue
+            for u in [n.get('cover_url')] + [(p if isinstance(p, str) else (p or {}).get('url')) for p in (n.get('photos') or [])]:
+                k = key_from_url(u)
+                if k: keys.add(k)
+        for x in (apl or []):
+            if x.get('status') not in AP_ST: continue
+            for p in (x.get('photos') or []):
+                if isinstance(p, dict) and p.get('path'): keys.add('appeals/' + p['path'])
+        thumbs_changed = build_thumbs(root, sb_url, keys, prune=apl is not None and not a.data_dir)
+        MIRROR['root'] = root
+    elif not a.no_thumbs:
+        print('thumbs: skipped — workflow does not allow t/ yet (see NOTE.md)')
     today = a.today or (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5)).date().isoformat()
     W = Writer(root)
     pages = []  # (ru_path, kz_path or None)

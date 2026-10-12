@@ -85,7 +85,7 @@ const visible=()=>LST.filter(l=>new Date(l.expires_at).getTime()>Date.now());
 async function load(){if(!ON||!SB.enabled)return;try{const r=await SB.get(`listings?select=${COLS}&order=sort_at.desc&limit=500`,6000);LST=Array.isArray(r)?r:[]}catch(e){LST=[]}}
 function lcard(l,compact){const ph=(l.photos||[])[0];const closed=l.status==='closed';const pr=fmtPrice(l);
  return `<a class="lcard ${compact?'mini':''} ${l.highlighted?'hl':''} ${closed?'closed':''}" href="#/item/${l.id}">
-  <div class="lc-img" ${ph?`style="background-image:url('${esc(photoUrl(ph))}')"`:''}>${ph?'':`<span>${SECT[l.section].e}</span>`}${closed?`<em>${t('lClosed')[l.section]}</em>`:''}${l.views>0?`<span class="lc-vw" aria-label="${A.t('viewsA')}: ${l.views}">${t('lViews')(l.views)}</span>`:''}</div>
+  <div class="lc-img">${ph?URKER_PIC(photoUrl(ph),false,'class="lc-ph" loading="lazy"',esc):`<span>${SECT[l.section].e}</span>`}${closed?`<em>${t('lClosed')[l.section]}</em>`:''}${l.views>0?`<span class="lc-vw" aria-label="${A.t('viewsA')}: ${l.views}">${t('lViews')(l.views)}</span>`:''}</div>
   <div class="lc-b"><div class="lc-k">${esc(t('lKind')[l.kind]||'')}${catLabel(l)&&l.category!=='other'?' · '+esc(catLabel(l)):''}</div><b class="lc-t">${esc(l.title)}</b>
   ${pr?`<div class="lc-p">${esc(pr)}</div>`:''}${compact?'':`<small>${esc([l.place,fmtDate(l.published_at||l.created_at)].filter(Boolean).join(' · '))}</small>`}</div></a>`}
 function empty(sec){return `<div class="ann-empty">🗂 <b>${t('lEmpty')}</b><span>${t('lEmptyS')}</span><a href="#/post${sec?'/'+sec:''}" class="lnk">${t('lPostBtn')}</a></div>`}
@@ -115,7 +115,7 @@ async function viewItem(id){
  A.setMeta(l.title+' — '+t('lSec')[l.section]+' · Уркер 24',(l.body||'').slice(0,150));
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/${ROUTE[l.section]}'" aria-label="${t('back')}">←</button><h1 class="sm">${S.e} ${t('lSec')[l.section]}</h1></div>
  <article class="article litem">
-  ${photos.length?`<div class="gallery" id="gal">${photos.map((u,i)=>`<img src="${esc(u)}" alt="" loading="${i?'lazy':'eager'}">`).join('')}</div>${photos.length>1?`<div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:''}`:''}
+  ${photos.length?`<div class="gallery" id="gal">${photos.map((u,i)=>URKER_PIC(u,true,`loading="${i?'lazy':'eager'}"`,esc)).join('')}</div>${photos.length>1?`<div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:''}`:''}
   <div class="nc-tags">${closed?`<span class="tag">${t('lClosed')[l.section]}</span>`:''}${l.highlighted?`<span class="chip pin">⭐ ${t('lHighlight')}</span>`:''}<span class="chip">${esc(t('lKind')[l.kind]||'')}</span>${catLabel(l)?`<span class="chip">${esc(catLabel(l))}</span>`:''}</div>
   <h1>${esc(l.title)}</h1>${pr?`<div class="lprice">${esc(pr)}</div>`:''}
   ${l.place?`<p class="lmeta">📍 ${l.section==='lost'?t('lWhere')+': ':''}${esc(l.place)}</p>`:''}${l.event_date?`<p class="lmeta">🗓 ${t('lWhen')}: ${esc(fmtDate(l.event_date+'T12:00:00Z'))}</p>`:''}
@@ -164,7 +164,7 @@ function form(sec,row,onSubmit){
   const pm=(f.querySelector('[name=pm]:checked')||{}).value;$('#lp').hidden=pm!=='fixed'};
  const pmEl=f.querySelector(`[name=pm][value=${pmDefault}]`)||f.querySelector('[name=pm]');if(pmEl)pmEl.checked=true;
  f.onchange=ev=>{if(ev.target.name==='lk'||ev.target.name==='pm')syncKind()};syncKind();
- const draw=()=>{A.setFC('lpf',photos.keep.length+photos.add.length,5);$('#lth').innerHTML=photos.keep.map((p,i)=>`<div class="th"><img src="${esc(photoUrl(p))}" alt=""><button type="button" data-rk="${i}" aria-label="✕">✕</button></div>`).join('')
+ const draw=()=>{A.setFC('lpf',photos.keep.length+photos.add.length,5);$('#lth').innerHTML=photos.keep.map((p,i)=>`<div class="th">${URKER_PIC(photoUrl(p),false,'',esc)}<button type="button" data-rk="${i}" aria-label="✕">✕</button></div>`).join('')
    +photos.add.map((p,i)=>`<div class="th"><img src="${p.url}" alt=""><button type="button" data-ra="${i}" aria-label="✕">✕</button></div>`).join('')};
  $('#lth').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;if(b.dataset.rk!=null)photos.keep.splice(+b.dataset.rk,1);else{URL.revokeObjectURL(photos.add[+b.dataset.ra].url);photos.add.splice(+b.dataset.ra,1)}draw()};
  $('#lpf').onchange=ev=>{const fs=[...ev.target.files];ev.target.value='';const room=5-photos.keep.length-photos.add.length;if(fs.length>room)A.toast(t('pTooMany'));

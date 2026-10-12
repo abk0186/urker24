@@ -87,7 +87,7 @@ const shareHref=a=>{const link='https://urker24.kz/a/'+a.id+'/';/* [siteT] ст�
  return 'https://wa.me/?text='+encodeURIComponent(`📢 ${t('apShareMsg')}: ${CE[a.category]||''} ${t('apCat')[a.category]||''} — ${addrTxt(a)}\n«${d.length>140?d.slice(0,140)+'…':d}»\n${link}`)};
 function apCard(a){const ph=(a.photos||[])[0];
  return `<article class="apc" id="ap${a.id}"><div class="apc-h">${catChip(a.category)}${stBadge(a.status)}</div>
-  <a class="apc-b" href="#/appeal/${a.id}">${ph?`<img class="apc-img" src="${esc(photoUrl(ph))}" alt="" loading="lazy">`:''}
+  <a class="apc-b" href="#/appeal/${a.id}">${ph?`${URKER_PIC(photoUrl(ph),false,'class="apc-img" loading="lazy"',esc)}`:''}
    <p class="apc-d">${esc(a.description)}</p>
    <div class="apc-m">📍 ${esc(addrTxt(a))} · ${esc(t('apScopeS')[a.scope]||'')} · ${esc(fmtDate(a.published_at||a.created_at))}</div></a>
   ${a.response?`<div class="apc-r">${t('apResp')}: ${esc(a.response.length>160?a.response.slice(0,160)+'…':a.response)}</div>`:''}
@@ -123,7 +123,7 @@ async function viewItem(id){
  A.setMeta(`${t('apCat')[a.category]} — ${addrTxt(a)} · ${t('apTitle')} · Уркер 24`,String(a.description||'').slice(0,150));
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/appeals'" aria-label="${t('back')}">←</button><h1 class="sm">📢 ${esc(t('apTitle'))}</h1></div>
  <article class="article ap-item">
-  ${photos.length?`<div class="gallery" id="gal">${photos.map((u,i)=>`<img src="${esc(u)}" alt="" loading="${i?'lazy':'eager'}">`).join('')}</div>`:''}
+  ${photos.length?`<div class="gallery" id="gal">${photos.map((u,i)=>URKER_PIC(u,true,`loading="${i?'lazy':'eager'}"`,esc)).join('')}</div>`:''}
   <div class="apc-h">${catChip(a.category)}${stBadge(a.status)}</div>
   <h1>${CE[a.category]||''} ${esc(t('apCat')[a.category])}</h1>
   <p class="ap-addr">📍 ${esc(addrTxt(a))}<br><small>${esc(t('apScopeS')[a.scope]||'')} · ${esc(t('apResident')(streetTxt(a.street)))} · ${esc(fmtDate(a.published_at||a.created_at))}</small></p>

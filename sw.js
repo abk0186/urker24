@@ -13,6 +13,7 @@ self.addEventListener('fetch', e => {
   if (url.origin !== self.location.origin) return;                 // Supabase, YouTube, WhatsApp и т.п. — мимо
   if (url.pathname.startsWith('/admin')) return;                   // админка — всегда из сети
   if (url.pathname === '/config.js') return;                       // настройки — всегда свежие, мимо SW
+  if (url.pathname.startsWith('/t/')) return;                      // [siteU] копии фото — обычный HTTP-кэш браузера
   if (!/(\.(html|css|js|png|jpg|webmanifest)|\/)$/.test(url.pathname)) return;
   e.respondWith(fetch(req).then(res => {
     if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }

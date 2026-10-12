@@ -67,4 +67,16 @@ function create(opts){
  return api;
 }
 window.SBCreate=create;
+// [siteU] Копии фото на GitHub Pages (urker24.kz/t/…): маленькая для плиток, полная для галереи — не тратят трафик Supabase.
+// Имя = FNV-1a (2×32 бита) от «bucket/путь». Если копии ещё нет (первые ~30 мин), <img data-fb> сам переключится на оригинал.
+function fnv(b,h){for(let i=0;i<b.length;i++){h^=b[i];h=Math.imul(h,16777619)>>>0}return h>>>0}
+const hx=n=>('0000000'+n.toString(16)).slice(-8);
+window.URKER_IMG=function(u,full){
+ const m=/\/storage\/v1\/object\/public\/([^?#]+)/.exec(String(u||''));if(!m)return '';
+ let k;try{k=decodeURIComponent(m[1])}catch(e){return ''}
+ const b=new TextEncoder().encode(k);return '/t/'+hx(fnv(b,2166136261))+hx(fnv(b,84696351))+(full?'f':'')+'.jpg'};
+document.addEventListener('error',e=>{const el=e.target;if(el&&el.tagName==='IMG'&&el.dataset&&el.dataset.fb&&el.src!==el.dataset.fb){const f=el.dataset.fb;delete el.dataset.fb;el.src=f}},true);
+// <img> с копией и запасным адресом; extra — доп. атрибуты
+window.URKER_PIC=function(u,full,extra,esc){const m=window.URKER_IMG(u,full);const e=esc||(x=>String(x).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';'));
+ return `<img src="${e(m||u)}"${m?` data-fb="${e(u)}"`:''} alt="" decoding="async" ${extra||''}>`};
 })();

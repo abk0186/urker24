@@ -566,3 +566,9 @@ main[data-view=home] .hints button{min-height:40px;padding:5px 12px;font-size:14
 .phr-a .btn{width:100%}
 .phl{margin:0 0 8px}
 .ann-done-h{font-size:16px;color:var(--muted);margin:16px 2px 8px;border-top:1px dashed var(--line);padding-top:12px}
+
+/* [siteU] фото плиток и обложек — <img loading=lazy> вместо background-image (копии на GitHub Pages) */
+.lc-img{overflow:hidden}
+.lc-img>img.lc-ph,.has-ph>img.cv-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.lc-img>em,.lc-img>.lc-vw{z-index:1}
+.nc-img.has-ph,.art-cover.has-ph{position:relative;overflow:hidden}

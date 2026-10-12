@@ -355,7 +355,7 @@ const LT=o=>{o=o||{};const want=o[lang]||'',other=o[lang==='kz'?'ru':'kz']||'';r
 function newsSorted(){return NEWS.slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||String(b.date).localeCompare(String(a.date)))}
 const newsDate=n=>{if(!n.date)return '';const [y,m,d]=n.date.slice(0,10).split('-').map(Number);return `${d} ${MONTHS[lang][m-1]} ${y}`};
 function newsCover(n,cls){const c=(t('newsCats')[n.category]||'📰').split(' ')[0];
- return n.cover?`<div class="${cls}" style="background-image:url('${esc(n.cover)}')"></div>`:`<div class="${cls} ph"><span>${c}</span></div>`}
+ return n.cover?`<div class="${cls} has-ph">${URKER_PIC(n.cover,cls==='art-cover',`class="cv-ph" loading="${cls==='art-cover'?'eager':'lazy'}"`,esc)}</div>`:`<div class="${cls} ph"><span>${c}</span></div>`}
 function newsCard(n,compact){const ti=LT(n.title),le=LT(n.lead);
  return `<a class="news-card ${compact?'compact':''}" href="#/news/${n.id}">${newsCover(n,'nc-img')}<div class="nc-b">
   <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span>${vw('news',n.id)}</div>
@@ -392,7 +392,7 @@ function viewArticle(id){
  const msg=`📰 ${ti.text}\n${le.text?le.text+'\n':''}${link}`;
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/news'" aria-label="${t('back')}">←</button><h1 class="sm">📰 ${t('newsTitle')}</h1></div>
  <article class="article">
-  ${photos.length>1?`<div class="gallery" id="gal">${photos.map((u,i)=>`<img src="${esc(u)}" alt="" loading="${i?'lazy':'eager'}">`).join('')}</div><div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:newsCover(n,'art-cover')}
+  ${photos.length>1?`<div class="gallery" id="gal">${photos.map((u,i)=>URKER_PIC(u,true,`loading="${i?'lazy':'eager'}"`,esc)).join('')}</div><div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:newsCover(n,'art-cover')}
   <div class="nc-tags">${n.pinned?`<span class="chip pin">${t('pinned')}</span>`:''}<span class="chip">${esc(t('newsCats')[n.category]||'')}</span><small>${esc(newsDate(n))}</small>${vw('news',n.id)}</div>
   <h1>${esc(ti.text)}</h1>
   ${fb?`<p class="fb-note">🌐 ${t('fallbackNote')}</p>`:''}
