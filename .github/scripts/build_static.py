@@ -153,14 +153,14 @@ def crumbs(lg, items):
 
 # ---------------------------------------------------------------- объявления / новости / обращения
 STYLE_V = 2
-L_SEC = {'market': ('🛍', 'Барахолка', 'Барахолка'), 'ads': ('📋', 'Объявления', 'Хабарландырулар'), 'lost': ('🐾', 'Потеряшки', 'Жоғалғандар')}
+L_SEC = {'market': ('🛍', 'Барахолка', 'Барахолка'), 'ads': ('📋', 'Объявления', 'Хабарландырулар'), 'jobs': ('💼', 'Работа', 'Жұмыс'), 'lost': ('🐾', 'Потеряшки', 'Жоғалғандар')}
 L_KIND = {'sell': 'Продам', 'buy': 'Куплю', 'free': 'Отдам даром', 'rent_offer': 'Сдам', 'rent_seek': 'Сниму', 'job_offer': 'Вакансия', 'job_seek': 'Ищу работу',
           'gig': 'Подработка', 'service': 'Услуги частных лиц', 'ride': 'Попутчики', 'other': 'Разное', 'lost': 'Потерял', 'found': 'Нашёл'}
 L_CAT = {'market': {'kids': 'Детское', 'clothes': 'Одежда', 'tech': 'Техника', 'furniture': 'Мебель', 'home': 'Для дома и дачи', 'auto': 'Авто и запчасти',
                     'animals': 'Животные и скот', 'build': 'Стройматериалы', 'other': ''},
          'ads': {'house': 'Дом', 'flat': 'Квартира', 'room': 'Комната', 'garage': 'Гараж', 'equipment': 'Техника', 'other': ''},
          'lost': {'animals': 'Животные', 'docs': 'Документы', 'keys': 'Ключи', 'things': 'Вещи', 'other': ''}}
-L_CLOSED = {'market': 'Продано', 'ads': 'Неактуально', 'lost': 'Нашлось'}
+L_CLOSED = {'market': 'Продано', 'ads': 'Неактуально', 'jobs': 'Неактуально', 'lost': 'Нашлось'}
 AP_CAT = {'light': ('💡', 'Освещение'), 'trash': ('🗑', 'Мусор и вывоз'), 'roads': ('🛣', 'Дороги и ямы'), 'water': ('🚰', 'Вода и канализация'),
           'heat': ('🔥', 'Отопление и газ'), 'yard': ('🌳', 'Благоустройство, дворы, детские площадки'), 'dogs': ('🐕', 'Бездомные собаки'),
           'safety': ('🚨', 'Безопасность'), 'transport': ('🚌', 'Транспорт'), 'other': ('📌', 'Другое')}
@@ -245,6 +245,7 @@ def og_img(key, sb_url):
 def listing_page(l, sb_url):
     lid = int(l['id']); path = f'/i/{lid}/'; route = f'/#/item/{lid}'
     sec = l.get('section') if l.get('section') in L_SEC else 'market'
+    if sec == 'ads' and l.get('kind') in ('job_offer', 'job_seek'): sec = 'jobs'  # [jobs]
     em, sec_ru, sec_kz = L_SEC[sec]
     kind = L_KIND.get(l.get('kind'), ''); cat = L_CAT.get(sec, {}).get(l.get('category'), '')
     closed = l.get('status') == 'closed'

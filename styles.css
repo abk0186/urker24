@@ -572,3 +572,12 @@ main[data-view=home] .hints button{min-height:40px;padding:5px 12px;font-size:14
 .lc-img>img.lc-ph,.has-ph>img.cv-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .lc-img>em,.lc-img>.lc-vw{z-index:1}
 .nc-img.has-ph,.art-cover.has-ph{position:relative;overflow:hidden}
+/* [jobs] вкладки раздела «Работа» */
+.jtabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#eef1f4;border-radius:14px;padding:4px;margin:0 0 8px}
+.jtabs button{border:0;background:transparent;border-radius:11px;padding:11px 6px;font:inherit;font-size:15px;font-weight:600;color:var(--muted,#555);line-height:1.2;min-height:44px}
+.jtabs button.on{background:#fff;color:var(--ink,#111);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.jtabs button i{font-style:normal;font-weight:500;font-size:12px;margin-left:6px;background:#dfe4ea;border-radius:999px;padding:1px 7px}
+.jtabs button.on i{background:var(--accent);color:#fff}
+.jtd{margin:0 0 8px}
+@media (max-width:300px){.jtabs{grid-template-columns:1fr}}
+#homeBody .stiles .stile.spost,.stiles .stile.spost{grid-column:1/-1;flex-direction:row;justify-content:center;gap:8px}
