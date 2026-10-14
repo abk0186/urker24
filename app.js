@@ -223,8 +223,13 @@ function search(query){
  });
  const bad=e=>e.flags.includes('malformed')?1:0;
  res.sort((a,b)=>bad(a.e)-bad(b.e)||b.s-a.s||a.e.id-b.e.id);
- const subs={};res.forEach(r=>{subs[r.e.sub]=(subs[r.e.sub]||0)+1});
- return{list:res.map(r=>r.e),subs:Object.entries(subs).sort((a,b)=>b[1]-a[1])};
+ // релевантность подкатегории: совпадение в названии/первых синонимах важнее, чем в хвосте списка синонимов
+ const subRel=id=>{const t=subTokens[id]||[];let r=0;for(const q of qs){if(/^\d+$/.test(q))continue;for(let k=0;k<t.length;k++){const sc=tokScore(q,[t[k]]);if(sc){r+=sc*1000-k;break}}}return r};
+ const subs={},best={},rel={};res.forEach(r=>{const id=r.e.sub;subs[id]=(subs[id]||0)+1;if(!(id in rel))rel[id]=subRel(id);best[id]=Math.max(best[id]||0,r.s)});
+ const subOrder=Object.keys(subs).sort((a,b)=>best[b]-best[a]||rel[b]-rel[a]||subs[b]-subs[a]);
+ const pos={};subOrder.forEach((id,i)=>pos[id]=i);
+ res.sort((a,b)=>bad(a.e)-bad(b.e)||(b.s>=10)-(a.s>=10)||pos[a.e.sub]-pos[b.e.sub]||b.s-a.s||a.e.id-b.e.id);
+ return{list:res.map(r=>r.e),subs:subOrder.map(id=>[id,subs[id]])};
 }
 
 // ---------- UI pieces ----------
