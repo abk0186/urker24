@@ -100,7 +100,7 @@ const fromLocalInput=v=>v?v+':00+05:00':null;
 const normWa=p=>{const d=String(p||'').replace(/\D/g,'');if(/^8\d{10}$/.test(d)&&!/^8800/.test(d))return '7'+d.slice(1);if(/^7\d{10}$/.test(d))return d;return null};
 let tab='stats',editing=null,filterQ='',CACHE={};
 // [siteO moderator] роль «модератор» (14_moderator.sql): вкладки Заявки, Объявления жителей, Новости, Отзывы, Сообщения; данные — через mod_*
-let ROLE='admin';const IS_MOD=()=>ROLE==='moderator';const MOD_TABS=['pending','appeals','listings','news','reviews','reports','ann','phones','digest'];const tabOk=k=>!IS_MOD()||MOD_TABS.includes(k);
+let ROLE='admin';const IS_MOD=()=>ROLE==='moderator';const MOD_TABS=['pending','listings','news','reviews','reports','ann','phones','digest'];const tabOk=k=>!IS_MOD()||MOD_TABS.includes(k);
 Object.assign(T.ru,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Уркер',addL:'+ Добавить объявление',newL:'Новое объявление',evDate:'Когда потеряли / нашли',photosL:'Фото (до 5)',lcreated:'✅ Объявление опубликовано',publishL:'Опубликовать',priceFixed:'цена',noPrice:'без цены',uploadingL:'Загрузка фото…',
  lerr:{invalid_phone:'Проверьте телефон: нужен номер вида 8 701 123 45 67',bad_title:'Заголовок — не короче 3 символов',bad_price:'Укажите цену цифрами',bad_kind:'Выберите тип и категорию'}});
 Object.assign(T.kz,{barTM:'МОДЕРАТОР',docTM:'🛡 Модератор · Үркер',addL:'+ Хабарландыру қосу',newL:'Жаңа хабарландыру',evDate:'Қашан жоғалды / табылды',photosL:'Фото (5-ке дейін)',lcreated:'✅ Хабарландыру жарияланды',publishL:'Жариялау',priceFixed:'баға',noPrice:'бағасыз',uploadingL:'Фото жүктелуде…',
@@ -112,57 +112,9 @@ Object.assign(T.ru,{lEdit:'✏️ Редактировать',lEditT:'Редак
 Object.assign(T.kz,{lEdit:'✏️ Өңдеу',lEditT:'Хабарландыруды өңдеу',lPhotos:'Фото (5-ке дейін): біріншісі — басты',lMain:'Басты',lAddPh:'📷 Фото қосу',lNoPh:'Фото жоқ',
  lMax:'5 фотодан артық болмайды',lHeic:'Бұл фото ашылмайды (HEIC форматы). JPEG форматындағы фотоны таңдаңыз немесе фотоның скриншотын жасаңыз',lPhSaved:'✅ Сақталды',lPhWait:'Күте тұрыңыз, фото әлі жүктелуде',
  lPhPart:n=>`Хабарландыру жарияланды, бірақ фото жүктелмеді: ${n}. «✏️ Өңдеу» батырмасын басып, қайта қосыңыз`,lLeft:'◀',lRight:'▶',lRm:'✕',lRmT:'Фотоны алып тастау',lLeftT:'Солға',lRightT:'Оңға'});
-// [siteQ appeals] «📢 Обращения жителей»: вкладка для админа и модератора (20_appeals.sql, функции mod_appeal_*)
-{const ins=(o,v)=>{const r={};for(const [a,b] of Object.entries(o)){r[a]=b;if(a==='pending')r.appeals=v}if(!r.appeals)r.appeals=v;return r};
- T.ru.tabs=ins(T.ru.tabs,'📢 Обращения');T.kz.tabs=ins(T.kz.tabs,'📢 Өтініштер');T.ru.nb.appeals='Обращения жителей';T.kz.nb.appeals='Тұрғындар өтініштері'}
 // [siteT growth] «Объявления» (announcements) теперь «⚠️ Отключения»; новые вкладки «📞 Телефоны» и «🗞 Уркер за неделю»
 {const ins=(o,v)=>{const r={};for(const [a,b] of Object.entries(o)){r[a]=b;if(a==='ann')Object.assign(r,v)}if(!('phones' in r))Object.assign(r,v);return r};
  T.ru.tabs=ins(Object.assign(T.ru.tabs,{ann:'⚠️ Отключения'}),{phones:'📞 Телефоны',digest:'🗞 Уркер за неделю'});T.kz.tabs=ins(Object.assign(T.kz.tabs,{ann:'⚠️ Өшірулер'}),{phones:'📞 Телефондар',digest:'🗞 Апта қорытындысы'})}
-const AP_T={ru:{st:{pending:'на проверке',new:'опубликовано · новое',sent:'передано в акимат',in_work:'в работе',resolved:'решено',rejected:'отклонено'},
-  stF:{pending:'На проверке',new:'Новые',sent:'В акимате',in_work:'В работе',resolved:'Решено',rejected:'Отклонено','':'Все'},
-  cat:{light:'Освещение',trash:'Мусор и вывоз',roads:'Дороги и ямы',water:'Вода и канализация',heat:'Отопление и газ',yard:'Благоустройство, дворы, детские площадки',dogs:'Бездомные собаки',safety:'Безопасность',transport:'Транспорт',other:'Другое'},
-  scope:{street:'частное (улица / дом)',district:'общее (весь район)'},allCats:'Все темы',search:'Поиск: улица, имя, телефон, текст, №',
-  publish:'✅ Опубликовать',reject:'Отклонить',toSent:'📤 Передано в акимат',toWork:'🛠 В работе',toResolved:'✅ Решено',toNew:'↩ Снова «новое»',restore:'↩ Вернуть на проверку',
-  edit:'✏️ Редактировать',del:'🗑 Удалить',delQ:'Удалить обращение? Оно исчезнет с сайта и из выгрузки.',wa:'📲 Написать жителю',sup:n=>`👥 Поддержали: ${n}`,supNone:'Пока никто не поддержал',
-  add:'+ Добавить обращение',newT:'Новое обращение',editT:'Обращение',created:'✅ Обращение опубликовано',saved:'✅ Сохранено',
-  f:{category:'Тема',scope:'Чего касается',street:'Улица',house:'Дом',description:'Суть проблемы',name:'Имя жителя',phone:'Телефон жителя',response:'Ответ (виден на сайте)',admin_note:'Заметка (только для админки)',status:'Статус'},
-  added:'добавлено вручную',photos:'Фото (до 3): первое — главное',max:'Не больше 3 фото',
-  err:{bad_category:'Выберите тему',bad_street:'Укажите улицу',bad_house:'Укажите номер дома',bad_text:'Суть проблемы — не короче 10 символов',bad_name:'Укажите имя жителя',invalid_phone:'Проверьте телефон: 8 701 123 45 67',forbidden:'Нет прав'},
-  exp:'📄 Выгрузка для акимата',expD:'Сводка по теме и периоду: адреса, имена, телефоны, число поддержавших. Можно распечатать или сохранить в PDF, или скачать таблицу для Excel.',
-  from:'С даты',to:'По дату',expSt:{public:'Опубликованные (все статусы)','':'Все, кроме отклонённых',new:'Только новые',sent:'Только переданные в акимат',in_work:'Только в работе',resolved:'Только решённые'},expStL:'Какие обращения',
-  show:'👁 Показать сводку',print:'🖨 Печать / PDF',csv:'⬇️ Таблица для Excel (CSV)',expNone:'За этот период обращений нет',
-  hTitle:'Обращения жителей района Уркер (г. Астана)',hPeriod:'Период',hAll:'за всё время',hCat:'Тема',hGen:'Сформировано',hSrc:'Собрано через сайт urker24.kz. Каждое обращение подано жителем с указанием имени, адреса и телефона.',
-  hTot:'Итого по темам',cN:'Обращений',cS:'Жителей поддержали',total:'Всего',
-  col:{n:'№',date:'Дата',addr:'Адрес',text:'Суть обращения',who:'Заявитель',sup:'Поддержали',st:'Статус',scope:'Масштаб',street:'Улица',house:'Дом',name:'Имя',phone:'Телефон',supStreets:'Улицы поддержавших',resp:'Ответ',note:'Заметка',photos:'Фото',link:'Ссылка на сайте',cat:'Тема'},
-  waMsg:{new:'Здравствуйте, {n}! Ваше обращение № {id} ({c}, {a}) опубликовано на сайте urker24.kz: {u}\nПоделитесь ссылкой с соседями — чем больше жителей поддержат, тем весомее обращение.',
-   sent:'Здравствуйте, {n}! Ваше обращение № {id} ({c}, {a}) передано в акимат. Следить за ним можно здесь: {u}',
-   in_work:'Здравствуйте, {n}! По вашему обращению № {id} ({c}, {a}) начаты работы. Подробнее: {u}',
-   resolved:'Здравствуйте, {n}! Ваше обращение № {id} ({c}, {a}) отмечено как решённое. Спасибо, что сообщили! {u}',
-   other:'Здравствуйте, {n}! Пишу с сайта Уркер 24 по вашему обращению № {id} ({c}, {a}).'},
-  flagged:'⚠️ проверьте текст',addr:(s,h)=>`ул. ${s}${h?', д. '+h:''}`},
- kz:{st:{pending:'тексеруде',new:'жарияланды · жаңа',sent:'әкімдікке жіберілді',in_work:'жұмыста',resolved:'шешілді',rejected:'қабылданбады'},
-  stF:{pending:'Тексеруде',new:'Жаңа',sent:'Әкімдікте',in_work:'Жұмыста',resolved:'Шешілді',rejected:'Қабылданбады','':'Барлығы'},
-  cat:{light:'Жарықтандыру',trash:'Қоқыс және шығару',roads:'Жолдар мен шұңқырлар',water:'Су және кәріз',heat:'Жылу және газ',yard:'Абаттандыру, аулалар, балалар алаңдары',dogs:'Қаңғыбас иттер',safety:'Қауіпсіздік',transport:'Көлік',other:'Басқа'},
-  scope:{street:'жеке (көше / үй)',district:'жалпы (бүкіл аудан)'},allCats:'Барлық тақырып',search:'Іздеу: көше, аты, телефон, мәтін, №',
-  publish:'✅ Жариялау',reject:'Қабылдамау',toSent:'📤 Әкімдікке жіберілді',toWork:'🛠 Жұмыста',toResolved:'✅ Шешілді',toNew:'↩ Қайта «жаңа»',restore:'↩ Тексеруге қайтару',
-  edit:'✏️ Өңдеу',del:'🗑 Жою',delQ:'Өтінішті жою керек пе? Ол сайттан және есептен жоғалады.',wa:'📲 Тұрғынға жазу',sup:n=>`👥 Қолдағандар: ${n}`,supNone:'Әзірге ешкім қолдамады',
-  add:'+ Өтініш қосу',newT:'Жаңа өтініш',editT:'Өтініш',created:'✅ Өтініш жарияланды',saved:'✅ Сақталды',
-  f:{category:'Тақырып',scope:'Неге қатысты',street:'Көше',house:'Үй',description:'Мәселенің мәні',name:'Тұрғынның аты',phone:'Тұрғынның телефоны',response:'Жауап (сайтта көрінеді)',admin_note:'Жазба (тек әкімші бетінде)',status:'Күйі'},
-  added:'қолмен қосылды',photos:'Фото (3-ке дейін): біріншісі — басты',max:'3 фотодан артық болмайды',
-  err:{bad_category:'Тақырыпты таңдаңыз',bad_street:'Көшені көрсетіңіз',bad_house:'Үй нөмірін көрсетіңіз',bad_text:'Мәселенің мәні — кемінде 10 таңба',bad_name:'Тұрғынның атын көрсетіңіз',invalid_phone:'Телефонды тексеріңіз: 8 701 123 45 67',forbidden:'Құқық жоқ'},
-  exp:'📄 Әкімдікке арналған есеп',expD:'Тақырып пен кезең бойынша жиынтық: мекенжайлар, аты-жөні, телефондар, қолдағандар саны. Басып шығаруға немесе PDF-ке сақтауға, не Excel кестесін жүктеуге болады.',
-  from:'Күннен бастап',to:'Күнге дейін',expSt:{public:'Жарияланғандар (барлық күй)','':'Қабылданбағандардан басқасы',new:'Тек жаңалар',sent:'Тек әкімдікке жіберілгендер',in_work:'Тек жұмыстағылар',resolved:'Тек шешілгендер'},expStL:'Қандай өтініштер',
-  show:'👁 Жиынтықты көрсету',print:'🖨 Басып шығару / PDF',csv:'⬇️ Excel кестесі (CSV)',expNone:'Бұл кезеңде өтініш жоқ',
-  hTitle:'Үркер ауданы тұрғындарының өтініштері (Астана қ.)',hPeriod:'Кезең',hAll:'барлық уақыт',hCat:'Тақырып',hGen:'Жасалған күні',hSrc:'urker24.kz сайты арқылы жиналды. Әр өтінішті тұрғын аты-жөнін, мекенжайын және телефонын көрсетіп берген.',
-  hTot:'Тақырыптар бойынша жиыны',cN:'Өтініштер',cS:'Қолдаған тұрғындар',total:'Барлығы',
-  col:{n:'№',date:'Күні',addr:'Мекенжайы',text:'Өтініштің мәні',who:'Өтініш беруші',sup:'Қолдағандар',st:'Күйі',scope:'Ауқымы',street:'Көше',house:'Үй',name:'Аты',phone:'Телефон',supStreets:'Қолдағандардың көшелері',resp:'Жауап',note:'Жазба',photos:'Фото',link:'Сайттағы сілтеме',cat:'Тақырып'},
-  waMsg:{new:'Сәлеметсіз бе, {n}! № {id} өтінішіңіз ({c}, {a}) urker24.kz сайтында жарияланды: {u}\nСілтемені көршілеріңізбен бөлісіңіз — қолдаған тұрғындар көп болса, өтініш салмақты болады.',
-   sent:'Сәлеметсіз бе, {n}! № {id} өтінішіңіз ({c}, {a}) әкімдікке жіберілді. Барысын мына жерден көре аласыз: {u}',
-   in_work:'Сәлеметсіз бе, {n}! № {id} өтінішіңіз ({c}, {a}) бойынша жұмыс басталды. Толығырақ: {u}',
-   resolved:'Сәлеметсіз бе, {n}! № {id} өтінішіңіз ({c}, {a}) шешілді деп белгіленді. Хабарлағаныңызға рақмет! {u}',
-   other:'Сәлеметсіз бе, {n}! № {id} өтінішіңіз ({c}, {a}) бойынша Үркер 24 сайтынан жазып отырмын.'},
-  flagged:'⚠️ мәтінді тексеріңіз',addr:(s,h)=>`${s} көшесі${h?', '+h+' үй':''}`}};
-const APT=()=>AP_T[lang];
 // кнопка «🔄 Обновить»: перезагрузка с ?r=<время> и #tab=<вкладка> — после загрузки возвращаем вкладку и чистим адрес
 try{const m=/^#tab=([a-z]+)$/.exec(location.hash);if(m&&T.ru.tabs[m[1]])tab=m[1];if(m||/[?&]r=\d/.test(location.search))history.replaceState(null,'',location.pathname)}catch(e){}
 
@@ -193,7 +145,7 @@ function editor(spec,row,extraBtns){
 }
 
 // ---------- data ----------
-const NB_KEYS=['pending','appeals','listings','claims','news','reviews','reports'];
+const NB_KEYS=['pending','listings','claims','news','reviews','reports'];
 const nbKeys=()=>NB_KEYS.filter(k=>(k!=='listings'||F_LIST)&&(k!=='claims'||F_CLAIM)&&tabOk(k));
 let NB_RPC=true;
 async function counts(){
@@ -439,10 +391,10 @@ async function refreshCounts(){clearTimeout(NB_TIMER);const my=++NB_SEQ;try{cons
 const countsSoon=()=>{clearTimeout(NB_TIMER);NB_TIMER=setTimeout(refreshCounts,350)};
 // после любого изменения в базе (одобрить/отклонить/удалить/сохранить) — пересчитать
 for(const m of ['insert','update','remove']){const f=SB[m];SB[m]=(...a)=>f(...a).then(r=>{countsSoon();return r})}
-{const f=SB.rpc;SB.rpc=(fn,...a)=>f(fn,...a).then(r=>{if(/^(admin_apply|mod_(hide_target|specialist_save|listing_set_status|listing_update|listing_create|news_suggestion_set|review_set|report_set|appeal_set_status|appeal_create))/.test(fn))countsSoon();return r})}
+{const f=SB.rpc;SB.rpc=(fn,...a)=>f(fn,...a).then(r=>{if(/^(admin_apply|mod_(hide_target|specialist_save|listing_set_status|listing_update|listing_create|news_suggestion_set|review_set|report_set))/.test(fn))countsSoon();return r})}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&$('#nbox'))refreshCounts()});
 function goTo(k){tab=k;editing=null;filterQ='';JUST=null;
- if(k==='listings')LF={status:'pending',section:'',q:''};if(k==='appeals'){APF={status:'pending',cat:'',q:''};APJ=null}if(k==='claims')CLF='pending';
+ if(k==='listings')LF={status:'pending',section:'',q:''};if(k==='claims')CLF='pending';
  render().then(()=>{const tb=adm.querySelector('.tabs');if(tb){const y=tb.getBoundingClientRect().top+scrollY-(($('#admbar')||{}).offsetHeight||0)-8;if(y<scrollY)scrollTo({top:Math.max(0,y)})}})}
 async function render(){
  clearTimeout(NB_TIMER);const my=++NB_SEQ;
@@ -452,7 +404,7 @@ async function render(){
  if(my===NB_SEQ)applyCounts(c);else applyCounts(NB_C);
  {const tb=adm.querySelector('.tabs'),on=tb&&tb.querySelector('button.on');if(on&&(on.offsetLeft+on.offsetWidth>tb.scrollLeft+tb.clientWidth||on.offsetLeft<tb.scrollLeft))tb.scrollLeft=Math.max(0,on.offsetLeft-12)}
  adm.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;editing=null;filterQ='';JUST=null;render()});
- try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,cards:vCards,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims,appeals:vAppeals,phones:vPhones,digest:vDigest})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
+ try{await ({stats:vStats,pending:vPending,reviews:vReviews,reports:vReports,specs:vSpecs,cards:vCards,ann:vAnn,ads:vAds,news:vNews,listings:vListings,claims:vClaims,phones:vPhones,digest:vDigest})[tab]($('#list'))}catch(e){$('#list').innerHTML=`<div class="row">⚠️ ${esc(e.message)}</div>`}
 }
 const pill=s=>`<span class="pill ${esc(s)}">${esc(t('st')[s]||s)}</span>`;
 function bindSpecEditor(box,row,onDone){
@@ -609,9 +561,8 @@ function digestText(o,lg,top){const X=DGX[lg],out=[],day=iso=>{const a=almaty(is
  const an=(o.ann||[]).filter(a=>!a.end_at||new Date(a.end_at)>new Date());if(an.length){out.push('',X.ann);an.slice(0,5).forEach(a=>{const ic={power:'⚡',water:'💧',gas:'🔥',repair:'🚧'}[a.type]||'📌';let w='';
    if(a.start_at){const s=almaty(a.start_at),e=a.end_at?almaty(a.end_at):null;w=`${s.d} ${X.months[s.m]}, ${s.hm}`+(e?(e.d===s.d&&e.m===s.m?`–${e.hm}`:` — ${e.d} ${X.months[e.m]}, ${e.hm}`):'')}
    const tt=nm(a.title_ru,a.title_kz);if(/\d{1,2}:\d{2}/.test(tt))w='';out.push(`• ${ic} ${tt}${w?' — '+w:''}`)});out.push(`  ${PUB}#/ann`)}
- const ap=o.appeals||{};if(+ap.total||+ap.new_period){out.push('',X.ap,X.apL(+ap.new_period||0,+ap.total||0,+ap.resolved_total||0,+ap.resolved_period||0));if(+ap.supports_period)out.push(X.apS(+ap.supports_period));out.push(`  ${PUB}#/appeals`)}
  out.push('',X.cta,PUB,X.cta2);return out.join('\n')}
-const dgEmpty=o=>!((o.specialists||[]).length||(o.listings||[]).length||(o.news||[]).length||(o.ann||[]).length||+(o.appeals||{}).new_period);
+const dgEmpty=o=>!((o.specialists||[]).length||(o.listings||[]).length||(o.news||[]).length||(o.ann||[]).length);
 async function vDigest(box){const G=DG_T[lang];
  if(!DG.data||DG.data._days!==DG.days){DG.data=await SB.rpc('mod_digest',{p_days:DG.days});DG.data._days=DG.days}
  const o=DG.data;const txt=DG.lng==='both'?digestText(o,'ru',DG.top)+'\n\n— — —\n\n'+digestText(o,'kz',DG.top):digestText(o,DG.lng,DG.top);
@@ -795,151 +746,6 @@ function openPw(){
  $('#pw1').focus();
 }
 // заметная полоса «🔐 АДМИНКА · вы вошли как …» — только когда вошёл администратор
-// ---------- [siteQ appeals] «📢 Обращения жителей» (админ и модератор: mod_appeal_*) ----------
-const AP_CATS=[['light','💡'],['trash','🗑'],['roads','🛣'],['water','🚰'],['heat','🔥'],['yard','🌳'],['dogs','🐕'],['safety','🚨'],['transport','🚌'],['other','📌']],AP_E=Object.fromEntries(AP_CATS);
-const AP_PREF=/^(мкр|микрорайон|мкрн|пер\.?|переулок|пр\.?|проспект|ш\.?|шоссе|тупик|ж\.?\s?м|тұйық|даңғыл|шағын)/i;
-const apAddr=(r,L)=>{L=L||APT();return AP_PREF.test(r.street||'')?(r.street+(r.house?', '+r.house:'')):L.addr(r.street,r.house)};
-const apPhoto=p=>p&&p.path?SB.publicUrl('appeals',p.path):'';
-const apLink=r=>PUB+'a/'+r.id+'/';  // [siteT] страница с превью
-const apDay=iso=>iso?new Date(iso).toLocaleDateString('ru-RU',{timeZone:'Asia/Almaty',day:'2-digit',month:'2-digit',year:'numeric'}):'';
-const apToday=()=>new Date(Date.now()+5*3600e3).toISOString().slice(0,10);
-const apErrT=e=>{const m=String(e&&e.message||e||'');const E=APT().err;const k=Object.keys(E).find(c=>m.includes(c));return k?E[k]:m};
-let APJ=null,APF={status:'pending',cat:'',q:''},APX={from:apToday().slice(0,8)+'01',to:apToday(),cat:'',st:'public'};
-function apWa(r){const L=AP_T[r.lang==='kz'?'kz':'ru'];const tpl=L.waMsg[r.status]||L.waMsg.other;
- const msg=tpl.replace('{n}',()=>r.name||'').replace('{id}',()=>r.id).replace('{c}',()=>L.cat[r.category]||r.category).replace('{a}',()=>apAddr(r,L)).replace('{u}',()=>apLink(r));
- return 'https://api.whatsapp.com/send?phone='+encodeURIComponent(r.phone)+'&text='+encodeURIComponent(msg)}
-// фото обращения: сжатие на телефоне (до 1280 px, JPEG, без EXIF), до 3 шт.; файлы админа/модератора — appeals/<id>/m/<имя>.jpg
-function apPhotoBox(slot,photos,id,live){
- const L=APT();const st={items:(photos||[]).filter(p=>p&&p.path).map(p=>({path:p.path,url:apPhoto(p)})),busy:0,uploaded:[],removed:[]};
- const startKey=JSON.stringify(st.items.map(p=>p.path));const fid='apf'+(id||'new');
- slot.innerHTML=`<label>${esc(L.photos)}</label><div class="pgrid lpg"></div><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*" multiple class="vh-file" id="${fid}">
-  <label for="${fid}" class="b sec upl">${esc(t('lAddPh'))}</label> <span class="meta lpst"></span>`;
- const pg=slot.querySelector('.lpg'),pst=slot.querySelector('.lpst'),inp=slot.querySelector('input[type=file]');
- const draw=()=>{pg.innerHTML=st.items.length?st.items.map((p,i)=>`<div class="ph ${i===0?'cv':''}"><img src="${esc(p.url)}" alt="">${i===0?`<span class="cvb">${esc(t('lMain'))}</span>`:''}
-   <div class="pb"><button type="button" data-p="l" data-i="${i}" title="${esc(t('lLeftT'))}" aria-label="${esc(t('lLeftT'))}" ${i===0?'disabled':''}>${t('lLeft')}</button><button type="button" data-p="r" data-i="${i}" title="${esc(t('lRightT'))}" aria-label="${esc(t('lRightT'))}" ${i===st.items.length-1?'disabled':''}>${t('lRight')}</button><button type="button" data-p="rm" data-i="${i}" class="no" title="${esc(t('lRmT'))}" aria-label="${esc(t('lRmT'))}">${t('lRm')}</button></div></div>`).join(''):`<div class="meta lnoph">🖼 ${esc(t('lNoPh'))}</div>`;
-  slot.querySelector('label.upl').style.display=st.items.length>=3?'none':''};
- pg.onclick=ev=>{const b=ev.target.closest('[data-p]');if(!b)return;ev.preventDefault();const i=+b.dataset.i,a=b.dataset.p,P=st.items;
-  if(a==='l'&&i>0)[P[i-1],P[i]]=[P[i],P[i-1]];if(a==='r'&&i<P.length-1)[P[i+1],P[i]]=[P[i],P[i+1]];
-  if(a==='rm'){const [x]=P.splice(i,1);if(x.path)st.removed.push(x.path);if(x.blob)URL.revokeObjectURL(x.url)}draw()};
- inp.onchange=async()=>{let list=[...(inp.files||[])];inp.value='';const free=3-st.items.length;if(list.length>free){toast(L.max);list=list.slice(0,Math.max(0,free))}
-  let k=0;st.busy++;
-  try{for(const f of list){pst.textContent=`${t('uploadingL')} ${++k}/${list.length}`;
-   try{const b=await lCompress(f);
-    if(live){const path=`${id}/m/${rnd()}.jpg`;await SB.upload('appeals',path,b,'image/jpeg');st.uploaded.push(path);st.items.push({path,url:apPhoto({path})})}
-    else st.items.push({blob:b,url:URL.createObjectURL(b)});
-    draw()}catch(e){toast(t('n').photoErr+': '+(e.message||e),6000)}}}
-  finally{st.busy--;pst.textContent=''}};
- draw();
- return{busy:()=>st.busy>0,
-  async save(){if(JSON.stringify(st.items.map(p=>p.path))===startKey)return null;const paths=st.items.map(p=>p.path);
-   const row=await SB.rpc('mod_appeal_set_photos',{p_id:id,p_paths:paths});const keep=new Set(paths);
-   for(const p of [...st.removed,...st.uploaded])if(!keep.has(p))await SB.removeFile('appeals',p).catch(()=>{});return row},
-  cancel(){for(const p of st.uploaded)SB.removeFile('appeals',p).catch(()=>{});for(const x of st.items)if(x.blob)URL.revokeObjectURL(x.url)},
-  async upload(newId){const paths=[];let failed=0,k=0;const list=st.items.filter(x=>x.blob);
-   for(const x of list){pst.textContent=`${t('uploadingL')} ${++k}/${list.length}`;const path=`${newId}/m/${rnd()}.jpg`;
-    try{await SB.upload('appeals',path,x.blob,'image/jpeg');paths.push(path)}catch(e){failed++}}
-   pst.textContent='';if(paths.length){try{await SB.rpc('mod_appeal_set_photos',{p_id:newId,p_paths:paths})}catch(e){failed+=paths.length;for(const p of paths)SB.removeFile('appeals',p).catch(()=>{})}}
-   for(const x of st.items)if(x.blob)URL.revokeObjectURL(x.url);return{failed}}}}
-// форма: правка (row.id) или новое обращение
-function apForm(slot,row,onDone){
- const L=APT(),F=L.f,isNew=!row.id;row=Object.assign({category:'',scope:'street',street:'',house:'',description:'',name:'',phone:'',response:'',admin_note:'',status:'new'},row);
- const opt=(v,l,cur)=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(l)}</option>`;
- slot.innerHTML=`<form class="ed apform" novalidate><h3 class="full" style="margin:0">${isNew?'📝 '+esc(L.newT):'✏️ '+esc(L.editT)+' № '+row.id}</h3>
-  <div><label>${esc(F.category)}</label><select name="category">${isNew?opt('','—',row.category):''}${AP_CATS.map(([c,e])=>opt(c,e+' '+L.cat[c],row.category)).join('')}</select></div>
-  <div><label>${esc(F.scope)}</label><select name="scope">${['street','district'].map(s=>opt(s,L.scope[s],row.scope)).join('')}</select></div>
-  <div><label>${esc(F.street)}</label><input name="street" maxlength="80" value="${esc(row.street)}"></div>
-  <div><label>${esc(F.house)}</label><input name="house" maxlength="20" value="${esc(row.house)}"></div>
-  <div class="full"><label>${esc(F.description)}</label><textarea name="description" rows="4" maxlength="2000">${esc(row.description)}</textarea></div>
-  <div><label>${esc(F.name)}</label><input name="name" maxlength="80" value="${esc(row.name)}"></div>
-  <div><label>${esc(F.phone)}</label><input name="phone" type="tel" inputmode="tel" value="${esc(row.phone)}" placeholder="8 701 123 45 67"></div>
-  ${isNew?`<div><label>${esc(F.status)}</label><select name="status">${['new','sent','in_work','resolved'].map(s=>opt(s,L.st[s],row.status)).join('')}</select></div><div></div>`:''}
-  <div class="full"><label>${esc(F.response)}</label><textarea name="response" rows="2" maxlength="2000">${esc(row.response)}</textarea></div>
-  <div class="full"><label>${esc(F.admin_note)}</label><input name="admin_note" maxlength="2000" value="${esc(row.admin_note)}"></div>
-  <div class="full lphotos"></div>
-  <div class="full acts"><button class="b pri" type="submit">${isNew?esc(t('publishL')):esc(t('save'))}</button><button type="button" class="b" data-x>${esc(t('cancel'))}</button></div></form>`;
- const f=slot.querySelector('form');const PB=apPhotoBox(f.querySelector('.lphotos'),row.photos,row.id,!isNew);
- f.querySelector('[data-x]').onclick=()=>{PB.cancel();slot.innerHTML=''};
- f.onsubmit=async ev=>{ev.preventDefault();if(PB.busy()){toast(t('lPhWait'));return}const btn=f.querySelector('[type=submit]');
-  const v=Object.fromEntries(['category','scope','street','house','description','name','phone','response','admin_note','status'].filter(n=>f.elements[n]).map(n=>[n,f.elements[n].value.trim()]));
-  v.street=v.street.replace(/^(ул\.?|улица|көш\.?|көшесі)\s+/i,'').replace(/\s+(ул\.?|улица|көшесі|көш\.?)$/i,'');
-  if(!v.category){toast(L.err.bad_category);return}
-  btn.disabled=true;
-  try{if(isNew){v.lang=lang;const r=await SB.rpc('mod_appeal_create',{p:v});const up=await PB.upload(r.id);toast(up.failed?t('lPhPart')(up.failed):L.created,up.failed?9000:3500)}
-   else{delete v.status;await SB.rpc('mod_appeal_update',{p_id:row.id,p:v});await PB.save();toast(L.saved)}
-   slot.innerHTML='';onDone&&onDone()}
-  catch(e){toast(apErrT(e),6000);btn.disabled=false}};
- slot.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-function apRow(r){const L=APT(),A_=['pending','rejected'].includes(r.status);
- const btns=[];const B=(a,l,c)=>btns.push(`<button type="button" class="b ${c||''}" data-a="${a}">${esc(l)}</button>`);
- if(r.status==='pending'){B('new',L.publish,'ok');B('rejected',L.reject,'no')}
- else if(r.status==='rejected')B('pending',L.restore);
- else{if(r.status!=='sent')B('sent',L.toSent);if(r.status!=='in_work')B('in_work',L.toWork);if(r.status!=='resolved')B('resolved',L.toResolved,'ok');if(r.status!=='new')B('new',L.toNew);B('rejected',L.reject,'no')}
- B('edit',L.edit);
- return `<div class="row aprow ${r.status==='pending'?'pend':''}" data-id="${r.id}"><h3>№ ${r.id} · ${AP_E[r.category]||''} ${esc(L.cat[r.category]||r.category)}</h3>
-  <div class="meta"><span class="pill ap-${esc(r.status)}">${esc(L.st[r.status]||r.status)}</span> ${fmtDT(r.created_at)} · ${esc(L.scope[r.scope]||'')} · 👍 ${+r.supports||0}${r.source==='admin'?` · ${esc(L.added)}${r.added_by?' ('+esc(r.added_by)+')':''}`:''}${(r.mod_flags||[]).length?flagChips(r):''}</div>
-  <p class="apdesc">${esc(r.description)}</p>
-  <div class="apwho">📍 <b>${esc(apAddr(r))}</b><br>👤 ${esc(r.name)} · 📞 <a href="tel:+${esc(r.phone)}">+${esc(r.phone)}</a></div>
-  ${(r.photos||[]).length?`<div class="thumbs">${r.photos.map(p=>`<a href="${esc(apPhoto(p))}" target="_blank" rel="noopener"><img src="${esc(apPhoto(p))}" alt="" loading="lazy"></a>`).join('')}</div>`:''}
-  ${r.response?`<div class="apresp">💬 ${esc(r.response)}</div>`:''}${r.admin_note?`<div class="meta">📝 ${esc(r.admin_note)}</div>`:''}
-  <div class="acts">${btns.join('')}<a class="b ok wa-share" target="_blank" rel="noopener" href="${esc(apWa(r))}">${esc(L.wa)}</a>${r.supports>0?`<button type="button" class="b" data-a="sup">${esc(L.sup(r.supports))}</button>`:''}${A_?'':`<a class="b" href="${esc('./#/appeal/'+r.id)}" target="_blank" rel="noopener">${esc(t('cOpen')||'↗')}</a>`}${IS_MOD()?'':`<button type="button" class="b no" data-a="del">${esc(L.del)}</button>`}</div><div class="slot"></div></div>`}
-async function vAppeals(box){
- const L=APT();
- const rows=(await SB.rpc('mod_appeals',{p_status:APF.status,p_category:APF.cat})).filter(r=>textHit(APF.q,[r.street,r.house,r.name,r.description,r.response,r.admin_note,String(r.id)],[r.phone]));
- box.innerHTML=`<details class="row apexp" id="apexp"><summary><b>${esc(L.exp)}</b></summary><p class="meta">${esc(L.expD)}</p>
-   <form class="ed" id="apxf" novalidate><div><label>${esc(L.from)}</label><input type="date" name="from" value="${esc(APX.from)}"></div><div><label>${esc(L.to)}</label><input type="date" name="to" value="${esc(APX.to)}"></div>
-   <div><label>${esc(L.f.category)}</label><select name="cat"><option value="">${esc(L.allCats)}</option>${AP_CATS.map(([c,e])=>`<option value="${c}" ${APX.cat===c?'selected':''}>${e} ${esc(L.cat[c])}</option>`).join('')}</select></div>
-   <div><label>${esc(L.expStL)}</label><select name="st">${Object.keys(L.expSt).map(s=>`<option value="${s}" ${APX.st===s?'selected':''}>${esc(L.expSt[s])}</option>`).join('')}</select></div>
-   <div class="full acts"><button type="button" class="b pri" data-x="show">${esc(L.show)}</button><button type="button" class="b" data-x="print">${esc(L.print)}</button><button type="button" class="b" data-x="csv">${esc(L.csv)}</button></div></form>
-   <div class="apx-out" id="apxOut"></div></details>
-  ${APJ?`<div class="row just" id="apJust"><div><b>${esc(L.st[APJ.status]||APJ.status)}</b>: № ${APJ.id} · ${AP_E[APJ.category]||''} ${esc(apAddr(APJ))}</div><div class="acts"><a class="b ok wa-share" target="_blank" rel="noopener" href="${esc(apWa(APJ))}">${esc(L.wa)}</a><button type="button" class="b" id="apJx">${esc(t('closeX'))}</button></div></div>`:''}
-  <button class="b pri" id="addAp" type="button" style="margin:0 0 10px">${esc(L.add)}</button><div id="newAp"></div>
-  <div class="tabs">${['pending','new','sent','in_work','resolved','rejected',''].map(s=>`<button type="button" data-aps="${s}" class="${APF.status===s?'on':''}">${esc(L.stF[s])}</button>`).join('')}</div>
-  <div class="srch apsrch"><select id="apCat"><option value="">${esc(L.allCats)}</option>${AP_CATS.map(([c,e])=>`<option value="${c}" ${APF.cat===c?'selected':''}>${e} ${esc(L.cat[c])}</option>`).join('')}</select><input class="filter" id="apQ" type="search" placeholder="${esc(L.search)}" value="${esc(APF.q)}"></div>
-  ${rows.length?rows.map(apRow).join(''):`<div class="row">${t('empty')}</div>`}`;
- const again=()=>vAppeals(box);
- box.querySelectorAll('[data-aps]').forEach(b=>b.onclick=()=>{APF.status=b.dataset.aps;APJ=null;again()});
- $('#apCat').onchange=e=>{APF.cat=e.target.value;again()};
- {let tm;$('#apQ').oninput=e=>{clearTimeout(tm);tm=setTimeout(()=>{APF.q=e.target.value;again().then(()=>{const i=$('#apQ');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}})},350)}}
- {const x=$('#apJx');if(x)x.onclick=()=>{APJ=null;$('#apJust').remove()}}
- $('#addAp').onclick=()=>apForm($('#newAp'),{},()=>{APF.status='new';again()});
- bindApExport(box);
- box.querySelectorAll('.aprow').forEach(el=>{const r=rows.find(x=>x.id==el.dataset.id);el.querySelector('.acts').onclick=async ev=>{const a=ev.target.closest('[data-a]')&&ev.target.closest('[data-a]').dataset.a;if(!a)return;
-  try{if(a==='edit'){const s=el.querySelector('.slot');if(s.querySelector('form'))return;return apForm(s,r,again)}
-   if(a==='sup'){const s=el.querySelector('.slot');const list=await SB.rpc('mod_appeal_supporters',{p_id:r.id});
-    s.innerHTML=`<div class="apsups">${list.length?list.map(x=>`<span>${esc(apAddr(x))}${x.hidden?' ⚠️':''} <small>${apDay(x.created_at)}</small></span>`).join(''):esc(L.supNone)}</div>`;return}
-   if(a==='del'){if(!confirm(L.delQ))return;await SB.rpc('mod_appeal_set_status',{p_id:r.id,p_status:'deleted'});for(const p of (r.photos||[]))if(p.path)SB.removeFile('appeals',p.path).catch(()=>{});toast(t('deleted'));return again()}
-   const nr=await SB.rpc('mod_appeal_set_status',{p_id:r.id,p_status:a});toast(t('saved'));
-   APJ=nr&&nr.id?nr:null;  // плашка сверху: «опубликовано / статус изменён — 📲 Написать жителю»
-   again()}catch(e){toast(apErrT(e),6000)}}});
-}
-// выгрузка: сводка (печать / PDF) и CSV для Excel
-async function apExportRows(){return SB.rpc('mod_appeals_export',{p_from:APX.from||null,p_to:APX.to||null,p_category:APX.cat,p_status:APX.st},20000)}
-function apSummaryHtml(rows){const L=APT(),C=L.col;
- const per=APX.from||APX.to?`${APX.from?apDay(APX.from+'T12:00:00+05:00'):'…'} — ${APX.to?apDay(APX.to+'T12:00:00+05:00'):'…'}`:L.hAll;
- const cats=AP_CATS.map(([c])=>c).filter(c=>rows.some(r=>r.category===c));
- const tot=cats.map(c=>{const l=rows.filter(r=>r.category===c);return [c,l.length,l.reduce((s,r)=>s+(+r.supports||0),0)]});
- return `<div class="apx-doc"><h2>${esc(L.hTitle)}</h2><p><b>${esc(L.hPeriod)}:</b> ${esc(per)}${APX.cat?` · <b>${esc(L.hCat)}:</b> ${esc(L.cat[APX.cat])}`:''} · ${esc(L.expSt[APX.st]||'')}<br><b>${esc(L.hGen)}:</b> ${esc(fmtDT(new Date().toISOString()))}<br>${esc(L.hSrc)}</p>
-  ${rows.length?`<h3>${esc(L.hTot)}</h3><table class="apx-t"><thead><tr><th>${esc(C.cat)}</th><th>${esc(L.cN)}</th><th>${esc(L.cS)}</th></tr></thead><tbody>${tot.map(([c,n,s])=>`<tr><td>${AP_E[c]} ${esc(L.cat[c])}</td><td>${n}</td><td>${s}</td></tr>`).join('')}<tr class="tt"><td>${esc(L.total)}</td><td>${rows.length}</td><td>${tot.reduce((a,x)=>a+x[2],0)}</td></tr></tbody></table>
-  ${cats.map(c=>`<h3>${AP_E[c]} ${esc(L.cat[c])} — ${rows.filter(r=>r.category===c).length}</h3><table class="apx-t"><thead><tr><th>${esc(C.n)}</th><th>${esc(C.date)}</th><th>${esc(C.addr)}</th><th>${esc(C.text)}</th><th>${esc(C.who)}</th><th>${esc(C.sup)}</th><th>${esc(C.st)}</th></tr></thead><tbody>
-   ${rows.filter(r=>r.category===c).map(r=>`<tr><td>${r.id}</td><td class="nw">${esc(apDay(r.created_at))}</td><td>${esc(apAddr(r))}<br><small>${esc(L.scope[r.scope]||'')}</small></td><td>${esc(r.description)}${(r.photos||[]).length?`<br><small>${esc(C.photos)}: ${r.photos.length}</small>`:''}${r.response?`<br><small>💬 ${esc(r.response)}</small>`:''}</td>
-    <td>${esc(r.name)}<br><span class="nw">+${esc(r.phone)}</span></td><td><b>${+r.supports||0}</b>${(r.supporters||[]).length?`<br><small>${esc([...new Set(r.supporters.map(s=>s.street))].join(', '))}</small>`:''}</td><td>${esc(L.st[r.status]||r.status)}</td></tr>`).join('')}</tbody></table>`).join('')}`:`<p>${esc(L.expNone)}</p>`}</div>`}
-function apCsv(rows){const L=APT(),C=L.col;const q=v=>{const s=String(v==null?'':v).replace(/\r/g,'');return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
- const head=[C.n,C.date,C.cat,C.scope,C.street,C.house,C.text,C.name,C.phone,C.st,C.sup,C.supStreets,C.resp,C.note,C.photos,C.link];
- const lines=[head.map(q).join(';')].concat(rows.map(r=>[r.id,apDay(r.created_at),L.cat[r.category]||r.category,L.scope[r.scope]||r.scope,r.street,r.house,r.description,r.name,'+'+r.phone,L.st[r.status]||r.status,+r.supports||0,
-  (r.supporters||[]).map(s=>s.street+(s.house?' '+s.house:'')).join(', '),r.response,r.admin_note,(r.photos||[]).map(apPhoto).join(' '),apLink(r)].map(q).join(';')));
- return '\ufeff'+lines.join('\r\n')}
-function bindApExport(box){const f=box.querySelector('#apxf');if(!f)return;const out=box.querySelector('#apxOut');
- const read=()=>{APX={from:f.elements.from.value,to:f.elements.to.value,cat:f.elements.cat.value,st:f.elements.st.value}};
- f.onclick=async ev=>{const b=ev.target.closest('[data-x]');if(!b)return;read();b.disabled=true;
-  try{const rows=await apExportRows();const html=apSummaryHtml(rows);
-   if(b.dataset.x==='show'){out.innerHTML=html;return}
-   if(b.dataset.x==='print'){let p=$('#apPrint');if(!p){p=document.createElement('div');p.id='apPrint';document.body.appendChild(p)}p.innerHTML=html;document.body.classList.add('ap-printing');
-    const end=()=>{document.body.classList.remove('ap-printing');window.removeEventListener('afterprint',end)};window.addEventListener('afterprint',end);setTimeout(()=>{window.print();setTimeout(end,1000)},50);return}
-   if(b.dataset.x==='csv'){const blob=new Blob([apCsv(rows)],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download=`obrashcheniya_${APX.cat||'vse'}_${APX.from||'nachalo'}_${APX.to||apToday()}.csv`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);out.innerHTML=html}}
-  catch(e){toast(apErrT(e),6000)}finally{b.disabled=false}};
-}
 function adminBar(on){const bar=$('#admbar');document.body.classList.toggle('in',!!on);
  if(!on){bar.hidden=true;bar.innerHTML='';document.title=t('docLogin');return}
  bar.innerHTML=`<b class="ab-t">${IS_MOD()?'🛡 '+t('barTM'):'🔐 '+t('barT')}</b><a class="ab-s" href="./">${t('toSite')}</a><button class="ab-lo" id="lo" type="button">${t('logout')}</button><button class="ab-pw" id="pwb" type="button" aria-haspopup="dialog">${t('pwBtn')}</button><button class="ab-rf" id="rfb" type="button" title="${t('refreshT')}" aria-label="${t('refreshT')}"><span aria-hidden="true">🔄</span><span class="ab-rt"> ${t('refresh')}</span></button><span class="ab-u"><span class="sep">· </span>${t('barAs')} <span class="ab-e" title="${esc(SB.email()||'')}">${esc(SB.email()||'')}</span></span>`;
