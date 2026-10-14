@@ -10,14 +10,14 @@ A.addDict({
  phTitle:'Полезные телефоны',phShort:'Телефоны',phMenuD:'Экстренные службы, аварийные, участковый, акимат',phHome:'112 · 104 · 109 · участковый',
  phIntro:'Нажмите на номер, чтобы позвонить. Номера взяты с официальных сайтов служб или проверены администрацией сайта.',
  phGr:{activist:'Активист района',emergency:'Экстренные службы',utility:'Коммунальные и аварийные службы',police:'Участковый',akimat:'Акимат',osi:'ОСИ / КСК',con:'ЦОН и госуслуги',clinic:'Поликлиника',school:'Школа',kindergarten:'Детские сады',other:'Другое'},
- phEmpty:'Список телефонов скоро появится',phCall:'Позвонить',phAlso:'Ещё',phFound:'Полезные телефоны',phWaGreet:'Здравствуйте! Нашёл ваш номер на сайте https://urker24.kz в разделе «Полезные телефоны».',
+ phEmpty:'Список телефонов скоро появится',phCall:'Позвонить',phAlso:'Ещё',phFound:'Полезные телефоны',phWaAct:n=>`Здравствуйте, ${n}! Ваш номер взял на сайте urker24.kz`,phWaGreet:'Здравствуйте! Нашёл ваш номер на сайте https://urker24.kz в разделе «Полезные телефоны».',
  menuAlerts:'Отключения',menuAlertsD:'Свет, вода, газ, ремонт — где и когда',annTitle:'Отключения и важное',annDoneH:'Завершённые',navAnn:'Отключения',annFound:'Отключения и важное',annEmpty:'Сейчас отключений и важных объявлений нет',liveRepNote:'Сообщение уйдёт на проверку и после подтверждения появится в разделе «Отключения и важное».',
  outT:'Отключения',outNow:'сейчас',outSoon:'скоро',outNone:'Сейчас нет',outN:n=>`Сейчас: ${n}`,outSoonN:n=>`Скоро: ${n}`,outAll:'Все →',outHead:'Отключения и работы'
 },{
  phTitle:'Пайдалы телефондар',phShort:'Телефондар',phMenuD:'Шұғыл қызметтер, апаттық қызметтер, учаскелік, әкімдік',phHome:'112 · 104 · 109 · учаскелік',
  phIntro:'Қоңырау шалу үшін нөмірді басыңыз. Нөмірлер қызметтердің ресми сайттарынан алынған немесе сайт әкімшілігі тексерген.',
  phGr:{activist:'Аудан белсендісі',emergency:'Шұғыл қызметтер',utility:'Коммуналдық және апаттық қызметтер',police:'Учаскелік инспектор',akimat:'Әкімдік',osi:'ПИК / ТҮБ',con:'ХҚКО және мемлекеттік қызметтер',clinic:'Емхана',school:'Мектеп',kindergarten:'Балабақшалар',other:'Басқа'},
- phEmpty:'Телефондар тізімі жақында шығады',phCall:'Қоңырау шалу',phAlso:'Тағы',phFound:'Пайдалы телефондар',phWaGreet:'Сәлеметсіз бе! Нөміріңізді https://urker24.kz сайтындағы «Пайдалы телефондар» бөлімінен таптым.',
+ phEmpty:'Телефондар тізімі жақында шығады',phCall:'Қоңырау шалу',phAlso:'Тағы',phFound:'Пайдалы телефондар',phWaAct:n=>`Сәлеметсіз бе, ${n}! Нөміріңізді urker24.kz сайтынан алдым`,phWaGreet:'Сәлеметсіз бе! Нөміріңізді https://urker24.kz сайтындағы «Пайдалы телефондар» бөлімінен таптым.',
  menuAlerts:'Өшірулер',menuAlertsD:'Жарық, су, газ, жөндеу — қай жерде және қашан',annTitle:'Өшірулер және маңызды',annDoneH:'Аяқталғандар',navAnn:'Өшірулер',annFound:'Өшірулер және маңызды',annEmpty:'Қазір өшірулер мен маңызды хабарландыру жоқ',liveRepNote:'Хабарлама тексеруге жіберіледі және расталғаннан кейін «Өшірулер және маңызды» бөлімінде жарияланады.',
  outT:'Өшірулер',outNow:'қазір',outSoon:'жақында',outNone:'Қазір жоқ',outN:n=>`Қазір: ${n}`,outSoonN:n=>`Жақында: ${n}`,outAll:'Барлығы →',outHead:'Өшірулер мен жұмыстар'
 });
@@ -28,10 +28,13 @@ const L=(r,k)=>A.lang()==='kz'?(r[k+'_kz']||r[k+'_ru']):(r[k+'_ru']||r[k+'_kz'])
 // 112 → «112»; 87172620438 → «8 7172 62 04 38»; 87012681101 → «8 701 268 11 01»; 88000807777 → «8 800 080 77 77»
 const fmt=p=>{p=String(p||'');if(p.length!==11)return p;if(/^87172/.test(p))return `8 7172 ${p.slice(5,7)} ${p.slice(7,9)} ${p.slice(9)}`;return `8 ${p.slice(1,4)} ${p.slice(4,7)} ${p.slice(7,9)} ${p.slice(9)}`};
 const tel=p=>{p=String(p||'');return p.length===11&&p[0]==='8'&&!/^8800/.test(p)?'+7'+p.slice(1):p};
+// activist: personal greeting by first name + patronymic (first two words of title_ru)
+const actName=r=>String(r.title_ru||'').split(/\s+[—–-]\s+/)[0].trim().split(/\s+/).slice(0,2).join(' ');
+const waHref=r=>{const n=r.grp==='activist'?actName(r):'';return n?`https://wa.me/${r.wa}?text=${encodeURIComponent(t('phWaAct')(n))}`:`https://api.whatsapp.com/send?phone=${r.wa}&text=${encodeURIComponent(t('phWaGreet'))}`};
 function row(r){const wa=/^7\d{10}$/.test(r.wa||'')?r.wa:'';const note=L(r,'note');
  return `<article class="phr" id="ph${r.id}"><div class="phr-b"><b class="phr-t">${esc(L(r,'title'))}</b>${note?`<small class="phr-n">${esc(note)}</small>`:''}
   <a class="phr-num" href="tel:${esc(tel(r.phone))}" aria-label="${esc(t('phCall'))}: ${esc(fmt(r.phone))}">${esc(fmt(r.phone))}</a>${r.phone2?`<a class="phr-num2" href="tel:${esc(tel(r.phone2))}">${esc(t('phAlso'))}: ${esc(fmt(r.phone2))}</a>`:''}</div>
-  <div class="phr-a"><a class="btn call" href="tel:${esc(tel(r.phone))}" aria-label="${esc(t('phCall'))}: ${esc(fmt(r.phone))}">📞 <span>${esc(t('phCall'))}</span></a>${wa?`<a class="btn wa" href="https://api.whatsapp.com/send?phone=${wa}&text=${encodeURIComponent(t('phWaGreet'))}" target="_blank" rel="noopener" aria-label="WhatsApp: ${esc(L(r,'title'))}">${A.WA_SVG}<span>WhatsApp</span></a>`:''}</div></article>`}
+  <div class="phr-a"><a class="btn call" href="tel:${esc(tel(r.phone))}" aria-label="${esc(t('phCall'))}: ${esc(fmt(r.phone))}">📞 <span>${esc(t('phCall'))}</span></a>${wa?`<a class="btn wa" href="${esc(waHref(r))}" target="_blank" rel="noopener" aria-label="WhatsApp: ${esc(L(r,'title'))}">${A.WA_SVG}<span>WhatsApp</span></a>`:''}</div></article>`}
 function view(){
  A.setMeta(t('phTitle')+' — Уркер 24',t('phMenuD'));
  const groups=GR.map(([g,e])=>[g,e,PH.filter(r=>r.grp===g)]).filter(x=>x[2].length);
