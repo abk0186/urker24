@@ -1,7 +1,7 @@
 // Уркер 24 — минимальный service worker: только оболочка сайта (HTML/CSS/JS/иконки).
 // Всё со своего домена — «сначала сеть», кэш только как запасной вариант без интернета.
 // Запросы к Supabase и другим доменам НЕ перехватываются и НЕ кэшируются. Админка не кэшируется.
-const CACHE = 'urker-shell-v10';
+const CACHE = 'urker-shell-v11';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

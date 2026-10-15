@@ -43,7 +43,7 @@ function create(opts){
   async upload(bucket,path,blob,contentType){if(!enabled)throw new Error('backend_disabled');await fresh();
    const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),60000);
    try{const r=await fetch(url+'/storage/v1/object/'+bucket+'/'+path,{method:'POST',signal:ctl.signal,body:blob,
-     headers:Object.assign({apikey:key,'Content-Type':contentType||blob.type||'application/octet-stream','cache-control':'31536000','x-upsert':'false'},session&&session.access_token?{Authorization:'Bearer '+session.access_token}:{})});
+     headers:Object.assign({apikey:key,'Content-Type':contentType||blob.type||'application/octet-stream','cache-control':'max-age=31536000','x-upsert':'false'},session&&session.access_token?{Authorization:'Bearer '+session.access_token}:{})});
     const txt=await r.text();let d=null;try{d=JSON.parse(txt)}catch(e){d=txt}
     if(!r.ok){const err=new Error((d&&(d.message||d.error))||r.statusText);err.status=r.status;throw err}
     return{path,url:api.publicUrl(bucket,path)}}finally{clearTimeout(tm)}},
