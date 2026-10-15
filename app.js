@@ -255,8 +255,8 @@ function card(e,showSection){
    <a class="btn wa ${e.wa?'':'off'}" aria-label="${esc(t('wa'))}: ${esc(e.name||fmtPhone(e))}" ${e.wa?`href="https://api.whatsapp.com/send?phone=${e.wa}&text=${waMsg}" target="_blank" rel="noopener"`:'aria-disabled="true"'}>${WA_SVG}<span>${t('waS')}</span></a>
    <a class="btn call ${bad?'off':''}" aria-label="${esc(t('call'))}: ${esc(fmtPhone(e))}" ${bad?'aria-disabled="true"':`href="tel:${esc(e.tel)}"`}>📞 <span>${t('callS')}</span></a>
   </div>
-  <div class="rate">${stars(r.avg)}<span class="rc">${r.n?`<b>★ ${fmtAvg(r.avg)}</b> (${r.n})`:t('noReviews')}</span>
-   <button data-review="${e.id}">✍️ ${t('review')}</button></div>
+  <div class="rate">${r.n?`<button type="button" class="rv-open" data-revs="${e.id}" aria-expanded="false" aria-controls="rvs${e.id}" aria-label="${esc(t('rvShow'))}">${stars(r.avg)}<span class="rc"><b>★ ${fmtAvg(r.avg)}</b> (${r.n}) <u>${t('rvShowS')}</u></span></button>`:`${stars(r.avg)}<span class="rc">${t('noReviews')}</span>`}
+   <button data-review="${e.id}">✍️ ${t('review')}</button></div>${r.n?`<div class="revs" id="rvs${e.id}" hidden></div>`:''}
   ${CLAIMS_ON?`<button class="claim-l" data-claim="${e.id}">${t('claimL')}</button>`:''}
  </article>`}
 const adWa=()=>{const d=String((window.URKER_CONFIG||{}).adContactWa||'').replace(/\D/g,'');return /^7\d{10}$/.test(d)?d:(/^87\d{9}$/.test(d)?'7'+d.slice(1):'')};
@@ -466,7 +466,7 @@ function viewCat(id,subId,focusId){  // focusId: #/c/<раздел>/<подра�
   ${list.some(e=>e.vip)?'':vipCard(s)}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
  $('#sort').onchange=ev=>{sortMode=ev.target.value;viewCat(id,subId)};
- if(focusId&&/^\d+$/.test(focusId)){const el=document.getElementById('e'+focusId);if(el)setTimeout(()=>{el.scrollIntoView({block:'center'});el.style.outline='3px solid #f4a340';el.style.outlineOffset='2px';setTimeout(()=>{el.style.outline='';el.style.outlineOffset=''},5000)},60)}
+ if(focusId&&/^\d+$/.test(focusId)){const el=document.getElementById('e'+focusId);if(el)setTimeout(()=>{const rb=el.querySelector('[data-revs]');if(rb)toggleRevs(rb,true);el.scrollIntoView({block:'center'});el.style.outline='3px solid #f4a340';el.style.outlineOffset='2px';setTimeout(()=>{el.style.outline='';el.style.outlineOffset=''},5000)},60)}
 }
 function formNote(liveKey){return OFFLINE?`<p class="demo-note warn">⚠️ ${t('offlineForm')}</p>`:`<p class="demo-note live">ℹ️ ${t(liveKey)}</p>`}
 async function sending(btn,fn){btn.disabled=true;try{await fn()}finally{btn.disabled=false}}
@@ -505,8 +505,8 @@ function openReview(id){
  m.hidden=false;
  m.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{pick=+b.dataset.s;m.querySelectorAll('[data-s]').forEach(c=>c.classList.toggle('on',+c.dataset.s<=pick))});
  $('#rvc').onclick=()=>{m.hidden=true};m.onclick=ev=>{if(ev.target===m)m.hidden=true};
- if(LIVE)SB.get(`reviews_public?select=id,stars,text,author_name,created_at&specialist_id=eq.${+id}&order=created_at.desc&limit=30`).then(rows=>{
-   const rl=$('#rvlist');if(!rl)return;rl.innerHTML=rows.length?rows.map(v=>`<div class="rev" data-rid="${+v.id}">${stars(v.stars)} <b>${esc(v.author_name||'')}</b> ${esc(v.text||'')}</div>`).join(''):`<div class="rev">${t('noReviews')}</div>`})
+ if(LIVE)loadRevs(id).then(rows=>{
+   const rl=$('#rvlist');if(!rl)return;rl.innerHTML=rows.length?rows.map(revHtml).join(''):`<div class="rev">${t('noReviews')}</div>`})
   .catch(()=>{const rl=$('#rvlist');if(rl)rl.innerHTML=''});
  $('#rvf').onsubmit=ev=>{ev.preventDefault();if(!pick){toast(t('rvPick'));return}
   if(OFFLINE){toast(t('offlineForm'));return}
@@ -514,6 +514,22 @@ function openReview(id){
   sending(ev.target.querySelector('.btn'),async()=>{
    try{await SB.rpc('submit_review',{p_specialist_id:+id,p_stars:pick,p_text:$('#rvt').value,p_device_id:deviceId(),p_phone:$('#rvp').value||null,p_name:$('#rvn').value||null,p_hp:$('#hpf').value});
     m.hidden=true;toast(t('rvSent'))}catch(e){toast(errMsg(e))}})};
+}
+// ---------- отзывы на карточке: тап по звёздам раскрывает тексты ----------
+Object.assign(T.ru,{rvShow:'Показать отзывы',rvShowS:'отзывы ▾',rvHideS:'свернуть ▴',rvAnon:'Житель Уркера',rvNoText:'оценка без текста',rvErr:'Не удалось загрузить отзывы. Попробуйте позже.'});
+Object.assign(T.kz,{rvShow:'Пікірлерді көрсету',rvShowS:'пікірлер ▾',rvHideS:'жасыру ▴',rvAnon:'Үркер тұрғыны',rvNoText:'мәтінсіз баға',rvErr:'Пікірлер жүктелмеді. Кейінірек көріңіз.'});
+const REVS={};  // кэш: id мастера → одобренные отзывы
+const loadRevs=id=>REVS[id]||(REVS[id]=SB.get(`reviews_public?select=id,stars,text,author_name,created_at&specialist_id=eq.${+id}&order=created_at.desc&limit=30`).catch(e=>{delete REVS[id];throw e}));
+const revDate=iso=>{if(!iso)return '';const [y,m,d]=toAlmaty(iso).slice(0,10).split('-').map(Number);return `${d} ${MONTHS[lang][m-1]} ${y}`};
+const revHtml=v=>`<div class="rev" data-rid="${+v.id}"><div class="rv-h">${stars(v.stars)}<b>${esc(v.author_name||t('rvAnon'))}</b><time>${revDate(v.created_at)}</time></div>${v.text?`<p>${esc(v.text)}</p>`:`<p class="rv-nt">${t('rvNoText')}</p>`}</div>`;
+function toggleRevs(btn,open){
+ const id=btn.dataset.revs,box=document.getElementById('rvs'+id);if(!box)return;
+ const show=open!=null?open:box.hidden;box.hidden=!show;btn.setAttribute('aria-expanded',show);
+ const u=btn.querySelector('u');if(u)u.textContent=t(show?'rvHideS':'rvShowS');
+ if(!show||box.dataset.ok)return;
+ box.innerHTML=`<div class="rev">${t('loading')}</div>`;
+ loadRevs(id).then(rows=>{box.dataset.ok=1;box.innerHTML=rows.length?rows.map(revHtml).join(''):`<div class="rev">${t('noReviews')}</div>`})
+  .catch(()=>{box.innerHTML=`<div class="rev">${t('rvErr')}</div>`});
 }
 // ---------- «Это ваш бизнес? Дополните карточку» ----------
 Object.assign(T.ru,{claimL:'Это ваш бизнес? Дополните карточку',clTitle:'Дополнить карточку',clNote:'Заполните то, что хотите показать клиентам. После проверки данные появятся на карточке. Если ваш телефон совпадает с номером на карточке — проверим быстрее.',
@@ -594,6 +610,7 @@ function route(){setMeta();setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trac
 document.addEventListener('click',ev=>{
  const ct=ev.target.closest('a.btn.wa[href],a.btn.call[href]');const art=ct&&ct.closest('article.card[id^="e"]');
  if(art)track('contact',{p_specialist_id:+art.id.slice(1),p_channel:ct.classList.contains('wa')?'wa':'call'});
+ const rs=ev.target.closest('[data-revs]');if(rs){toggleRevs(rs);return}
  const rv=ev.target.closest('[data-review]');if(rv){openReview(rv.dataset.review);return}
  const cl=CLAIMS_ON&&ev.target.closest('[data-claim]');if(cl){openClaim(cl.dataset.claim);return}
  const hint=ev.target.closest('[data-hint]');if(hint){const i=$('#q');i.value=hint.dataset.hint;i.dispatchEvent(new Event('input'));return}

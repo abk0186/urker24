@@ -499,3 +499,14 @@ main[data-view=home] .hints button{min-height:40px;padding:5px 12px;font-size:14
 .jtd{margin:0 0 8px}
 @media (max-width:300px){.jtabs{grid-template-columns:1fr}}
 #homeBody .stiles .stile.spost,.stiles .stile.spost{grid-column:1/-1;flex-direction:row;justify-content:center;gap:8px}
+
+/* отзывы: тап по звёздам раскрывает тексты */
+.card .rate .rv-open{flex:1;min-width:0;display:flex;align-items:center;gap:6px;border:0;background:none;padding:0;margin:0;font:inherit;font-size:13px;color:var(--muted);text-align:left;cursor:pointer;min-height:44px;font-weight:400}
+.card .rate .rv-open u{color:var(--accent);text-decoration:none;font-weight:700;margin-left:2px}
+.revs{margin:0 0 6px;padding:2px 10px;background:#fffaf3;border:1px solid var(--line);border-radius:12px}
+.revs .rev:first-child{border-top:0}
+.rev .rv-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:14px}
+.rev .rv-h .stars{font-size:14px;letter-spacing:0}
+.rev .rv-h time{color:var(--muted);font-size:12.5px;margin-left:auto}
+.rev p{margin:3px 0 0;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.rev p.rv-nt{color:var(--muted);font-size:13px;font-style:italic}
