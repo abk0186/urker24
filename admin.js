@@ -248,12 +248,12 @@ async function vListings(box){
   <div class="tabs">${['','market','ads','jobs','lost'].map(s=>`<button data-lsec="${s}" class="${LF.section===s?'on':''}">${s?L.sec[s]:L.all}</button>`).join('')}</div>
   <input class="filter" id="lq" placeholder="${esc(t('lq'))}" value="${esc(LF.q)}">${LF.q?`<div class="meta">${t('foundN')(rows.length)}</div>`:''}`
   +(rows.length?rows.map(r=>{const exp=new Date(r.expires_at).getTime()<now;const ph=(r.photos||[]);return `<div class="row lrow" data-id="${r.id}">
-   ${ph[0]?`<img class="lthumb" src="${esc(lPhoto(ph[0]))}" alt="">`:`<div class="lthumb ph">${L.sec[lSecOf(r)].split(' ')[0]}</div>`}
+   ${ph[0]?URKER_PIC(lPhoto(ph[0]),false,'class="lthumb" loading="lazy"',esc):`<div class="lthumb ph">${L.sec[lSecOf(r)].split(' ')[0]}</div>`}
    <div class="lmain"><h3>${r.highlighted?'⭐ ':''}${esc(r.title)}</h3>
    <div class="meta">${pill(r.status)}${flagChips(r)}${exp&&r.status==='approved'?`<span class="pill rejected">${L.st.expired}</span>`:''} ${esc(L.sec[lSecOf(r)])} · ${esc(lKindT(r))} · ${esc(lCatT(r))} · ${r.price_mode==='fixed'?esc(Number(r.price).toLocaleString('ru-RU').replace(/\s/g,' '))+' ₸ · ':(L.pm[r.price_mode]?esc(L.pm[r.price_mode])+' · ':'')}📞 ${esc(r.phone)}${r.has_wa?' (WA)':''}
     · ${fmtDT(r.created_at)} · ${L.until} ${fmtDT(r.expires_at)} · 👁 ${r.views} · 🖼 ${ph.length||L.noPhotos}${r.bumped_at?` · ⬆ ${L.bumped} ${fmtDT(r.bumped_at)}`:''}${r.device_id?` · ${t('device')}: ${esc(String(r.device_id).slice(0,8))}`:''}</div>
    ${r.body?`<p class="pre">${esc(r.body)}</p>`:''}${r.place?`<p>📍 ${esc(r.place)}${r.event_date?' · 🗓 '+esc(r.event_date):''}</p>`:''}
-   ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph"><img src="${esc(lPhoto(p))}" alt=""></div>`).join('')}</div>`:''}
+   ${ph.length?`<div class="pgrid sm">${ph.map(p=>`<div class="ph">${URKER_PIC(lPhoto(p),false,'loading="lazy"',esc)}</div>`).join('')}</div>`:''}
    <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="approved">${L.approve}</button><button class="b no" data-a="rejected">${L.reject}</button>`:''}
     ${r.status==='approved'?`<button class="b" data-a="rejected">${t('hide')}</button>`+shareBtn('l',r):''}${(MOD?['rejected']:['rejected','deleted','closed']).includes(r.status)?`<button class="b ok" data-a="approved">${t('show')}</button>`:''}
     ${MOD?(['pending','approved','rejected'].includes(r.status)?`<button class="b" data-a="edit">${t('lEdit')}</button>`:''):`<button class="b" data-a="edit">${t('lEdit')}</button><button class="b sec" data-a="hl">${r.highlighted?L.unhl:L.hl}</button><button class="b" data-a="bump">${L.bump}</button><button class="b" data-a="extend">${L.extend}</button>${r.status!=='deleted'?`<button class="b" data-a="alink">${L.alink}</button>`:''}
@@ -634,7 +634,7 @@ async function vNews(box){
    <div class="acts"><button class="b ok" data-a="tonews">${N.toNews}</button><button class="b no" data-a="rejected">${t('reject')}</button></div></div>`).join(''):'')
   +`<button class="b pri" id="addNews" style="margin:6px 0 10px">${N.addNews}</button><div id="edSlot"></div><h2>${N.list}</h2>`
   +(rows.length?rows.map(r=>{const sch=r.status==='published'&&new Date(r.publish_at).getTime()>now;return `<div class="row nrow" data-id="${r.id}">
-   ${r.cover_url?`<img class="nthumb" src="${esc(r.cover_url)}" alt="">`:`<div class="nthumb ph">${esc((t('cats')[r.category]||'📰').split(' ')[0])}</div>`}
+   ${r.cover_url?URKER_PIC(r.cover_url,false,'class="nthumb" loading="lazy"',esc):`<div class="nthumb ph">${esc((t('cats')[r.category]||'📰').split(' ')[0])}</div>`}
    <div class="nmain"><h3>${r.pinned?'📌 ':''}${esc(ntitle(r))}</h3>
    <div class="meta">${pill(r.status)} ${r.is_demo?'<span class="pill">demo</span>':''} ${esc(t('cats')[r.category]||'')} · ${sch?`<b class="sched">${N.scheduled} ${fmtDT(r.publish_at)}</b>`:fmtDT(r.publish_at)}
     ${(r.photos||[]).length?' · 🖼 '+r.photos.length:''}${r.video_url?' · ▶️':''}${views[r.id]?` · 👁 ${views[r.id]} ${N.views}`:''}${!r.title_kz||!r.title_ru?` · <span class="pill">${r.title_kz?'KZ':'RU'} only</span>`:''}</div>

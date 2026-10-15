@@ -432,10 +432,13 @@ def main():
             if x.get('status') not in AP_ST: continue
             for p in (x.get('photos') or []):
                 if isinstance(p, dict) and p.get('path'): keys.add('appeals/' + p['path'])
-        thumbs_changed = build_thumbs(root, sb_url, keys, prune=apl is not None and not a.data_dir)
+        # чистим копии удалённых фото, когда списки объявлений и новостей реально получены (раздел обращений удалён — от него больше не зависим)
+        thumbs_changed = build_thumbs(root, sb_url, keys, prune=not a.data_dir and isinstance(ls, list) and isinstance(nw, list) and len(live_i) >= 5)
         MIRROR['root'] = root
     elif not a.no_thumbs:
         print('thumbs: skipped — workflow does not allow t/ yet (see NOTE.md)')
+    # уже лежащие в репо копии используем всегда (og:image, картинка на i/ n/ для ботов/превью) — даже если новые писать нельзя
+    MIRROR['root'] = root
     today = a.today or (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5)).date().isoformat()
     W = Writer(root)
     pages = []  # (ru_path, kz_path or None)
