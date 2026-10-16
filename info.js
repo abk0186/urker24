@@ -23,7 +23,11 @@ A.addDict({
 });
 const COLS='id,grp,title_ru,title_kz,note_ru,note_kz,phone,phone2,wa,sort_order';
 let PH=[],LOADED=false;
-async function load(){if(!SB.enabled)return;try{const r=await SB.get(`phones?select=${COLS}&order=sort_order.asc,id.asc`,8000);PH=Array.isArray(r)?r:[];LOADED=true}catch(e){PH=[]}}
+// photo_url (25_phone_photos.sql): если колонки ещё нет, сервер ответит ошибкой — тогда грузим список без фото
+async function load(){if(!SB.enabled)return;const q=c=>SB.get(`phones?select=${c}&order=sort_order.asc,id.asc`,8000);
+ try{let r;try{r=await q(COLS+',photo_url')}catch(e){r=await q(COLS)}PH=Array.isArray(r)?r:[];LOADED=true}catch(e){PH=[]}}
+// фото: путь в бакете listings (admin/police/…jpg) или полный https-адрес
+const phUrl=r=>{const p=String(r.photo_url||'').trim();if(!p)return '';if(/^https:\/\//.test(p))return p;return SB.publicUrl?SB.publicUrl('listings',p.replace(/^\/+/,'')):''};
 const L=(r,k)=>A.lang()==='kz'?(r[k+'_kz']||r[k+'_ru']):(r[k+'_ru']||r[k+'_kz']);
 // 112 → «112»; 87172620438 → «8 7172 62 04 38»; 87012681101 → «8 701 268 11 01»; 88000807777 → «8 800 080 77 77»
 const fmt=p=>{p=String(p||'');if(p.length!==11)return p;if(/^87172/.test(p))return `8 7172 ${p.slice(5,7)} ${p.slice(7,9)} ${p.slice(9)}`;return `8 ${p.slice(1,4)} ${p.slice(4,7)} ${p.slice(7,9)} ${p.slice(9)}`};
@@ -31,8 +35,8 @@ const tel=p=>{p=String(p||'');return p.length===11&&p[0]==='8'&&!/^8800/.test(p)
 // activist: personal greeting by first name + patronymic (first two words of title_ru)
 const actName=r=>String(r.title_ru||'').split(/\s+[—–-]\s+/)[0].trim().split(/\s+/).slice(0,2).join(' ');
 const waHref=r=>{const n=r.grp==='activist'?actName(r):'';return n?`https://wa.me/${r.wa}?text=${encodeURIComponent(t('phWaAct')(n))}`:`https://api.whatsapp.com/send?phone=${r.wa}&text=${encodeURIComponent(t('phWaGreet'))}`};
-function row(r){const wa=/^7\d{10}$/.test(r.wa||'')?r.wa:'';const note=L(r,'note');
- return `<article class="phr" id="ph${r.id}"><div class="phr-b"><b class="phr-t">${esc(L(r,'title'))}</b>${note?`<small class="phr-n">${esc(note)}</small>`:''}
+function row(r){const wa=/^7\d{10}$/.test(r.wa||'')?r.wa:'';const note=L(r,'note');const pu=phUrl(r);
+ return `<article class="phr${pu?' phr-wp':''}" id="ph${r.id}"><div class="phr-b">${pu?`<img class="phr-ph" src="${esc(pu)}" alt="${esc(L(r,'title'))}" width="64" height="64" loading="lazy" decoding="async" onerror="this.remove()">`:''}<b class="phr-t">${esc(L(r,'title'))}</b>${note?`<small class="phr-n">${esc(note)}</small>`:''}
   <a class="phr-num" href="tel:${esc(tel(r.phone))}" aria-label="${esc(t('phCall'))}: ${esc(fmt(r.phone))}">${esc(fmt(r.phone))}</a>${r.phone2?`<a class="phr-num2" href="tel:${esc(tel(r.phone2))}">${esc(t('phAlso'))}: ${esc(fmt(r.phone2))}</a>`:''}</div>
   <div class="phr-a"><a class="btn call" href="tel:${esc(tel(r.phone))}" aria-label="${esc(t('phCall'))}: ${esc(fmt(r.phone))}">📞 <span>${esc(t('phCall'))}</span></a>${wa?`<a class="btn wa" href="${esc(waHref(r))}" target="_blank" rel="noopener" aria-label="WhatsApp: ${esc(L(r,'title'))}">${A.WA_SVG}<span>WhatsApp</span></a>`:''}</div></article>`}
 function view(){

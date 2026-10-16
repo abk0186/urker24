@@ -483,6 +483,17 @@ main[data-view=home] .hints button{min-height:40px;padding:5px 12px;font-size:14
 @media(max-width:339px){.phr-a{flex:1 1 100%;flex-direction:row}.phr-a .btn{flex:1}}
 .phr-a .btn{width:100%}
 .phl{margin:0 0 8px}
+/* фото в строке телефона (участковые): круглый портрет слева от имени, текст обтекает; строки без фото не меняются */
+.phr-wp .phr-b{display:block}
+.phr-wp .phr-b>*{display:block}
+.phr-wp .phr-t,.phr-wp .phr-n{margin:0 0 3px}
+.phr-wp .phr-num,.phr-wp .phr-num2{display:inline-block}
+.phr-wp .phr-b>.phr-num2{display:block}
+.phr-ph{float:left;width:64px;height:64px;border-radius:50%;object-fit:cover;object-position:50% 30%;margin:2px 10px 4px 0;background:#eef2f7;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.phr-wp .phr-t{overflow-wrap:break-word}
+/* телефоны: у строк с фото текст во всю ширину, кнопки рядом под ним (как на узких экранах) */
+@media(max-width:519px){.phr-wp .phr-b{flex:1 1 100%}.phr-wp .phr-a{flex:1 1 100%;flex-direction:row}.phr-wp .phr-a .btn{flex:1;width:auto}}
+@media(max-width:379px){.phr-ph{width:56px;height:56px}.phr-wp .phr-a .btn{font-size:14px;padding:0 8px;white-space:nowrap}}
 .ann-done-h{font-size:16px;color:var(--muted);margin:16px 2px 8px;border-top:1px dashed var(--line);padding-top:12px}
 
 /* [siteU] фото плиток и обложек — <img loading=lazy> вместо background-image (копии на GitHub Pages) */
