@@ -14,7 +14,7 @@ window.URKER_CONFIG = {
   //   claims   — «Это ваш бизнес? Дополните карточку» (нужен 08_claims.sql)
   //   ads      — рекламный баннер на главной и место «Закрепиться наверху» (пока скрыто)
   //   popular  — «🔥 Часто ищут» на главной из живой статистики (нужен 22_popular_searches.sql); false = встроенный список
-  features: { listings: true, claims: false, ads: false, popular: false },
+  features: { listings: true, claims: false, ads: false, popular: true },
   // Активист района: кому уходят обращения жителей (раздел «Обращение», кнопка «📲 Передать» в админке).
   // Должность/имя меняются только здесь. _dat — дательный падеж («передано кому?»).
   activist: {
