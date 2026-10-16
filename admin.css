@@ -155,3 +155,14 @@ body.mod .admbar .ab-pw,body.mod .admbar .ab-rf{color:#fff}
 .dg-f{margin:4px 2px 8px;color:var(--muted)}
 .dg-acts{display:flex;flex-wrap:wrap;gap:8px}.dg-acts .b{min-height:46px;display:inline-flex;align-items:center;text-decoration:none}
 .row .meta small{overflow-wrap:anywhere;word-break:break-word}
+/* [appeal] обращения жителей и [phones] статистика нажатий */
+.row.ap{border-left:5px solid #2f9e5b}
+.row.ap .ap-acts .b{min-height:46px;display:inline-flex;align-items:center;text-decoration:none}
+.b-link{border:0;background:none;color:#8a7f76;font:inherit;font-size:13.5px;text-decoration:underline;cursor:pointer;padding:10px 6px;margin-left:auto}
+.pill.forwarded{background:#e2f6e9;color:#1d6b3e}.pill.ap-d{background:#eef4ff;color:#2a4f9a}
+.st-t{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+.st-t th,.st-t td{padding:5px 6px;border-bottom:1px solid #eee;text-align:right}
+.st-t th:first-child,.st-t td:first-child{text-align:left}
+.st-ph .tl li.main{background:#fff7e0;border-radius:10px}
+.st-ph details{margin-top:6px;width:100%}.st-ph summary{cursor:pointer;color:#7a6a5c;font-size:13.5px}
+.st-ap h4{margin:10px 0 2px;font-size:14.5px}

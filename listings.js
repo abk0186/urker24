@@ -272,7 +272,7 @@ function viewMy(){A.setMeta(t('pMy')+' — Уркер 24','');const a=my();
    const m=my().find(x=>x.id===s.id);if(m&&m.title!==s.title){ch=true;row.querySelector('b').textContent=s.title}});
   if(ch)saveMy(my().map(x=>{const r=res.find(y=>y.id===x.id&&!y.gone);return r?Object.assign(x,{title:r.title}):x}))}).catch(()=>{})}
 function viewMenu(){A.setMeta(t('menuTitle')+' — Уркер 24','');
- const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(window.URKER_PH?[['#/phones','📞',t('phTitle'),t('phMenuD')]]:[]),...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
+ const items=[['#/',`🧰`,t('menuMasters'),t('menuMastersD')],...(window.URKER_PH?[['#/phones','📞',t('phTitle'),t('phMenuD')]]:[]),...(window.URKER_AP?[['#/appeal','📨',t('apMenu'),t('apMenuD')]]:[]),...(ON?Object.keys(SECT):[]).map(s=>[`#/${ROUTE[s]}`,SECT[s].e,t('lSec')[s],t('lSecD')[s]]),
   ['#/news','📰',t('menuNews'),t('menuNewsD')],['#/ann','⚠️',t('menuAlerts'),t('menuAlertsD')],...(ON?[['#/my','🔑',t('pMy'),'']]:[]),['#/add','➕',t('menuAddBiz'),''],['#/report','📣',t('repTitle'),''],['#/install','📲',t('pwaMenu')||'',''],['#/search','🔍',t('navSearch'),'']];
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>☰ ${t('menuTitle')}</h1></div>
  <div class="mlist">${items.map(([h,e,ti,d])=>`<a class="mrow" href="${h}"><span>${e}</span><b>${esc(ti)}</b>${d?`<small>${esc(d)}</small>`:''}</a>`).join('')}</div>`}

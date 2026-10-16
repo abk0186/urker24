@@ -510,3 +510,22 @@ main[data-view=home] .hints button{min-height:40px;padding:5px 12px;font-size:14
 .rev .rv-h time{color:var(--muted);font-size:12.5px;margin-left:auto}
 .rev p{margin:3px 0 0;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
 .rev p.rv-nt{color:var(--muted);font-size:13px;font-style:italic}
+/* [popular-search] «🔥 Часто ищут» над подсказками и метка 🔥 на популярных разделах (только главная) */
+.hints .pop-l{flex:0 0 100%;font-size:13px;font-weight:700;color:var(--muted);margin:0 2px -2px}
+main[data-view=home] .hints .pop-l{font-size:13px}
+.tile{position:relative}
+.tile .hot-m{position:absolute;top:4px;right:5px;font-size:13px;line-height:1;opacity:.9}
+#homeBody .tile.hot{border-color:#f6c9a8}
+/* [appeal] обращение активисту района */
+.ap-who{display:flex;gap:10px;align-items:flex-start;background:#fff7ef;border:1px solid #f6d7bd;border-radius:16px;padding:12px;margin:0 0 14px}
+.ap-who .ap-i{font-size:30px;line-height:1}
+.ap-who b{display:block;font-size:16px}
+.ap-who p{margin:4px 0 0;font-size:14.5px;line-height:1.4;color:var(--ink)}
+.ap-who small{display:block;margin-top:6px;font-size:13px;color:var(--muted);line-height:1.35}
+.ap-ok{text-align:center;padding:18px 8px}
+.ap-ok div{font-size:48px}
+.ap-ok h2{margin:8px 0}
+.ap-ok p{color:var(--muted);font-size:15px;line-height:1.4}
+.ap-link{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:#fff7ef;border:1px solid #f6d7bd;border-radius:14px;padding:10px 12px;margin:6px 0 12px;min-height:48px}
+.ap-link span{font-size:22px}.ap-link b{font-size:15px}.ap-link small{display:block;font-size:13px;color:var(--muted)}
+.ap-ok .ap-more{display:inline-block;margin-top:6px;padding:10px;color:var(--accent);font-weight:600;font-size:16px}

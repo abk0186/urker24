@@ -477,6 +477,36 @@ async function vReviews(box){
   +(appr.length?`<h2>${t('st').approved}</h2>`+appr.map(r=>card(r,`<button class="b" data-a="rejected">${t('hide')}</button>`)).join(''):'');
  box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;try{if(IS_MOD())await SB.rpc('mod_review_set',{p_id:+el.closest('.row').dataset.id,p_status:a});else await SB.update('reviews','id=eq.'+el.closest('.row').dataset.id,{status:a});toast(t('saved'));render()}catch(e){toast(e.message)}});
 }
+// ---------- [appeal] обращения жителей (24_resident_appeals.sql): не публикуются, передаются активисту в WhatsApp ----------
+const AC=Object.assign({wa:'77016441239',phone:'+7 701 644 1239',short_ru:'Карашаш Султановна',short_ru_dat:'Карашаш Султановне',name_ru_dat:'Карашаш Султановне Ташеновой',title_ru_dat:'активисту района Уркер',
+ name_kz_dat:'Карашаш Султановна Ташеноваға',title_kz:'Үркер ауданының белсендісі'},(window.URKER_CONFIG||{}).activist||{});
+const AP_TOP={power:['⚡','Свет','Жарық'],gas:['🔥','Газ и отопление','Газ және жылу'],water:['💧','Вода','Су'],road:['🛣','Дороги','Жолдар'],trash:['🗑','Мусор','Қоқыс'],improve:['🌳','Благоустройство','Абаттандыру'],other:['📌','Другое','Басқа']};
+Object.assign(T.ru,{apT:'📨 Обращение',apFwd:`📲 Передать ${AC.short_ru_dat}`,apRep:'📲 Ответить жителю',apFwdD:`Передано ${AC.short_ru_dat.split(' ')[0]}`,apRepD:'Жителю отвечено',apNoPh:'нет номера WhatsApp',apRej:'Отклонить (спам)',apRejQ:'Отклонить обращение как спам? Жителю ничего не отправляется.'});
+Object.assign(T.kz,{apT:'📨 Өтініш',apFwd:`📲 ${AC.short_kz||'Карашаш Султановна'}ға жіберу`,apRep:'📲 Тұрғынға жауап',apFwdD:'Белсендіге жіберілді',apRepD:'Тұрғынға жауап берілді',apNoPh:'WhatsApp нөмірі жоқ',apRej:'Қабылдамау (спам)',apRejQ:'Өтінішті спам ретінде қабылдамау керек пе? Тұрғынға ештеңе жіберілмейді.'});
+Object.assign(T.ru.st,{forwarded:'передано активисту'});Object.assign(T.kz.st,{forwarded:'белсендіге жіберілді'});
+const apWa=v=>{let d=String(v||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);if(d.length===10&&d[0]==='7')d='7'+d;return /^77\d{9}$/.test(d)?d:''};
+const apPh=v=>{const d=String(v||'').replace(/\D/g,'');return d.length===11?`8 ${d.slice(1,4)} ${d.slice(4,7)} ${d.slice(7,9)} ${d.slice(9)}`:String(v||'')};
+const apTopic=(r,l)=>{const x=AP_TOP[r.topic]||AP_TOP.other;return l==='kz'?x[2]:x[1]};
+// активисту — только факты, по-русски (формат согласован с Асетом 16.10)
+const apFwdText=r=>`Здравствуйте, ${AC.short_ru}! С сайта urker24.kz поступило обращение жителя.
+Тема: ${apTopic(r,'ru')}
+Адрес: ${r.area||''}
+Дата: ${fmtDT(r.created_at)}
+Суть: ${r.details||r.title||''}
+Телефон жителя: ${apPh(r.contact)}
+Ваш номер я тоже передал жителю, чтобы он мог связаться с вами напрямую.`;
+// жителю — RU + KZ
+const apRepText=r=>`Здравствуйте! Ваше обращение с сайта urker24.kz (${apTopic(r,'ru')}, ${r.area||''}) передано ${AC.name_ru_dat}, ${AC.title_ru_dat}. Она решает вопросы жителей и работает с акиматом и службами. Её номер: ${AC.phone} (WhatsApp).
+
+Сәлеметсіз бе! urker24.kz сайтынан жіберген өтінішіңіз (${apTopic(r,'kz')}, ${r.area||''}) ${AC.title_kz} ${AC.name_kz_dat} жіберілді. Ол тұрғындардың мәселелерін шешеді, әкімдікпен және қызметтермен жұмыс істейді. Оның нөмірі: ${AC.phone} (WhatsApp).`;
+function apRow(r){const top=AP_TOP[r.topic]||AP_TOP.other,rw=apWa(r.contact),open=r.status==='pending'||r.status==='forwarded';
+ return `<div class="row ap" data-id="${r.id}"><h3>${t('apT')} · ${top[0]} ${esc(apTopic(r,lang))}</h3>
+  <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${flagChips(r)}${r.forwarded_at?` <span class="pill ap-d">✅ ${esc(t('apFwdD'))} · ${fmtDT(r.forwarded_at)}</span>`:''}${r.replied_at?` <span class="pill ap-d">💬 ${esc(t('apRepD'))} · ${fmtDT(r.replied_at)}</span>`:''}</div>
+  <p>📍 ${esc(r.area)}<br>${esc(r.details||r.title)}${r.contact?'<br>📞 '+esc(apPh(r.contact)):''}</p>
+  ${r.status==='rejected'?'':`<div class="acts ap-acts">
+   <a class="b ok ap-b" data-mark="forwarded" href="https://wa.me/${esc(AC.wa)}?text=${encodeURIComponent(apFwdText(r))}" target="_blank" rel="noopener">${esc(t('apFwd'))}${r.forwarded_at?' ✓':''}</a>
+   ${rw?`<a class="b sec ap-b" data-mark="replied" href="https://wa.me/${rw}?text=${encodeURIComponent(apRepText(r))}" target="_blank" rel="noopener">${esc(t('apRep'))}${r.replied_at?' ✓':''}</a>`:`<span class="meta">📵 ${esc(t('apNoPh'))}</span>`}
+   ${open?`<button class="b" data-a="done">${t('done')}</button><button class="b-link" data-a="rejected" data-q="1">${esc(t('apRej'))}</button>`:''}</div>`}</div>`}
 async function vReports(box){
  const rows=(IS_MOD()?await SB.rpc('mod_reports',{}):await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=200')).sort((a,b)=>(b.status==='pending')-(a.status==='pending'));
  const names=rows.some(r=>r.type==='complaint')?(IS_MOD()?Object.fromEntries((await SB.get('specialists_public?select=id,name,sub_id').catch(()=>[])).map(x=>[x.id,x])):await specNames().catch(()=>({}))):{};  // [siteO moderator]
@@ -486,11 +516,13 @@ async function vReports(box){
   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${r.device_id?' · '+t('device')+': '+esc(String(r.device_id).slice(0,8)):''}${flagChips(r)}</div>
   <p>«${esc(String(r.title||'').replace(/^[a-z]+ #\d+: /,''))}»<br><b>${t('cReason')}:</b> ${esc((t('cr')||{})[r.reason]||r.reason||'')}${r.source?`<br><b>${t('cComment')}:</b> ${esc(r.source)}`:''}</p>
   <div class="acts">${tgtLink(r)?`<a class="b" href="${esc(tgtLink(r))}" target="_blank" rel="noopener">${t('cOpen')}</a>`:''}${r.status==='pending'?`${IS_MOD()&&r.target_kind==='spec'?'':`<button class="b no" data-a="hidetgt">${t('cHide')}</button>`}<button class="b" data-a="done">${t('done')}</button><button class="b" data-a="rejected">${t('cReject')}</button>`:''}</div></div>`;
- box.innerHTML=rows.length?rows.map(r=>r.type==='complaint'?crow(r):`<div class="row" data-id="${r.id}"><h3>${esc(t('types')[r.type]||r.type)} · ${esc(r.title)}</h3>
+ box.innerHTML=rows.length?rows.map(r=>r.type==='appeal'?apRow(r):r.type==='complaint'?crow(r):`<div class="row" data-id="${r.id}"><h3>${esc(t('types')[r.type]||r.type)} · ${esc(r.title)}</h3>
   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${flagChips(r)}</div><p>📍 ${esc(r.area)}<br>🕒 ${esc(r.when_text)}<br>ℹ️ ${esc(r.source)} ${r.contact?'<br>📞 '+esc(r.contact):''}</p>
   <div class="acts">${r.status==='pending'?`<button class="b ok" data-a="ann">${t('toAnn')}</button><button class="b" data-a="done">${t('done')}</button><button class="b no" data-a="rejected">${t('reject')}</button>`:''}</div></div>`).join(''):`<div class="row">${t('empty')}</div>`;
  const HIDE={spec:['specialists','hidden'],listing:['listings','rejected'],news:['news','draft'],review:['reviews','rejected']};
- box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;const r=rows.find(x=>x.id==el.closest('.row').dataset.id);
+ box.querySelectorAll('.row.ap .ap-b').forEach(el=>el.addEventListener('click',()=>{const id=+el.closest('.row').dataset.id;  // ссылка открывает WhatsApp, а статус отмечаем в базе
+  SB.rpc('appeal_mark',{p_id:id,p_what:el.dataset.mark}).then(()=>{toast(t('saved'));setTimeout(render,600)}).catch(e=>toast(e.message))}));
+ box.querySelectorAll('.row[data-id] .acts').forEach(el=>el.onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;if(ev.target.dataset.q&&!confirm(t('apRejQ')))return;const r=rows.find(x=>x.id==el.closest('.row').dataset.id);
   try{if(a==='ann'){tab='ann';editing={type:r.type,title_ru:r.title,area_ru:r.area,source_ru:r.source,status:'draft',report_id:r.id,start_at:r.when_text&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(r.when_text)?r.when_text+':00+05:00':null};return render()}
    if(a==='hidetgt'&&IS_MOD()){if(!HIDE[r.target_kind]||!confirm(t('cHideQ')))return;const res=await SB.rpc('mod_hide_target',{p_kind:r.target_kind,p_id:+r.target_id});toast(res==='hidden'?t('cHidden'):t('cGone'));return render()}  // [siteO moderator]
    if(a==='hidetgt'){const h=HIDE[r.target_kind];if(!h||!confirm(t('cHideQ')))return;const res=await SB.update(h[0],'id=eq.'+(+r.target_id),{status:h[1]});
@@ -687,7 +719,28 @@ async function vStats(box){
   </div>`;
  SB.rpc('admin_install_stats',{p_days:30}).then(ins=>{const L=lang==='kz'?{t:'📲 Телефон экранына қосу (30 күн)',android:'Android: орнатылды',installed:'Браузер растады',ios:'iPhone: нұсқаулық ашылды',inapp:'WhatsApp/Instagram ішінен',guide:'Android: нұсқаулық'}:{t:'📲 Добавили на экран телефона (30 дней)',android:'Android: установили',installed:'Подтверждено браузером',ios:'iPhone: открыли инструкцию',inapp:'Из WhatsApp/Instagram (подсказка)',guide:'Android: инструкция'};
   box.insertAdjacentHTML('beforeend',`<div class="row"><h3>${L.t}</h3>${Object.keys(ins||{}).length?`<ol class="tl">${Object.entries(ins).map(([k,v])=>`<li><span>${esc(L[k]||k)}</span><b>${v}</b></li>`).join('')}</ol>`:`<p class="meta">${S.none}</p>`}</div>`)}).catch(()=>{});
+ const ph=document.createElement('div'),ap=document.createElement('div');box.append(ph,ap);
+ SB.rpc('admin_phone_stats',{p_days:30}).then(d=>{ph.innerHTML=phoneStatsHtml(d)}).catch(()=>{});      // 23_phone_clicks.sql
+ SB.rpc('admin_appeal_stats',{p_days:30}).then(d=>{ap.innerHTML=appealStatsHtml(d)}).catch(()=>{});    // 24_resident_appeals.sql
 }
+const dm=d=>String(d||'').slice(8,10)+'.'+String(d||'').slice(5,7);
+function phoneStatsHtml(d){d=d||{};const kz=lang==='kz',S=t('st_');
+ const L=kz?{t:'📞 Пайдалы телефондар — басулар (30 күн)',c:'қоңырау',all:'Барлығы',day:'Күн',byDay:'Күндер бойынша (барлық телефондар)',k:'күндер бойынша'}:{t:'📞 Полезные телефоны — нажатия (30 дней)',c:'звонков',all:'Всего',day:'День',byDay:'По дням (все телефоны)',k:'по дням'};
+ const rows=Array.isArray(d.rows)?d.rows:[],daily=Array.isArray(d.daily)?d.daily:[];
+ const tbl=l=>l.length?`<table class="st-t"><tr><th>${L.day}</th><th>📞</th><th>WhatsApp</th></tr>${l.map(x=>`<tr><td>${dm(x.day)}</td><td>${x.calls}</td><td>${x.wa}</td></tr>`).join('')}</table>`:'';
+ return `<div class="row st-ph"><h3>${L.t}</h3><p class="meta">${L.all}: <b>${+d.total||0}</b> · 📞 ${+d.calls||0} · WhatsApp ${+d.wa||0}</p>
+  ${rows.length?`<ol class="tl">${rows.map(r=>`<li class="${r.main?'main':''}"><span>${r.main?'⭐ ':''}${esc(kz?(r.title_kz||r.title_ru):(r.title_ru||r.title_kz))} <small>${esc(r.phone)}</small></span><b>${r.total}</b><small>📞 ${L.c} ${r.calls} · WhatsApp ${r.wa}</small>
+   ${r.main&&r.daily&&r.daily.length?`<details open><summary>${L.k}</summary>${tbl(r.daily)}</details>`:''}</li>`).join('')}</ol>`:`<p class="meta">${S.none}</p>`}
+  ${daily.length?`<details><summary>${L.byDay}</summary>${tbl(daily)}</details>`:''}</div>`}
+function appealStatsHtml(d){d=d||{};const kz=lang==='kz',S=t('st_'),tt=d.totals||{};
+ const L=kz?{t:'📢 Өтініштер (30 күн)',rc:'Түсті',fw:'Белсендіге жіберілді',rp:'Тұрғынға жауап',wt:'Күтуде',day:'Күн',top:'Тақырыптар бойынша',byDay:'Күндер бойынша'}
+           :{t:'📢 Обращения (30 дней)',rc:'Поступило',fw:`Передано ${AC.short_ru_dat.split(' ')[0]}`,rp:'Жителю отвечено',wt:'Ждут',day:'День',top:'По темам',byDay:'По дням'};
+ const hd=`<tr><th></th><th>${L.rc}</th><th>${L.fw}</th><th>${L.rp}</th></tr>`;
+ const daily=Array.isArray(d.daily)?d.daily:[],tops=Array.isArray(d.topics)?d.topics:[];
+ return `<div class="row st-ap"><h3>${L.t}</h3>
+  <div class="kpis"><div class="kpi"><small>${L.rc}</small><b>${+tt.received||0}</b></div><div class="kpi"><small>${L.fw}</small><b>${+tt.forwarded||0}</b></div><div class="kpi"><small>${L.rp}</small><b>${+tt.replied||0}</b></div>${+tt.waiting?`<div class="kpi"><small>${L.wt}</small><b>${+tt.waiting}</b></div>`:''}</div>
+  ${tops.length?`<h4>${L.top}</h4><table class="st-t">${hd}${tops.map(x=>{const tp=AP_TOP[x.topic]||AP_TOP.other;return `<tr><td>${tp[0]} ${esc(kz?tp[2]:tp[1])}</td><td>${x.received}</td><td>${x.forwarded}</td><td>${x.replied}</td></tr>`}).join('')}</table>`:`<p class="meta">${S.none}</p>`}
+  ${daily.length?`<h4>${L.byDay}</h4><table class="st-t">${hd}${daily.map(x=>`<tr><td>${dm(x.day)}</td><td>${x.received}</td><td>${x.forwarded}</td><td>${x.replied}</td></tr>`).join('')}</table>`:''}</div>`}
 
 // ---------- login / boot ----------
 function vLogin(msg){

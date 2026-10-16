@@ -66,7 +66,7 @@ Object.assign(T.ru,{waS:'WhatsApp',callS:'Позвонить',err_bad_photo:'Ф�
  err_invalid_phone:'Проверьте номер телефона.',err_no_consent:'Отметьте согласие на показ номера.',
  viewsA:'Просмотры',addPhoto:'Добавить фото',photoCount:'Выбрано: {n} из {m}',vRequired:'Заполните это поле',vCheck:'Отметьте этот пункт',vChoose:'Выберите вариант из списка',vFormat:'Проверьте, правильно ли заполнено поле',
  err_generic:'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.',stillLoading:'Подождите пару секунд — данные ещё загружаются, затем отправьте снова.',offlineForm:'Сейчас нет связи с сервером. Попробуйте позже.',
- back:'Назад',hints:['сантехник','газель','укол','электрик','такси','уголь'],
+ back:'Назад',hints:['сантехник','газель','укол','электрик','такси','уголь'],popT:'🔥 Часто ищут',popHot:'часто ищут',
  waGreet:'Здравствуйте! Нашёл ваш контакт на сайте https://urker24.kz в разделе «{s}».',
  nothing:q=>`Пока никого нет по запросу «${q}»`,
  addErr:'Заполните название, раздел, номер из 11 цифр и отметьте согласие',repErr:'Напишите, что случилось и где',
@@ -95,7 +95,7 @@ T.kz={waS:'WhatsApp',callS:'Қоңырау',err_bad_photo:'Фото жарама
  draft:'Жоба-прототип · жариялауға арналмаған',brand:'Үркер',tagline:'Жаныңыздағы шеберлер мен қызметтер',
  navHome:'Басты бет',navSearch:'Іздеу',navAdd:'Қосу',navAnn:'Маңызды',back:'Артқа',
  searchPh:'Мысалы: көмір, жүк тасу',searchTitle:'Шебер немесе қызмет іздеу',cats:'Барлық бөлімдер',catsHint:'Бөлімді басып, қажетті маманды/бизнесті таңдаңыз',
- hints:['сантехник','жүк тасу','ине салу','электрик','такси','көмір'],
+ hints:['сантехник','жүк тасу','ине салу','электрик','такси','көмір'],popT:'🔥 Жиі іздейді',popHot:'жиі іздейді',
  promoT:'Мұнда сіздің жарнамаңыз болуы мүмкін',promoS:'Жарнама орналастыру үшін басыңыз',promoBtn:'Жарнама орналастыру',adMsg:'Сәлеметсіз бе! https://urker24.kz сайтында жарнама орналастырғым келеді.',ad:'Жарнама',
  wa:'WhatsApp-қа жазу',call:'Қоңырау шалу',noName:'Тізімдегі нөмір',noReviews:'әзірге пікір жоқ',review:'Баға беру',demo:'демо',
  waGreet:'Сәлеметсіз бе! Сіздің байланысыңызды https://urker24.kz сайтындағы «{s}» бөлімінен таптым.',
@@ -153,13 +153,13 @@ const hp=()=>`<div style="position:absolute;left:-5000px;width:1px;height:1px;ov
 const STATS_OFF=navigator.doNotTrack==='1'||navigator.globalPrivacyControl===true;
 function visitorId(){let v=localStorage.getItem('urker_vid');if(!v||!/^[A-Za-z0-9-]{8,64}$/.test(v)){v=(crypto.randomUUID?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join(''));localStorage.setItem('urker_vid',v)}return v}
 const DEVICE=(matchMedia('(pointer:coarse)').matches||/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent))?'mobile':'desktop';
-let firstView=true,lastPath='',lastSearch='',searchTimer=0;
+let firstView=true,lastPath='',lastSearch='',searchTimer=0,chipQuery='';
 function track(kind,extra){if(!SB.enabled||STATS_OFF||OFFLINE)return;
  SB.beacon('track',Object.assign({p_kind:kind,p_visitor_id:visitorId(),p_lang:lang,p_device:DEVICE},extra||{}))}
 function trackView(){const path=((location.hash||'#/').replace(/^#/,'').split('?')[0].replace(/^\/my\/.*/,'/my')).slice(0,120)||'/';if(path===lastPath)return;lastPath=path;
  let ref=null;if(firstView){try{const h=document.referrer?new URL(document.referrer).hostname:'';if(h&&h!==location.hostname)ref=h}catch(e){}firstView=false}
  track('view',{p_path:path,p_referrer:ref})}
-function trackSearch(q,n){clearTimeout(searchTimer);const qq=String(q||'').trim().toLowerCase();if(qq.length<2)return;
+function trackSearch(q,n){clearTimeout(searchTimer);const qq=String(q||'').trim().toLowerCase();if(qq.length<2||qq===chipQuery)return;
  searchTimer=setTimeout(()=>{if(qq===lastSearch)return;lastSearch=qq;track('search',{p_query:qq,p_result_count:n})},1500)}
 function loadMetrika(){const C=window.URKER_CONFIG||{},id=String(C.metrikaId||'').trim();if(!/^\d{5,12}$/.test(id))return;
  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();
@@ -265,7 +265,32 @@ const vipCard=(sec)=>!ADS_ON?'':`<a class="card vip vip-mini" ${adLink(t('vipMsg
 const promo=()=>!ADS_ON?'':ADS.length?ADS.slice(0,2).map(a=>{const href=a.link_url||(a.wa?`https://wa.me/${a.wa}`:'#/add');return `<a class="promo live" href="${esc(href)}" ${href.startsWith('http')?'target="_blank" rel="noopener sponsored"':''}><span class="pi">${esc(a.emoji||'☕')}</span><span class="tag">${t('adLive')}</span><b>${esc(L({ru:a.title_ru,kz:a.title_kz}))}</b><span>${esc(L({ru:a.text_ru,kz:a.text_kz}))}</span></a>`}).join(''):`<a class="promo" ${adLink(t('adMsg'))}><span class="pi">📣</span><b>${t('promoT')}</b><span>${t('promoS')}</span><span class="promo-btn">${t('promoBtn')}</span></a>`;
 const nothing=q=>`<div class="empty"><div style="font-size:52px">🤷</div><h2>${t('nothing')(esc(q))}</h2><p>${t('nothingS')}</p><a class="btn primary" href="#/add">${t('addBiz')}</a></div>`;
 const searchBox=(q='')=>`<section class="hero"><h2>${t('searchTitle')}</h2><div class="search"><span class="ic">🔍</span><input id="q" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="${t('searchPh')}" value="${esc(q)}"></div>
- <div class="hints">${t('hints').map(h=>`<button data-hint="${h}">${h}</button>`).join('')}</div></section>`;
+ <div class="hints" id="popular">${popularHtml()}</div></section>`;
+// ---------- «🔥 Часто ищут»: популярные запросы (живая статистика popular_searches → кэш 6 ч → встроенный список) ----------
+// [ru запрос, kz подпись/запрос]. Встроенный список = топ «Частых поисков» из админки на 16.10.2026.
+const POP_FALLBACK=[['сантехник',91],['такси',29],['электрик',29],['газель',28],['ремонт котлов',20],['укол',18],['юрист',18],['уголь',16]];
+const POP_KZ={'сантехник':'сантехник','такси':'такси','электрик':'электрик','газель':'жүк тасу','ремонт котлов':'қазандық жөндеу','укол':'укол','юрист':'заңгер',
+ 'уголь':'көмір','химчистка':'химтазалау','ассенизатор':'ассенизатор','кран':'кран','эвакуатор':'эвакуатор','сварка':'дәнекерлеу','репетитор':'репетитор','массаж':'массаж','уборка':'тазалау'};
+let POP=POP_FALLBACK.slice(),POP_SRC='builtin';
+// мусор/личное не показываем: цифры (телефоны), ссылки, длинные фразы; запрос должен совпадать с названием/синонимом раздела (не имя человека)
+function popOk(q){q=String(q||'').trim().toLowerCase();if(q.length<3||q.length>30||/[0-9@:/\\]/.test(q))return false;
+ const ws=norm(q).split(' ').filter(Boolean);if(!ws.length||ws.length>3)return false;
+ if(!Object.keys(subTokens).some(id=>ws.every(w=>tokScore(w,subTokens[id])>0)))return false;
+ const r=search(q);return !!(r&&r.list.length)}
+function popList(){const out=[],seen=[];
+ for(const [q] of POP.concat(POP_FALLBACK)){const k=norm(q),st=k.slice(0,5);if(!popOk(q)||seen.some(x=>x===k||(st.length>=4&&x.slice(0,5)===st)))continue;
+  seen.push(k);const kz=POP_KZ[q];const kq=lang==='kz'&&kz&&kz!==q&&(search(kz)||{list:[]}).list.length?kz:q;out.push(kq);if(out.length>=8)break}
+ return out}
+function popularHtml(){const l=popList();return `<span class="pop-l">${t('popT')}</span>`+l.map(h=>`<button data-hint="${esc(h)}" data-pop="1">${esc(h)}</button>`).join('')}
+function popRefresh(){const el=$('#popular');if(el)el.innerHTML=popularHtml()}
+async function loadPopular(){if(!SB.enabled||!(((window.URKER_CONFIG||{}).features||{}).popular))return;
+ const K='urker_pop_v1';let c=null;try{c=JSON.parse(localStorage.getItem(K))}catch(e){}
+ if(!(c&&Array.isArray(c.rows)&&Date.now()-c.t<6*3600e3)){try{const r=await SB.rpc('popular_searches',{p_days:30,p_limit:20},8000);
+   c={t:Date.now(),rows:(Array.isArray(r)?r:[]).filter(x=>x&&typeof x.query==='string').map(x=>[x.query.slice(0,30),+x.cnt||0])};localStorage.setItem(K,JSON.stringify(c))}catch(e){return}}
+ if(c.rows.length>=4){POP=c.rows;POP_SRC='live';popRefresh();const tl=$('.tiles');if(tl&&$('#homeBody'))tl.innerHTML=homeTilesHtml()}}
+// разделы, куда ведут популярные запросы: выше в списке и с маленькой меткой 🔥 (первые 3)
+function hotSections(){const sc={};POP.slice(0,10).forEach(([q,n],i)=>{const r=search(q);if(!r||!r.subs.length)return;const x=subById[r.subs[0][0]];if(x)sc[x.section]=(sc[x.section]||0)+(+n||(10-i))});
+ return Object.keys(sc).sort((a,b)=>sc[b]-sc[a])}
 
 function renderResults(q){
  const box=$('#results'),home=$('#homeBody');const r=search(q);
@@ -327,7 +352,7 @@ function viewAnn(focusId){
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>📣 ${t('annTitle')}</h1></div>
  <div class="chips"><button class="${annFilter?'':'on'}" data-af="">${t('all')}</button>${Object.entries(ANN_TYPES).map(([k,v])=>`<button class="${annFilter===k?'on':''}" data-af="${k}">${v.ic} ${t('annTypes')[k]}</button>`).join('')}</div>
  ${list.length?list.map((a,i)=>`${!annActive(a)&&(i===0||annActive(list[i-1]))?`<h2 class="ann-done-h">${t('annDoneH')}</h2>`:''}<div id="a${a.id}">${annCard(a,false)}</div>`).join(''):annEmpty()}
- <a class="btn primary" style="margin:8px 0 6px" href="#/report">${t('annReport')}</a>`;
+ <a class="btn primary" style="margin:8px 0 6px" href="#/report">${t('annReport')}</a>${window.URKER_AP?URKER_AP.link():''}`;
  app.querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{annFilter=b.dataset.af;viewAnn()});
  if(focusId&&ANN.some(a=>String(a.id)===String(focusId)))countView('ann',focusId);
  if(focusId){const el=document.getElementById('a'+focusId);if(el)setTimeout(()=>{el.scrollIntoView({block:'center'});el.firstElementChild.classList.add('flash')},30)}
@@ -447,10 +472,14 @@ function pinRow(){const l=outList(),n=l.filter(outNow).length,m=l.length-n;
  <a class="pin-t pin-p" href="#/phones"><span class="pin-i" aria-hidden="true">📞</span><span class="pin-b"><b>${t('phTitle')}</b><small>${t('phHome')}</small></span></a></div>`}
 function viewHome(q=''){
  app.innerHTML=`${searchBox(q)}<div id="results"></div>
- <div id="homeBody">${outAlert()}${pinRow()}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${D.sections.filter(s=>D.entries.some(e=>e.section===s.id)).map(s=>{const n=D.entries.filter(e=>e.section===s.id).length;
-  return `<a class="tile" href="#/c/${s.id}"><span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}</div></div>`;
+ <div id="homeBody">${outAlert()}${pinRow()}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${homeTilesHtml()}</div></div>`;
  bindSearch();
 }
+function homeTilesHtml(){const hot=hotSections(),top=hot.slice(0,3);
+ const secs=D.sections.filter(s=>D.entries.some(e=>e.section===s.id));
+ const ord=hot.map(id=>secs.find(s=>s.id===id)).filter(Boolean).concat(secs.filter(s=>!hot.includes(s.id)));
+ return ord.map(s=>{const n=D.entries.filter(e=>e.section===s.id).length,h=top.includes(s.id);
+  return `<a class="tile${h?' hot':''}" href="#/c/${s.id}">${h?`<span class="hot-m" title="${esc(t('popHot'))}" aria-label="${esc(t('popHot'))}">🔥</span>`:''}<span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}
 let sortMode='list';
 function viewCat(id,subId,focusId){  // focusId: #/c/<раздел>/<подраздел>/<id карточки> — ссылка на конкретную карточку (кнопка «📲 Отправить автору» в админке)
  const s=secById[id];if(!s)return viewHome();
@@ -601,7 +630,7 @@ function route(){setMeta();setTimeout(()=>{if(!OFFLINE&&(LIVE||!SB.enabled))trac
  else if(h.startsWith('#/report')){viewReport();nav='menu'}
  else if(h.startsWith('#/search')){const q=decodeURIComponent((h.split('q=')[1]||''));viewHome(q);nav='home';const i=$('#q');if(i&&!q)i.focus()}
  else if(h.startsWith('#/install')&&window.URKER_PWA){URKER_PWA.view();nav='menu'}
- else if(/^#\/appeal/.test(h)){history.replaceState(null,'','#/');app.dataset.view='home';viewHome()}  // раздел «Обращения» удалён: старые ссылки ведут на главную
+ else if(/^#\/appeal/.test(h)){if(window.URKER_AP){URKER_AP.view();nav='menu'}else{history.replaceState(null,'','#/');app.dataset.view='home';viewHome()}}  // «Обращение» активисту (appeal.js), не публикуется
  else if(window.URKER_PH&&URKER_PH.route(h)){nav='menu'}  // [siteT phones] #/phones
  else{const ln=window.URKER_L&&URKER_L.route(h);if(ln)nav=ln;else viewHome()}
  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav));
@@ -613,7 +642,7 @@ document.addEventListener('click',ev=>{
  const rs=ev.target.closest('[data-revs]');if(rs){toggleRevs(rs);return}
  const rv=ev.target.closest('[data-review]');if(rv){openReview(rv.dataset.review);return}
  const cl=CLAIMS_ON&&ev.target.closest('[data-claim]');if(cl){openClaim(cl.dataset.claim);return}
- const hint=ev.target.closest('[data-hint]');if(hint){const i=$('#q');i.value=hint.dataset.hint;i.dispatchEvent(new Event('input'));return}
+ const hint=ev.target.closest('[data-hint]');if(hint){const i=$('#q');chipQuery=String(hint.dataset.hint).toLowerCase();i.value=hint.dataset.hint;i.dispatchEvent(new Event('input'));return}
  const g=ev.target.closest('[data-goto]');if(g){const [s,sub]=g.dataset.goto.split('|');location.hash='#/c/'+s+'/'+sub}
 });
 function applyLang(){document.documentElement.lang=lang==='kz'?'kk':'ru';document.title=t('docTitle');document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
@@ -654,7 +683,7 @@ async function loadBackend(){
 function setMeta(title,desc){document.title=title||t('docTitle');const d=document.querySelector('meta[name="description"]');if(d){if(!d.dataset.def)d.dataset.def=d.content;d.content=desc||(lang==='ru'?d.dataset.def:t('docTitle'))}}
 window.URKER_APP={fileBtn,setFC,t,esc,$,app,SB,isLive:()=>LIVE,isOffline:()=>OFFLINE,toast,deviceId,hp,formNote,sending,errMsg,norm,tokScore,WA_SVG,MONTHS,lang:()=>lang,setMeta,track,
  addDict(ru,kz){Object.assign(T.ru,ru||{});Object.assign(T.kz,kz||{})}};
-const start=()=>{applyLang();route();loadBackend().then(()=>{if(LIVE)trackView()});loadMetrika()};
+const start=()=>{applyLang();route();loadBackend().then(()=>{if(LIVE)trackView();loadPopular()});loadMetrika()};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 window.addEventListener('urker-lang',()=>{const n=$('#netnote');if(n)n.textContent=t('offline')});
 })();
