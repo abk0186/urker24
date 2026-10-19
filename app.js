@@ -292,16 +292,37 @@ async function loadPopular(){if(!SB.enabled||!(((window.URKER_CONFIG||{}).featur
 function hotSections(){const sc={};POP.slice(0,10).forEach(([q,n],i)=>{const r=search(q);if(!r||!r.subs.length)return;const x=subById[r.subs[0][0]];if(x)sc[x.section]=(sc[x.section]||0)+(+n||(10-i))});
  return Object.keys(sc).sort((a,b)=>sc[b]-sc[a])}
 
+// Шаринг поиска. WhatsApp не читает #/search?q=, поэтому ссылка — статическая /s/… с og:title.
+// Подкатегорию берём по тому же tokScore, что и поиск: запрос против названия и синонимов
+// каждой подкатегории, побеждает лучший счёт (не первая карточка). «сантехники» → home-1,
+// даже если в выдаче рядом home-3; «костоправы» → med-2, не авто-СТО. Если очков нет
+// (имя или телефон) — подкатегория, которой больше всего среди найденных карточек.
+function searchShare(query,list){
+ const qs=norm(query).split(' ').filter(w=>w.length>=2&&!/^\d+$/.test(w));
+ let id='',best=0;
+ if(qs.length){for(const sid in subById){const tk=subTokens[sid]||[];let rel=0;
+  for(const q of qs){for(let k=0;k<tk.length;k++){const sc=tokScore(q,[tk[k]]);if(sc){rel+=sc*1000-k;break}}}
+  if(rel>best){best=rel;id=sid}}}
+ if(!id){const cnt={};list.forEach(e=>{cnt[e.sub]=(cnt[e.sub]||0)+1});let n=0;
+  for(const sid in cnt){if(cnt[sid]>n){n=cnt[sid];id=sid}}}
+ const x=subById[id];if(!x)return null;
+ const sec=secById[x.section];
+ const sub=x.implicit||(sec&&sec.subs.length===1)?'':x.id;
+ return {title:subTitle(x)+' '+t('brand'),url:catShareUrl(x.section,sub)};
+}
 function renderResults(q){
  const box=$('#results'),home=$('#homeBody');const r=search(q);
- if(!r){clearTimeout(searchTimer);box.innerHTML='';if(home)home.hidden=false;return}
+ if(!r){clearTimeout(searchTimer);box.innerHTML='';if(home)home.hidden=false;setMeta();return}
  const ls0=window.URKER_L?URKER_L.searchHtml(q):{n:0,html:''},ph0=window.URKER_PH?URKER_PH.searchHtml(q):{n:0,html:''};const ls={n:ls0.n+ph0.n,html:ph0.html+ls0.html};  // [siteT phones]  // [siteQ appeals]
  trackSearch(q,r.list.length+annSearch(q).length+newsSearch(q).length+ls.n);
  if(home)home.hidden=true;
  const nw=newsSearch(q);const newsHtml=nw.length?`<div class="sugg-l">📰 ${t('newsFound')}: ${nw.length}</div>${nw.slice(0,3).map(n=>newsCard(n,true)).join('')}`:'';
  const an=annSearch(q);const annHtml=ls.html+newsHtml+(an.length?`<div class="sugg-l">📣 ${t('annFound')}: ${an.length}</div>${an.map(a=>`<a href="#/ann/${a.id}" class="ann-link">${annCard(a,true)}</a>`).join('')}`:'');
- if(!r.list.length){box.innerHTML=annHtml+(an.length||nw.length||ls.n?'':nothing(q));return}
- box.innerHTML=annHtml+`<div class="sortbar"><span>${t('found')(r.list.length)}</span></div>
+ if(!r.list.length){setMeta();box.innerHTML=annHtml+(an.length||nw.length||ls.n?'':nothing(q));return}
+ const sh=searchShare(q,r.list);
+ if(sh)setMeta(sh.title,sh.title,sh.url);else setMeta();
+ const share=sh?`<a class="btn sm share" href="https://wa.me/?text=${encodeURIComponent(sh.title+'\n'+sh.url)}" target="_blank" rel="noopener">${WA_SVG}${t('annShare')}</a>`:'';
+ box.innerHTML=annHtml+share+`<div class="sortbar"><span>${t('found')(r.list.length)}</span></div>
   ${r.subs.length?`<div class="sugg-l">${t('sections')}:</div><div class="chips">${r.subs.map(([id,n])=>{const x=subById[id];return `<button data-goto="${x.section}|${id}">${esc(x.emoji)} ${esc(subTitle(x))} · ${n}</button>`}).join('')}</div>`:''}
   <div class="cards">${r.list.map(e=>card(e,true)).join('')}</div>`;
 }
