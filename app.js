@@ -481,8 +481,18 @@ function homeTilesHtml(){const hot=hotSections(),top=hot.slice(0,3);
  return ord.map(s=>{const n=D.entries.filter(e=>e.section===s.id).length,h=top.includes(s.id);
   return `<a class="tile${h?' hot':''}" href="#/c/${s.id}">${h?`<span class="hot-m" title="${esc(t('popHot'))}" aria-label="${esc(t('popHot'))}">🔥</span>`:''}<span class="em">${s.emoji}</span><b>${esc(secTitle(s))}</b><small>${t('entries')(n)}</small></a>`}).join('')}
 let sortMode='list';
+// Статическая страница /s/… уже содержит og:title раздела. Хеш #/c/… WhatsApp не читает.
+function catShareUrl(sectionId,subId){
+ const sub=subId&&subById[subId]&&subById[subId].section===sectionId?subId:'';
+ return 'https://urker24.kz'+(lang==='kz'?'/kz':'')+'/s/'+encodeURIComponent(sectionId)+'/'+(sub?encodeURIComponent(sub)+'/':'');
+}
 function viewCat(id,subId,focusId){  // focusId: #/c/<раздел>/<подраздел>/<id карточки> — ссылка на конкретную карточку (кнопка «📲 Отправить автору» в админке)
  const s=secById[id];if(!s)return viewHome();
+ const sub=subId&&subById[subId]&&subById[subId].section===id?subById[subId]:null;
+ const catName=sub?subTitle(sub):secTitle(s);
+ const shareTitle=catName+' '+t('brand');
+ const shareUrl=catShareUrl(id,sub&&sub.id);
+ setMeta(shareTitle,shareTitle,shareUrl);
  const vs=visibleSubs(s);const showChips=!(vs.length<=1&&(vs[0]||{}).implicit);
  let list=D.entries.filter(e=>e.section===id&&(!subId||e.sub===subId));
  const bad=e=>e.flags.includes('malformed')?1:0;list.sort((a,b)=>bad(a)-bad(b)||a.id-b.id);
@@ -491,6 +501,7 @@ function viewCat(id,subId,focusId){  // focusId: #/c/<раздел>/<подра�
  list=list.filter(e=>e.vip).concat(list.filter(e=>!e.vip));
  app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${s.emoji} ${esc(secTitle(s))}</h1></div>
   ${showChips?`<div class="chips"><button class="${subId?'':'on'}" data-sub="">${t('all')}</button>${vs.map(x=>`<button class="${x.id===subId?'on':''}" data-sub="${x.id}">${esc(x.emoji)} ${esc(subTitle(x))}</button>`).join('')}</div>`:''}
+  <a class="btn sm share" href="https://wa.me/?text=${encodeURIComponent(shareTitle+'\n'+shareUrl)}" target="_blank" rel="noopener">${WA_SVG}${t('annShare')}</a>
   <div class="sortbar"><span>${t('found')(list.length)}</span><select id="sort"><option value="list">${t('sortList')}</option><option value="rating" ${sortMode==='rating'?'selected':''}>${t('sortRating')}</option></select></div>
   ${list.some(e=>e.vip)?'':vipCard(s)}<div class="cards">${list.map(e=>card(e,false)).join('')}</div>`;
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{location.hash='#/c/'+id+(b.dataset.sub?'/'+b.dataset.sub:'')});
@@ -680,7 +691,19 @@ async function loadBackend(){
  const n=$('#netnote');if(n){n.hidden=!OFFLINE;n.textContent=t('offline')}
  const q=$('#q');if(q&&document.activeElement===q)renderResults(q.value);else route();
 }
-function setMeta(title,desc){document.title=title||t('docTitle');const d=document.querySelector('meta[name="description"]');if(d){if(!d.dataset.def)d.dataset.def=d.content;d.content=desc||(lang==='ru'?d.dataset.def:t('docTitle'))}}
+function putMeta(attr,name,value){let el=document.head.querySelector(`meta[${attr}="${name}"]`);
+ if(!el){el=document.createElement('meta');el.setAttribute(attr,name);document.head.appendChild(el)}
+ if(!('def' in el.dataset))el.dataset.def=el.getAttribute('content')||'';
+ el.setAttribute('content',value==null?el.dataset.def:value)}
+function setMeta(title,desc,url){document.title=title||t('docTitle');const d=document.querySelector('meta[name="description"]');
+ if(d&&!('def' in d.dataset))d.dataset.def=d.content;
+ const descVal=desc||(lang==='ru'&&d?d.dataset.def:t('docTitle'));
+ if(d)d.content=descVal;
+ putMeta('property','og:title',title||null);
+ putMeta('property','og:description',desc?desc:(lang==='ru'?null:t('docTitle')));
+ putMeta('name','twitter:title',title||null);
+ putMeta('name','twitter:description',desc?desc:(lang==='ru'?null:t('docTitle')));
+ putMeta('property','og:url',url||null)}
 window.URKER_APP={fileBtn,setFC,t,esc,$,app,SB,isLive:()=>LIVE,isOffline:()=>OFFLINE,toast,deviceId,hp,formNote,sending,errMsg,norm,tokScore,WA_SVG,MONTHS,lang:()=>lang,setMeta,track,
  addDict(ru,kz){Object.assign(T.ru,ru||{});Object.assign(T.kz,kz||{})}};
 const start=()=>{applyLang();route();loadBackend().then(()=>{if(LIVE)trackView();loadPopular()});loadMetrika()};
