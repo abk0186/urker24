@@ -150,8 +150,10 @@ function toBlob(file,maxSide,q){return new Promise((res,rej)=>{const u=URL.creat
   const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error('encode')),'image/jpeg',q)};
  img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};img.src=u})}
 const rnd=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>b.toString(16).padStart(2,'0')).join('');
-async function uploadAll(id,ticket,files,onStep){const paths=[];let i=0;for(const f of files){onStep&&onStep(++i,files.length);
-  const b=await toBlob(f,1280,0.8);const r=await SB.upload('listings',`${id}/${ticket}/${rnd()}.jpg`,b,'image/jpeg');paths.push(r.path)}return paths}
+// [appeal-photo 21.10] общая загрузка: сжатие 1280px/0.8 → bucket listings, папка prefix (объявления: id/ticket, обращения: appeals/id/ticket)
+async function uploadTo(prefix,files,onStep){const paths=[];let i=0;for(const f of files){onStep&&onStep(++i,files.length);
+  const b=await toBlob(f,1280,0.8);const r=await SB.upload('listings',`${prefix}/${rnd()}.jpg`,b,'image/jpeg');paths.push(r.path)}return paths}
+const uploadAll=(id,ticket,files,onStep)=>uploadTo(`${id}/${ticket}`,files,onStep);
 // форма подачи / правки
 function form(sec,row,onSubmit){
  const S=SECT[sec];row=row||{};const JQ=(location.hash.match(/[?&]k=(job_offer|job_seek)/)||[])[1];const kind=row.kind||(sec==='jobs'&&JQ)||S.kinds[0];const J=sec==='jobs',JN=J&&!row.id;
@@ -297,5 +299,5 @@ function route(h){let m;
  if(/^#\/my\/?$/.test(h)){viewMy();return 'menu'}
  if(/^#\/menu/.test(h)){viewMenu();return 'menu'}
  return null}
-window.URKER_L={on:ON,route,load,homeStrip,homeTiles,searchHtml,count:()=>visible().length};
+window.URKER_L={on:ON,route,load,homeStrip,homeTiles,searchHtml,count:()=>visible().length,uploadTo};  // uploadTo — для appeal.js
 })();

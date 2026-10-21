@@ -487,13 +487,16 @@ Object.assign(T.ru.st,{forwarded:'передано активисту'});Object.
 const apWa=v=>{let d=String(v||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);if(d.length===10&&d[0]==='7')d='7'+d;return /^77\d{9}$/.test(d)?d:''};
 const apPh=v=>{const d=String(v||'').replace(/\D/g,'');return d.length===11?`8 ${d.slice(1,4)} ${d.slice(4,7)} ${d.slice(7,9)} ${d.slice(9)}`:String(v||'')};
 const apTopic=(r,l)=>{const x=AP_TOP[r.topic||guessTopic(r)]||AP_TOP.other;return l==='kz'?x[2]:x[1]};
+// [appeal-photo 21.10] фото обращения: reports.photos = ['appeals/<id>/<ticket>/x.jpg', …] в bucket listings
+const apPhotos=r=>(Array.isArray(r.photos)?r.photos:[]).map(p=>typeof p==='string'?p:(p&&p.path)||'').filter(x=>/^appeals\//.test(x)).map(x=>SB.publicUrl('listings',x));
 // активисту — только факты, по-русски (формат согласован с Асетом 16.10)
 const apFwdText=r=>`Здравствуйте, ${AC.short_ru}! С сайта urker24.kz поступило обращение жителя.
 Тема: ${apTopic(r,'ru')}
 Адрес: ${r.area||''}
 Дата: ${fmtDT(r.created_at)}
 Суть: ${r.details||r.title||''}
-Телефон жителя: ${apPh(r.contact)}
+Телефон жителя: ${apPh(r.contact)}${apPhotos(r).length?`
+Фото: ${apPhotos(r).join(' , ')}`:''}
 Ваш номер я тоже передал жителю, чтобы он мог связаться с вами напрямую.`;
 // жителю — RU + KZ
 const apRepText=r=>`Здравствуйте! Ваше обращение с сайта urker24.kz (${apTopic(r,'ru')}, ${r.area||''}) передано ${AC.name_ru_dat}, ${AC.title_ru_dat}. Она решает вопросы жителей и работает с акиматом и службами. Её номер: ${AC.phone} (WhatsApp).
@@ -508,11 +511,16 @@ function apRow(r){r=apNorm(r);const top=AP_TOP[r.topic]||AP_TOP.other,rw=apWa(r.
  return `<div class="row ap" data-id="${r.id}"><h3>${t('apT')} · ${top[0]} ${esc(apTopic(r,lang))}${r.type!=='appeal'?` <small class="meta">(${esc(t('apViaOut'))})</small>`:''}</h3>
   <div class="meta">${pill(r.status)} ${fmtDT(r.created_at)}${flagChips(r)}${r.forwarded_at?` <span class="pill ap-d">✅ ${esc(t('apFwdD'))} · ${fmtDT(r.forwarded_at)}</span>`:''}${r.replied_at?` <span class="pill ap-d">💬 ${esc(t('apRepD'))} · ${fmtDT(r.replied_at)}</span>`:''}</div>
   <p>📍 ${esc(r.area)}<br>${esc(r.details||r.title)}${r.contact?'<br>📞 '+esc(apPh(r.contact)):''}</p>
+  ${apPhotos(r).length?`<div class="ap-ph">${apPhotos(r).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener" class="ap-th"><img src="${esc(u)}" alt="📷" loading="lazy"></a>`).join('')}</div>`:''}
   ${r.status==='rejected'?'':`<div class="acts ap-acts">
    <a class="b ok ap-b" data-mark="forwarded" href="https://wa.me/${esc(AC.wa)}?text=${encodeURIComponent(apFwdText(r))}" target="_blank" rel="noopener">${esc(t('apFwd'))}${r.forwarded_at?' ✓':''}</a>
    ${rw?`<a class="b sec ap-b" data-mark="replied" href="https://wa.me/${rw}?text=${encodeURIComponent(apRepText(r))}" target="_blank" rel="noopener">${esc(t('apRep'))}${r.replied_at?' ✓':''}</a>`:`<span class="meta">📵 ${esc(t('apNoPh'))}</span>`}
    ${open?`<button class="b" data-a="done">${t('done')}</button><button class="b-link" data-a="rejected" data-q="1">${esc(t('apRej'))}</button>`:''}</div>`}</div>`}
 function vAppeals(box){return vReports(box,true)}
+// нажатие на миниатюру — фото целиком поверх страницы (закрыть: нажатие или Esc)
+document.addEventListener('click',ev=>{const a=ev.target.closest('a.ap-th');if(!a||ev.ctrlKey||ev.metaKey)return;ev.preventDefault();
+ const o=document.createElement('div');o.className='ap-lb';o.innerHTML=`<img src="${esc(a.href)}" alt=""><button type="button" aria-label="✕">✕</button>`;
+ const close=()=>{o.remove();document.removeEventListener('keydown',k)},k=e=>{if(e.key==='Escape')close()};o.onclick=close;document.addEventListener('keydown',k);document.body.appendChild(o)});
 async function vReports(box,appeals){
  const rows=(IS_MOD()?await SB.rpc('mod_reports',{}):await SB.get('reports?select=*&order=status.desc,created_at.desc&limit=200')).filter(r=>!!appeals===isAppealRow(r)).sort((a,b)=>(b.status==='pending')-(a.status==='pending'));
  const names=rows.some(r=>r.type==='complaint')?(IS_MOD()?Object.fromEntries((await SB.get('specialists_public?select=id,name,sub_id').catch(()=>[])).map(x=>[x.id,x])):await specNames().catch(()=>({}))):{};  // [siteO moderator]
