@@ -308,7 +308,8 @@ function searchShare(query,list){
  const x=subById[id];if(!x)return null;
  const sec=secById[x.section];
  const sub=x.implicit||(sec&&sec.subs.length===1)?'':x.id;
- return {title:subTitle(x)+' '+t('brand'),url:catShareUrl(x.section,sub)};
+ // ?q= — статическая страница /s/… сразу открывает живой поиск по запросу (весь список, как у отправителя).
+ return {title:subTitle(x)+' '+t('brand'),url:catShareUrl(x.section,sub)+'?q='+encodeURIComponent(String(query).trim())};
 }
 function renderResults(q){
  const box=$('#results'),home=$('#homeBody');const r=search(q);
@@ -321,7 +322,7 @@ function renderResults(q){
  if(!r.list.length){setMeta();box.innerHTML=annHtml+(an.length||nw.length||ls.n?'':nothing(q));return}
  const sh=searchShare(q,r.list);
  if(sh)setMeta(sh.title,sh.title,sh.url);else setMeta();
- const share=sh?`<a class="btn sm share" href="https://wa.me/?text=${encodeURIComponent(sh.title+'\n'+sh.url)}" target="_blank" rel="noopener">${WA_SVG}${t('annShare')}</a>`:'';
+ const share=sh?`<a class="btn sm share" href="https://wa.me/?text=${encodeURIComponent('«'+String(q).trim()+'» — '+t('found')(r.list.length)+' · '+t('brand')+'\n'+sh.url)}" target="_blank" rel="noopener">${WA_SVG}${t('annShare')}</a>`:'';
  box.innerHTML=annHtml+share+`<div class="sortbar"><span>${t('found')(r.list.length)}</span></div>
   ${r.subs.length?`<div class="sugg-l">${t('sections')}:</div><div class="chips">${r.subs.map(([id,n])=>{const x=subById[id];return `<button data-goto="${x.section}|${id}">${esc(x.emoji)} ${esc(subTitle(x))} · ${n}</button>`}).join('')}</div>`:''}
   <div class="cards">${r.list.map(e=>card(e,true)).join('')}</div>`;

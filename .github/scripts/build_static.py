@@ -93,6 +93,12 @@ def card(e, s, x, lg):
             (f'<a class="b call" href="tel:+7{p[1:]}" rel="nofollow">📞 {l["call"]}</a>' if ok else '') +
             f'</div><a class="more" href="{E(spa(lg, f"/c/{s["id"]}/{x["id"]}/{e["id"]}"))}">{l["more"]} ›</a></article>')
 
+def search_redirect(lg):
+    """Ссылка «Поделиться» из поиска: /s/<раздел>/<подраздел>/?q=<запрос>. Превью WhatsApp берёт og:title этой страницы,
+    а человека сразу открываем на живом поиске по тому же запросу — весь список, а не одна подкатегория."""
+    return (f'<script>(function(){{var m=/[?&]q=([^&#]*)/.exec(location.search);'
+            f'if(m&&m[1]&&!/{BOTS}/i.test(navigator.userAgent))location.replace({json.dumps(spa(lg, "/search?q="))}+m[1])}})()</script>\n')
+
 def head(lg, title, desc, path, alt_ru, alt_kz, og_img, ld):
     return f'''<!doctype html>
 <html lang="{'kk' if lg == 'kz' else 'ru'}">
@@ -101,7 +107,7 @@ def head(lg, title, desc, path, alt_ru, alt_kz, og_img, ld):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#e8603c">
 <meta name="color-scheme" content="only light">
-<title>{E(title)}</title>
+{search_redirect(lg)}<title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
 <link rel="canonical" href="{SITE}{path}">
 <link rel="alternate" hreflang="ru" href="{SITE}{alt_ru}">
