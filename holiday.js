@@ -26,8 +26,8 @@ function pick(){let d=today(),prev=false;
   if(n>=0&&n<h[1])return{key:start,prev,e:h[2],ru:h[3],kz:h[4]}}return null}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function banner(lang){const h=pick();if(!h)return '';const K='urker_hol_'+h.key;
- try{if(!h.prev&&localStorage.getItem(K))return ''}catch(e){}
+ try{if(!h.prev&&sessionStorage.getItem(K))return ''}catch(e){}
  const txt=lang==='kz'?h.kz:h.ru,sig=lang==='kz'?'— Үркер 24':'— Уркер 24',cl=lang==='kz'?'Жабу':'Закрыть';
- return `<div class="hol" role="note" data-hol="${esc(K)}"><span class="hol-e">${h.e}</span><div class="hol-t"><b>${esc(txt)}</b><small>${sig}</small></div><button class="hol-x" aria-label="${cl}" title="${cl}" onclick="try{localStorage.setItem(this.parentNode.dataset.hol,'1')}catch(e){}this.parentNode.remove()">✕</button></div>`}
+ return `<div class="hol" role="note" data-hol="${esc(K)}"><span class="hol-e">${h.e}</span><div class="hol-t"><b>${esc(txt)}</b><small>${sig}</small></div><button class="hol-x" aria-label="${cl}" title="${cl}" onclick="try{sessionStorage.setItem(this.parentNode.dataset.hol,'1')}catch(e){}this.parentNode.remove()">✕</button></div>`}
 window.URKER_HOL={banner,list:H};
 })();
