@@ -493,8 +493,8 @@ function pinRow(){const l=outList(),n=l.filter(outNow).length,m=l.length-n;
  return `<div class="pin2"><a class="pin-t pin-o ${n||m?'on':''}" href="#/ann"><span class="pin-i" aria-hidden="true">⚠️</span><span class="pin-b"><b>${t('outT')}</b><small>${n?t('outN')(n):m?t('outSoonN')(m):'✅ '+t('outNone')}</small></span></a>
  <a class="pin-t pin-p" href="#/phones"><span class="pin-i" aria-hidden="true">📞</span><span class="pin-b"><b>${t('phTitle')}</b><small>${t('phHome')}</small></span></a></div>`}
 function viewHome(q=''){
- app.innerHTML=`${searchBox(q)}<div id="results"></div>
- <div id="homeBody">${window.URKER_HOL?URKER_HOL.banner(lang):''}${outAlert()}${pinRow()}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${homeTilesHtml()}</div></div>`;
+ app.innerHTML=`${q?'':(window.URKER_HOL?URKER_HOL.banner(lang):'')}${searchBox(q)}<div id="results"></div>
+ <div id="homeBody">${outAlert()}${pinRow()}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${homeTilesHtml()}</div></div>`;
  bindSearch();
 }
 function homeTilesHtml(){const hot=hotSections(),top=hot.slice(0,3);
