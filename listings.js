@@ -27,7 +27,7 @@ A.addDict({
  pErrTitle:'Напишите заголовок (не короче 3 символов)',pErrPhone:'Укажите номер телефона: 8XXXXXXXXXX',pErrPrice:'Укажите цену или выберите «Договорная»',pTooMany:'Можно добавить не больше 5 фото',
  pUploading:'Загружаем фото…',pDone:'Готово!',pDonePending:'Объявление отправлено на проверку. После одобрения оно появится на сайте.',pDoneLive:'Объявление опубликовано.',
  pSecret:'Ваша секретная ссылка для изменения и удаления. Сохраните её — без неё управлять объявлением нельзя:',pCopy:'📋 Скопировать ссылку',pCopied:'Ссылка скопирована',
- pSaveWa:'💬 Отправить ссылку себе в WhatsApp',pView:'Открыть объявление',pMy:'Мои объявления',pMyEmpty:'Здесь появятся объявления, поданные с этого телефона.',
+ pSaveWa:'💬 Отправить ссылку себе в WhatsApp',pShareTitle:'Поделиться объявлением',pSharePub:'Поделиться объявлением в WhatsApp',pPrivate:'⚠️ Это ЛИЧНАЯ ссылка для управления. Не пересылайте её в чаты и никому не отправляйте. Чтобы показать объявление другим, нажмите «Поделиться объявлением» — там обычная ссылка без доступа к управлению.',phAsk:'Подтвердите, что это вы',phAskD:'Введите последние 4 цифры номера, который вы указали в объявлении (или номер полностью).',phPh:'Последние 4 цифры',phOk:'Подтвердить',phBad:'Номер не совпадает',phLocked:'Слишком много попыток. Попробуйте через час.',mNoTok:'Откройте свою личную ссылку на этом телефоне или войдите через «Мои объявления».',pView:'Открыть объявление',pMy:'Мои объявления',pMyEmpty:'Здесь появятся объявления, поданные с этого телефона.',
  mStatus:{pending:'На проверке',approved:'Опубликовано',rejected:'Отклонено',closed:'Закрыто',deleted:'Удалено'},mExpires:'Показывается до',mEdit:'✏️ Изменить',mClose:{market:'✅ Продано',ads:'✅ Неактуально',jobs:'✅ Неактуально',lost:'✅ Нашлось'},
  mRenew:'🔄 Продлить',mDelete:'🗑 Удалить',mConfirmDel:'Удалить объявление безвозвратно?',mDeleted:'Объявление удалено',mSaved:'Сохранено',mSavedPending:'Сохранено — отправлено на повторную проверку',
  mRenewed:'Продлено до',mBadLink:'Ссылка недействительна или объявление удалено',mManage:'Управление объявлением',
@@ -57,7 +57,7 @@ A.addDict({
  pErrTitle:'Тақырыпты жазыңыз (кемінде 3 таңба)',pErrPhone:'Телефон нөмірін көрсетіңіз: 8XXXXXXXXXX',pErrPrice:'Бағаны көрсетіңіз немесе «Келісімді» таңдаңыз',pTooMany:'5 фотодан артық қосуға болмайды',
  pUploading:'Фото жүктелуде…',pDone:'Дайын!',pDonePending:'Хабарландыру тексеруге жіберілді. Мақұлданғаннан кейін сайтта шығады.',pDoneLive:'Хабарландыру жарияланды.',
  pSecret:'Өзгерту және жою үшін құпия сілтемеңіз. Оны сақтап қойыңыз — онсыз хабарландыруды басқару мүмкін емес:',pCopy:'📋 Сілтемені көшіру',pCopied:'Сілтеме көшірілді',
- pSaveWa:'💬 Сілтемені өзіме WhatsApp-қа жіберу',pView:'Хабарландыруды ашу',pMy:'Менің хабарландыруларым',pMyEmpty:'Осы телефоннан берілген хабарландырулар осында шығады.',
+ pSaveWa:'💬 Сілтемені өзіме WhatsApp-қа жіберу',pShareTitle:'Хабарландырумен бөлісу',pSharePub:'Хабарландырумен WhatsApp-та бөлісу',pPrivate:'⚠️ Бұл басқаруға арналған ЖЕКЕ сілтеме. Оны чаттарға жібермеңіз және ешкімге бермеңіз. Хабарландыруды басқаларға көрсету үшін «Хабарландырумен бөлісу» батырмасын басыңыз — онда басқаруға рұқсатсыз қарапайым сілтеме.',phAsk:'Бұл сіз екеніңізді растаңыз',phAskD:'Хабарландыруда көрсеткен нөмірдің соңғы 4 цифрын (немесе толық нөмірді) енгізіңіз.',phPh:'Соңғы 4 цифр',phOk:'Растау',phBad:'Нөмір сәйкес келмейді',phLocked:'Әрекет тым көп. Бір сағаттан кейін қайталаңыз.',mNoTok:'Жеке сілтемеңізді осы телефонда ашыңыз немесе «Менің хабарландыруларым» арқылы кіріңіз.',pView:'Хабарландыруды ашу',pMy:'Менің хабарландыруларым',pMyEmpty:'Осы телефоннан берілген хабарландырулар осында шығады.',
  mStatus:{pending:'Тексеруде',approved:'Жарияланған',rejected:'Қабылданбады',closed:'Жабылды',deleted:'Жойылды'},mExpires:'Көрсетіледі',mEdit:'✏️ Өзгерту',mClose:{market:'✅ Сатылды',ads:'✅ Өзекті емес',jobs:'✅ Өзекті емес',lost:'✅ Табылды'},
  mRenew:'🔄 Ұзарту',mDelete:'🗑 Жою',mConfirmDel:'Хабарландыруды біржола жою керек пе?',mDeleted:'Хабарландыру жойылды',mSaved:'Сақталды',mSavedPending:'Сақталды — қайта тексеруге жіберілді',
  mRenewed:'Ұзартылды:',mBadLink:'Сілтеме жарамсыз немесе хабарландыру жойылған',mManage:'Хабарландыруды басқару',
@@ -217,51 +217,70 @@ function viewPost(sec){
    const r=await SB.rpc('submit_listing',{p,p_device_id:A.deviceId(),p_hp:$('#hpf').value},15000);
    if(!r||!r.id){A.toast(t('pDonePending'));return}
    if(photos.add.length){$('#lst').textContent=t('pUploading');try{const paths=await uploadAll(r.id,r.ticket,photos.add.map(x=>x.file),(i,n)=>$('#lst').textContent=`${t('pUploading')} ${i}/${n}`);
-     await SB.rpc('listing_set_photos',{p_id:r.id,p_token:r.token,p_paths:paths},15000)}catch(e){A.toast(lerr(e))}}
-   saveMy([{id:r.id,token:r.token,title:p.title,section:p.section,kind:p.kind,at:Date.now()},...my()]);
+     await SB.rpc('listing_set_photos',{p_id:r.id,p_token:r.token,p_phone:p.phone,p_paths:paths},15000)}catch(e){A.toast(lerr(e))}}
+   setOwnPh(r.id,p.phone);saveMy([{id:r.id,token:r.token,title:p.title,section:p.section,kind:p.kind,at:Date.now()},...my()]);
    if(r.status==='approved')await load();
    done(r,p,sec)}catch(e){A.toast(lerr(e))}})});
 }
 const secretLink=(id,tok)=>location.origin+location.pathname+'#/my/'+id+'/'+tok;
+const pubLink=id=>'https://urker24.kz/i/'+id+'/';  // публичная ссылка (превью WhatsApp), без доступа к управлению
+const pubShare=(title,id,cls)=>`<a class="btn wa sm ${cls||''}" href="https://wa.me/?text=${encodeURIComponent(title+'\n'+pubLink(id))}" target="_blank" rel="noopener">${A.WA_SVG}${t('pSharePub')}</a>`;
+const PHK=id=>'urker_own_ph_'+id;const ownPh=id=>{try{return sessionStorage.getItem(PHK(id))||''}catch(e){return ''}};const setOwnPh=(id,v)=>{try{sessionStorage.setItem(PHK(id),v)}catch(e){}};
+const BADPH=v=>v==='bad_phone'||v===null;
 function done(r,p,sec){const link=secretLink(r.id,r.token);
  A.app.innerHTML=`<div class="crumbs"><h1>✅ ${t('pDone')}</h1></div>
  <p class="demo-note live">${r.status==='approved'?t('pDoneLive'):t('pDonePending')}</p>
  <div class="secret"><p>🔑 ${t('pSecret')}</p><input id="sl" readonly value="${esc(link)}"><button class="btn primary" id="cp">${t('pCopy')}</button>
- <a class="btn wa sm" href="https://wa.me/?text=${encodeURIComponent(p.title+'\n'+link)}" target="_blank" rel="noopener">${A.WA_SVG}${t('pSaveWa')}</a>
+ <p class="meta warnp">${t('pPrivate')}</p>
  <p class="meta">✅ ${t('pSavedMy')}</p></div>
- <a class="btn sm ghost" href="#/my/${r.id}/${r.token}">${t('mManage')}</a><a class="btn sm ghost" href="#/my">${t('pOpenMy')}</a>${r.status==='approved'?`<a class="btn sm ghost" href="#/item/${r.id}">${t('pView')}</a>`:''}`;
+ ${r.status==='approved'?pubShare(p.title,r.id):''}
+ <a class="btn sm ghost" href="#/my/${r.id}">${t('mManage')}</a><a class="btn sm ghost" href="#/my">${t('pOpenMy')}</a>${r.status==='approved'?`<a class="btn sm ghost" href="#/item/${r.id}">${t('pView')}</a>`:''}`;
  $('#cp').onclick=async()=>{const i=$('#sl');i.select();try{await navigator.clipboard.writeText(i.value)}catch(e){document.execCommand&&document.execCommand('copy')}A.toast(t('pCopied'))};
 }
 async function viewManage(id,tok){
+ if(!tok){const m=my().find(x=>String(x.id)===String(id));tok=m&&m.token}
  A.setMeta(t('mManage')+' — Уркер 24','');
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1 class="sm">🔑 ${t('mManage')}</h1></div><p class="meta">…</p>`;
  if(!A.isLive()&&!SB.enabled){A.app.querySelector('.meta').textContent=t('pNoteDemo');return}
- let r;try{r=await SB.rpc('listing_get_own',{p_id:+id,p_token:tok},10000)}catch(e){A.app.innerHTML+=`<div class="empty"><h2>${t('mBadLink')}</h2></div>`;A.app.querySelector('.meta').remove();return}
- if(!my().some(x=>x.id===r.id))saveMy([{id:r.id,token:tok,title:r.title,section:r.section,kind:r.kind,at:Date.now()},...my()]);
+ let r;try{if(!tok)throw 0;r=await SB.rpc('listing_get_own',{p_id:+id,p_token:tok},10000)}catch(e){A.app.innerHTML+=`<div class="empty"><h2>${t('mBadLink')}</h2><p class="meta">${t('mNoTok')}</p></div>`;A.app.querySelector('.meta').remove();return}
+ {const o=my().find(x=>x.id===r.id);saveMy([{id:r.id,token:tok,title:r.title,section:r.section,kind:r.kind,at:(o&&o.at)||Date.now()},...my().filter(x=>x.id!==r.id)])}
  const RS=secOf(r),S=SECT[RS];const open=r.status==='approved'||r.status==='pending';
+ const ph=ownPh(r.id);
+ if(!ph){A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1 class="sm">🔑 ${t('mManage')}</h1></div>
+  <div class="card mcard"><div class="sub">${S.e} ${t('lSec')[RS]}</div><div class="idl"><span class="nm">${esc(r.title)}</span></div></div>
+  <form class="secret phchk" id="phf"><p><b>📱 ${t('phAsk')}</b></p><p class="meta">${t('phAskD')}</p>
+  <input id="phi" inputmode="tel" autocomplete="off" maxlength="20" placeholder="${t('phPh')}"><button class="btn primary" type="submit">${t('phOk')}</button><p class="meta" id="phe" style="color:#b42318"></p></form>
+  <p class="meta warnp">${t('pPrivate')}</p>${r.status==='approved'?pubShare(r.title,r.id):''}`;
+  $('#phi').focus();
+  $('#phf').onsubmit=async ev=>{ev.preventDefault();const v=$('#phi').value.trim();if(v.replace(/\D/g,'').length<4){$('#phe').textContent=t('phBad');return}
+   try{const ok=await SB.rpc('listing_check_phone',{p_id:r.id,p_token:tok,p_phone:v},10000);if(ok===true){setOwnPh(r.id,v);viewManage(id,tok)}else $('#phe').textContent=t('phBad')}
+   catch(e){$('#phe').textContent=String(e&&e.code||e&&e.message||'').includes('phone_locked')||String(e&&e.message||'').includes('phone_locked')?t('phLocked'):lerr(e)}};
+  return}
+ const chk=v=>{if(BADPH(v)){setOwnPh(r.id,'');try{sessionStorage.removeItem(PHK(r.id))}catch(e){}A.toast(t('phBad'));viewManage(id,tok);throw 'bad_phone'}return v};
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1 class="sm">🔑 ${t('mManage')}</h1></div>
  <div class="card mcard"><div class="sub">${S.e} ${t('lSec')[RS]} · ${esc(t('lKind')[r.kind]||'')}</div><div class="idl"><span class="nm">${esc(r.title)}</span></div>
   <div class="badges"><span class="badge ${r.status==='approved'?'new':r.status==='rejected'?'warn':''}">${t('mStatus')[r.status]||r.status}</span>${fmtPrice(r)?`<span class="badge">${esc(fmtPrice(r))}</span>`:''}<span class="badge">${t('lViews')(r.views||0)}</span>
   ${open?(new Date(r.expires_at).getTime()<Date.now()?`<span class="badge warn">${t('mExpired')}</span>`:`<span class="badge">${t('mExpires')} ${esc(fmtDate(r.expires_at))}</span>`):''}</div></div>
  <div class="mgrid">${open?`<button class="btn sm ghost" data-m="edit">${t('mEdit')}</button><button class="btn sm ok" data-m="close">${t('mClose')[RS]}</button><button class="btn sm ghost" data-m="renew">${t('mRenew')}</button>`:''}
   ${r.status==='approved'?`<a class="btn sm ghost" href="#/item/${r.id}">${t('pView')}</a>`:''}<button class="btn sm danger" data-m="del">${t('mDelete')}</button></div>
- <div class="secret"><p>🔑 ${t('pSecret')}</p><input id="sl" readonly value="${esc(secretLink(r.id,tok))}"><button class="btn sm ghost" id="cp">${t('pCopy')}</button><p class="meta">🔒 ${t('mOnlyYou')}</p></div>`;
+ ${r.status==='approved'?`<h2 style="margin-top:14px">${t('pShareTitle')}</h2>`+pubShare(r.title,r.id):''}
+ <div class="secret"><p>🔑 ${t('pSecret')}</p><input id="sl" readonly value="${esc(secretLink(r.id,tok))}"><button class="btn sm ghost" id="cp">${t('pCopy')}</button><p class="meta warnp">${t('pPrivate')}</p><p class="meta">🔒 ${t('mOnlyYou')}</p></div>`;
  $('#cp').onclick=async()=>{const i=$('#sl');i.select();try{await navigator.clipboard.writeText(i.value)}catch(e){}A.toast(t('pCopied'))};
  A.app.querySelector('.mgrid').onclick=async ev=>{const b=ev.target.closest('[data-m]');if(!b)return;const m=b.dataset.m;
-  try{if(m==='close'){await SB.rpc('listing_close',{p_id:r.id,p_token:tok});await load();return viewManage(id,tok)}
-   if(m==='renew'){const e=await SB.rpc('listing_renew',{p_id:r.id,p_token:tok});A.toast(t('mRenewed')+' '+fmtDate(e));return viewManage(id,tok)}
-   if(m==='del'){if(!confirm(t('mConfirmDel')))return;await SB.rpc('listing_delete',{p_id:r.id,p_token:tok});saveMy(my().filter(x=>x.id!==r.id));await load();A.toast(t('mDeleted'));location.hash='#/'+ROUTE[RS];return}
+  try{if(m==='close'){chk(await SB.rpc('listing_close',{p_id:r.id,p_token:tok,p_phone:ph}));await load();return viewManage(id,tok)}
+   if(m==='renew'){const e=chk(await SB.rpc('listing_renew',{p_id:r.id,p_token:tok,p_phone:ph}));A.toast(t('mRenewed')+' '+fmtDate(e));return viewManage(id,tok)}
+   if(m==='del'){if(!confirm(t('mConfirmDel')))return;chk(await SB.rpc('listing_delete',{p_id:r.id,p_token:tok,p_phone:ph}));saveMy(my().filter(x=>x.id!==r.id));await load();A.toast(t('mDeleted'));location.hash='#/'+ROUTE[RS];return}
    if(m==='edit')form(RS,r,async(p,photos,btn)=>{await A.sending(btn,async()=>{try{
-     const st=await SB.rpc('listing_update',{p_id:r.id,p_token:tok,p});
+     const st=chk(await SB.rpc('listing_update',{p_id:r.id,p_token:tok,p_phone:ph,p}));if(p.phone)setOwnPh(r.id,p.phone);
      const keepPaths=photos.keep.map(x=>x.path);let paths=keepPaths;
-     if(photos.add.length){const tk=await SB.rpc('listing_upload_ticket',{p_id:r.id,p_token:tok});paths=keepPaths.concat(await uploadAll(r.id,tk,photos.add.map(x=>x.file),(i,n)=>$('#lst').textContent=`${t('pUploading')} ${i}/${n}`))}
-     if(photos.add.length||keepPaths.length!==(r.photos||[]).length)await SB.rpc('listing_set_photos',{p_id:r.id,p_token:tok,p_paths:paths});
-     await load();A.toast(st==='pending'?t('mSavedPending'):t('mSaved'));viewManage(id,tok)}catch(e){A.toast(lerr(e))}})});
-  }catch(e){A.toast(lerr(e))}};
+     if(photos.add.length){const tk=chk(await SB.rpc('listing_upload_ticket',{p_id:r.id,p_token:tok,p_phone:ownPh(r.id)}));paths=keepPaths.concat(await uploadAll(r.id,tk,photos.add.map(x=>x.file),(i,n)=>$('#lst').textContent=`${t('pUploading')} ${i}/${n}`))}
+     if(photos.add.length||keepPaths.length!==(r.photos||[]).length)chk(await SB.rpc('listing_set_photos',{p_id:r.id,p_token:tok,p_phone:ownPh(r.id),p_paths:paths}));
+     await load();A.toast(st==='pending'?t('mSavedPending'):t('mSaved'));viewManage(id,tok)}catch(e){if(e!=='bad_phone')A.toast(lerr(e))}})});
+  }catch(e){if(e!=='bad_phone')A.toast(lerr(e))}};
 }
 function viewMy(){A.setMeta(t('pMy')+' — Уркер 24','');const a=my();
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/menu'" aria-label="${t('back')}">←</button><h1>🗂 ${t('pMy')}</h1></div>
- ${a.length?`<div class="mlist">${a.map(x=>`<a class="mrow" data-my="${x.id}" href="#/my/${x.id}/${x.token}"><span>${(SECT[secOf(x)]||{}).e||'🗂'}</span><b>${esc(x.title)}</b><small>${t('lSec')[secOf(x)]||''}<i class="myst" style="font-style:normal"></i></small></a>`).join('')}</div>`:`<div class="ann-empty"><span>${t('pMyEmpty')}</span></div>`}
+ ${a.length?`<div class="mlist">${a.map(x=>`<a class="mrow" data-my="${x.id}" href="#/my/${x.id}"><span>${(SECT[secOf(x)]||{}).e||'🗂'}</span><b>${esc(x.title)}</b><small>${t('lSec')[secOf(x)]||''}<i class="myst" style="font-style:normal"></i></small></a>`).join('')}</div>`:`<div class="ann-empty"><span>${t('pMyEmpty')}</span></div>`}
  ${a.length?`<p class="meta">🔒 ${t('mMyNote')}</p>`:''}
  <a class="btn primary" style="margin-top:10px" href="#/post">${t('lPostBtn')}</a>`;
  if(!a.length||!A.isLive())return;
@@ -295,7 +314,10 @@ function route(h){let m;
  if((m=h.match(/^#\/(bazar|ads|jobs|lost)(?:$|[/?])/))){viewList(BYROUTE[m[1]]);return m[1]==='bazar'?'bazar':'menu'}
  if((m=h.match(/^#\/item\/(\d+)/))){viewItem(m[1]);return 'bazar'}
  if((m=h.match(/^#\/post(?:\/(\w+))?/))){viewPost(m[1]);return 'post'}
- if((m=h.match(/^#\/my\/(\d+)\/([0-9a-f]{64})/))){viewManage(m[1],m[2]);return 'menu'}
+ if((m=h.match(/^#\/my\/(\d+)\/([0-9a-f]{64})/))){const id=+m[1],tok=m[2];  // токен убираем из адресной строки и истории
+  saveMy([{id,token:tok,title:(my().find(x=>x.id===id)||{}).title||'',at:Date.now()},...my().filter(x=>x.id!==id)]);
+  history.replaceState(null,'','#/my/'+id);viewManage(id,tok);return 'menu'}
+ if((m=h.match(/^#\/my\/(\d+)\/?$/))){viewManage(m[1]);return 'menu'}
  if(/^#\/my\/?$/.test(h)){viewMy();return 'menu'}
  if(/^#\/menu/.test(h)){viewMenu();return 'menu'}
  return null}
