@@ -548,3 +548,5 @@ main[data-view=home] .hints .pop-l{font-size:13px}
 .hol-e{font-size:34px;line-height:1;flex:none}
 .hol-t{flex:1;min-width:0}.hol-t b{display:block;font-size:16px;line-height:1.35}.hol-t small{display:block;opacity:.85;margin-top:4px;font-size:13px}
 .hol-x{flex:none;align-self:flex-start;background:rgba(255,255,255,.2);border:0;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}
+.btn.otdam{display:flex;justify-content:center;width:100%;margin:4px 0 12px;font-size:16px;font-weight:700;padding:14px 12px}
+.otdam-r{display:flex;align-items:center;gap:10px;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}.otdam-r small{display:block;color:#6b5e52;margin-top:2px}.otdam-r .btn{flex:none}

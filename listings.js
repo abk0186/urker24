@@ -101,6 +101,7 @@ function viewList(sec){
  const list=visible().filter(l=>secOf(l)===sec&&(!F.kind||l.kind===F.kind)&&(!F.cat||l.category===F.cat));
  A.setMeta(t('lSec')[sec]+' — Уркер 24',t('lSecD')[sec]);
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${S.e} ${t('lSec')[sec]}</h1></div>
+ ${sec==='market'?`<a class="btn wa otdam" href="https://chat.whatsapp.com/BSOe0MEwoTJ75EB0HHgIPn" target="_blank" rel="noopener">${A.lang()==='kz'?'💬 «Тегін беремін» WhatsApp чаты':'💬 Чат «Отдам даром» в WhatsApp'}</a>`:''}
  <div class="chips">${['',...S.kinds].map(k=>`<button class="${F.kind===k?'on':''}" data-lk="${k}">${k?esc(t('lKind')[k]):t('lAll')}</button>`).join('')}</div>
  ${showCats?`<div class="chips">${['',...S.cats].map(c=>`<button class="${F.cat===c?'on':''}" data-lc="${c}">${c?esc(t('lCat')[sec][c]):t('lAllCats')}</button>`).join('')}</div>`:''}
  <a class="btn primary lpost" href="#/post/${sec}">${t('lPostBtn')}</a>

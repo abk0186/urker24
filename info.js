@@ -44,6 +44,7 @@ function view(){
  const groups=GR.map(([g,e])=>[g,e,PH.filter(r=>r.grp===g)]).filter(x=>x[2].length);
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>📞 ${esc(t('phTitle'))}</h1></div>
  <p class="ph-intro">${esc(t('phIntro'))}</p>
+ <section class="phg"><h2>💬 ${A.lang()==='kz'?'Аудан чаттары':'Чаты района'}</h2><div class="phr otdam-r"><div><b>${A.lang()==='kz'?'«Тегін беремін» WhatsApp чаты':'Чат «Отдам даром» в WhatsApp'}</b><small>${A.lang()==='kz'?'Қажет емес заттарды тегін беру және алу':'Отдать или забрать ненужные вещи бесплатно'}</small></div><a class="btn wa sm" href="https://chat.whatsapp.com/BSOe0MEwoTJ75EB0HHgIPn" target="_blank" rel="noopener">${A.WA_SVG}<span>${A.lang()==='kz'?'Чатқа кіру':'Вступить'}</span></a></div></section>
  ${groups.length?groups.map(([g,e,l])=>`<section class="phg"><h2>${e} ${esc(t('phGr')[g])}</h2>${l.map(row).join('')}${g==='activist'&&window.URKER_AP?URKER_AP.link():''}</section>`).join('')
    :`<div class="ann-empty">${SB.enabled&&!LOADED&&!A.isOffline()?`⏳ <b>${t('loading')}</b>`:`📞 <b>${esc(t('phEmpty'))}</b>`}</div>`}`;
 }
