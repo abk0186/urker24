@@ -61,7 +61,7 @@ L = {
             greet='Сәлеметсіз бе! Сіздің байланысыңызды https://urker24.kz сайтындағы «{s}» бөлімінен таптым.',
             contacts=lambda n: f'{n} байланыс',
             lang_other='Русский', lang_self='Қазақша', sw_label='Тіл · Язык',
-            foot='Үркер ауданының (Астана) шеберлері мен қызметтерінің каталогы. Нөмірлерді тұрғындар мен шеберлердің өздері қосқан, модератор тексерген.',
+            foot='Үркер ауданының (Астана) шеберлері мен қызметтерінің каталогы. Нөмірлерді тұрғындар мен шеберлер өздері қосқан және оларды модератор тексерген.',
             reviews=lambda a, n: f'★ {a:.1f} ({n} пікір)'.replace('.', ','),
             sub_h='Бөлімшелер'),
 }
@@ -530,7 +530,7 @@ def build_sections(D, rows, W):
                 else:
                     title = f'Үркердегі {xt or st} — {l["contacts"](n)} | Үркер 24'
                     h1 = f'{(x or {}).get("emoji") or s["emoji"]} {xt or st}'
-                    lead = (f'Үркер ауданындағы (Астана) {xt or st}: {l["contacts"](n)}. Қоңырау шалыңыз немесе WhatsApp-қа бір рет басып жазыңыз.')
+                    lead = (f'Үркер ауданындағы (Астана) {xt or st}: {l["contacts"](n)}. Қоңырау шалыңыз немесе WhatsApp-қа бірден жазыңыз.')
                     desc = (f'Үркер ауданындағы (Астана) {xt or st}: {l["contacts"](n)}' + (f' ({", ".join(named)} және басқалар)' if named else '') +
                             '. Телефондар мен WhatsApp, делдалсыз.')
                 desc = desc if len(desc) <= 200 else desc[:197].rsplit(' ', 1)[0] + '…'
@@ -556,7 +556,7 @@ def build_sections(D, rows, W):
     tiles = ''.join(f'<a class="t" href="{page_url(lg, s["id"])}"><span class="em">{s["emoji"]}</span><b>{E(sec_t(s, lg))}</b><small>{l["contacts"](counts[s["id"]])}</small></a>'
                     for s in D['sections'] if counts.get(s['id']))
     title = 'Үркер 24 — Үркер ауданының шеберлері мен қызметтері, Астана'
-    desc = 'Жақын маман мен қызметтер: сантехниктер, электриктер, тазалау, медицина, авто және басқалар. Үркер ауданының (Астана) хабарландырулары мен жаңалықтары. WhatsApp-қа бір рет басып жазыңыз.'
+    desc = 'Жақындағы мамандар мен қызметтер: сантехниктер, электриктер, тазалау, медицина, авто және басқалар. Үркер ауданының (Астана) хабарландырулары мен жаңалықтары. WhatsApp-қа бірден жазыңыз.'
     ld = {'@context': 'https://schema.org', '@graph': [{'@type': 'WebPage', 'name': title, 'url': SITE + '/kz/', 'inLanguage': 'kk', 'isPartOf': {'@id': SITE + '/#website'}}]}
     W.put('/kz/', head(lg, title, desc, '/kz/', '/', '/kz/', '/og-urker24.jpg', ld) +
           f'<body>{topbar(lg, "/?lang=ru#/")}<main><h1>🏡 Үркер 24 — Үркер ауданының шеберлері мен қызметтері</h1>'
