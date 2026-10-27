@@ -492,7 +492,7 @@ function outAlert(){const l=outList();if(!l.length)return '';
  ${l.length>3?`<a class="out-more" href="#/ann">+ ${l.length-3}</a>`:''}</section>`}
 function pinRow(){const l=outList(),n=l.filter(outNow).length,m=l.length-n;
  return `<div class="pin2"><a class="pin-t pin-o ${n||m?'on':''}" href="#/ann"><span class="pin-i" aria-hidden="true">⚠️</span><span class="pin-b"><b>${t('outT')}</b><small>${n?t('outN')(n):m?t('outSoonN')(m):'✅ '+t('outNone')}</small></span></a>
- <div class="pin-t pin-p"><a class="pin-pt" href="#/phones"><span class="pin-i" aria-hidden="true">📞</span><b>${t('phShort')||t('phTitle')}</b></a><span class="pin-q"><a href="tel:112" aria-label="112">112</a><a href="tel:104" aria-label="104">104</a><a href="tel:109" aria-label="109">109</a><a href="#/phones">${esc(String(t('phHome')).split('·').pop().trim())}</a></span></div></div>`}
+ <div class="pin-t pin-p"><a class="pin-pt" href="#/phones"><span class="pin-i" aria-hidden="true">📞</span><b>${t('phShort')||t('phTitle')}</b></a><span class="pin-q">${(lang==='kz'?[['police','Учаскелік'],['activist','Белсенді'],['akimat','Әкімдік']]:[['police','Участковый'],['activist','Активист'],['akimat','Акимат']]).map(([g,l])=>`<a href="#/phones?g=${g}">${l}</a>`).join('')}</span></div></div>`}
 function viewHome(q=''){
  app.innerHTML=`${q?'':(window.URKER_HOL?URKER_HOL.banner(lang):'')}${searchBox(q)}<div id="results"></div>
  <div id="homeBody">${outAlert()}${pinRow()}${window.URKER_PWA?URKER_PWA.banner():''}${window.URKER_L?URKER_L.homeTiles():''}${window.URKER_L?URKER_L.homeStrip():''}${newsBlock()}${promo()}<h2 class="cats-h">${t('cats')}</h2><p class="cats-hint">${t('catsHint')}</p><div class="tiles">${homeTilesHtml()}</div></div>`;

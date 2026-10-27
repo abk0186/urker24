@@ -45,7 +45,7 @@ function view(){
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>📞 ${esc(t('phTitle'))}</h1></div>
  <p class="ph-intro">${esc(t('phIntro'))}</p>
  <section class="phg"><h2>💬 ${A.lang()==='kz'?'Аудан чаттары':'Чаты района'}</h2><div class="phr otdam-r"><div><b>${A.lang()==='kz'?'«Тегін беремін» WhatsApp чаты':'Чат «Отдам даром» в WhatsApp'}</b><small>${A.lang()==='kz'?'Қажет емес заттарды тегін беру және алу':'Отдать или забрать ненужные вещи бесплатно'}</small></div><a class="btn wa sm" href="https://chat.whatsapp.com/BSOe0MEwoTJ75EB0HHgIPn" target="_blank" rel="noopener">${A.WA_SVG}<span>${A.lang()==='kz'?'Чатқа кіру':'Вступить'}</span></a></div></section>
- ${groups.length?groups.map(([g,e,l])=>`<section class="phg"><h2>${e} ${esc(t('phGr')[g])}</h2>${l.map(row).join('')}${g==='activist'&&window.URKER_AP?URKER_AP.link():''}</section>`).join('')
+ ${groups.length?groups.map(([g,e,l])=>`<section class="phg" id="phg-${g}"><h2>${e} ${esc(t('phGr')[g])}</h2>${l.map(row).join('')}${g==='activist'&&window.URKER_AP?URKER_AP.link():''}</section>`).join('')
    :`<div class="ann-empty">${SB.enabled&&!LOADED&&!A.isOffline()?`⏳ <b>${t('loading')}</b>`:`📞 <b>${esc(t('phEmpty'))}</b>`}</div>`}`;
 }
 const KW={activist:'активист старший район вопросы акимат белсенді аудан',emergency:'экстренные экстренная служба спасение спасатели мчс пожар пожарная полиция скорая газ шұғыл құтқару өрт жедел жәрдем',
@@ -58,7 +58,7 @@ function searchHtml(q){const qs=A.norm(q).split(' ').filter(w=>w.length>=3||/^\d
   if(qs.every(x=>A.tokScore(x,all)>0))sc.push([qs.every(x=>A.tokScore(x,tt)>0)?2:1,r])}
  const hits=sc.sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
  return {n:hits.length,html:hits.length?`<div class="sugg-l">📞 ${esc(t('phFound'))}: ${hits.length}</div><div class="phl">${hits.slice(0,3).map(row).join('')}</div>`:''}}
-function route(h){if(/^#\/phones/.test(h)){view();return true}return false}
+function route(h){if(/^#\/phones/.test(h)){view();const g=(h.match(/[?&]g=([a-z]+)/)||[])[1];if(g){const el=document.getElementById('phg-'+g);if(el)setTimeout(()=>el.scrollIntoView({block:'start'}),0)}return true}return false}
 // статистика: нажатия «Позвонить» / WhatsApp / номер в строке (событие 'phone', 23_phone_clicks.sql; до SQL сервер просто отвечает 'ignored')
 document.addEventListener('click',ev=>{const a=ev.target.closest('article.phr a[href]');if(!a)return;const r=a.closest('article.phr'),id=+String(r.id||'').replace(/^ph/,'');
  if(id&&A.track)A.track('phone',{p_specialist_id:id,p_channel:/^tel:/.test(a.getAttribute('href')||'')?'call':'wa'})});

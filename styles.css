@@ -587,3 +587,7 @@ main[data-view=home] .hero{margin-bottom:7px}
 #homeBody .stiles{margin-bottom:8px}
 @media(max-width:639px){#homeBody .stile{min-height:40px;padding:3px 2px;gap:0}#homeBody .stile span{font-size:16px}#homeBody .stiles{gap:4px}#homeBody .stile b.wr{font-size:11.5px;line-height:1.05}}
 @media(max-width:639px){#homeBody .pin2{grid-template-columns:auto minmax(0,1fr)}.pin-q{gap:3px;flex-wrap:nowrap}.pin-q a{padding:1px 5px;font-size:12px;min-height:24px}}
+.pin-q a:last-child{color:#b02a12;font-weight:700}
+#homeBody .pin-q a{color:#7a3b10}
+.phg{scroll-margin-top:80px}
+@media(max-width:370px){#homeBody .pin-q{gap:2px}#homeBody .pin-q a{padding:1px 4px;font-size:11.5px;letter-spacing:-.2px}#homeBody .pin-t{padding:6px 6px}}
