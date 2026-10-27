@@ -570,3 +570,20 @@ main[data-view=home] .hints .pop-l{font-size:12.5px;margin:0 2px -3px}
 @media(min-width:640px){#homeBody .stiles{grid-template-columns:repeat(6,minmax(0,1fr)) 92px}#homeBody .stiles .stile.spost{grid-column:7;grid-row:1}#homeBody .stiles .stile.spost b{font-size:13.5px}}
 @media(max-width:430px){#homeBody .stile b{font-size:12px;letter-spacing:-.2px}#homeBody .stile{padding:4px 2px}#homeBody .stiles{gap:5px}}
 #homeBody .stile b.wr{white-space:normal;overflow:visible;hyphens:manual;line-height:1.1}
+/* [mobile-compact 27.10c] компактные «Отключения»/«Телефоны», плотнее сетка и отступы */
+#homeBody .pin2{gap:6px;margin-bottom:7px}
+#homeBody .pin-t{min-height:0;padding:6px 8px;gap:6px;border-radius:12px}
+#homeBody .pin-i{font-size:19px}
+#homeBody .pin-b b{font-size:13.5px;line-height:1.15}
+#homeBody .pin-b small{font-size:12px;line-height:1.2}
+#homeBody .pin-p{flex-direction:column;align-items:stretch;gap:4px}
+.pin-pt{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink)}.pin-pt b{font-size:13.5px;font-weight:700;line-height:1.15}
+.pin-q{display:flex;gap:4px;flex-wrap:wrap}
+.pin-q a{display:inline-flex;align-items:center;min-height:24px;padding:1px 7px;border-radius:999px;background:#f3eee8;color:#b02a12;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
+.pin-q a:last-child{color:var(--muted);font-weight:600}
+@media(min-width:640px){#homeBody .pin-p{flex-direction:row;align-items:center;justify-content:space-between}.pin-q a{font-size:13.5px;min-height:28px;padding:2px 10px}}
+main[data-view=home] .hero{margin-bottom:7px}
+#homeBody .ann-block{margin-bottom:8px}
+#homeBody .stiles{margin-bottom:8px}
+@media(max-width:639px){#homeBody .stile{min-height:40px;padding:3px 2px;gap:0}#homeBody .stile span{font-size:16px}#homeBody .stiles{gap:4px}#homeBody .stile b.wr{font-size:11.5px;line-height:1.05}}
+@media(max-width:639px){#homeBody .pin2{grid-template-columns:auto minmax(0,1fr)}.pin-q{gap:3px;flex-wrap:nowrap}.pin-q a{padding:1px 5px;font-size:12px;min-height:24px}}
