@@ -303,7 +303,7 @@ function homeStrip(){if(!ON)return '';const l=visible().filter(x=>x.status==='ap
  return `<section class="ann-block lfresh"><div class="ann-h"><h2>🗂 ${t('lFresh')}</h2><a href="#/bazar">${t('lFreshAll')}</a></div>
  ${l.length?`<div class="lcards lhome">${l.map(x=>lcard(x,true)).join('')}</div>`:`<a class="ann-empty lnk-empty" href="#/post"><span>${t('lFreshEmpty')}</span><b>${t('lPostBtn')}</b></a>`}</section>`}
 function homeTiles(){if(!ON)return '';const it=[['#/bazar','🛍',t('lSec').market],['#/jobs','💼',t('lSec').jobs],['#/ads','📋',t('lSec').ads],['#/lost','🐾',t('lSec').lost],['#/news','📰',t('navNews')],['#/ann','⚠️',t('menuAlerts')],['#/post','➕',t('navPost')]];
- return `<div class="stiles">${it.map(([h,e,n])=>`<a class="stile${h==='#/post'?' spost':''}" href="${h}"><span>${e}</span><b>${esc(n)}</b></a>`).join('')}</div>`}
+ return `<div class="stiles">${it.map(([h,e,n])=>`<a class="stile${h==='#/post'?' spost':''}" href="${h}"><span>${e}</span><b${n.length>13?' class="wr"':''}>${esc(n).replace('Хабарландырулар','Хабарлан\u00ADдырулар')}</b></a>`).join('')}</div>`}
 function searchHtml(q){if(!ON)return {n:0,html:''};const qs=A.norm(q).split(' ').filter(w=>w.length>=3);if(!qs.length)return {n:0,html:''};
  const hits=visible().filter(l=>{const tk=A.norm([l.title,l.body,l.place,T_KIND(l),catLabel(l),t('lSec')[secOf(l)],secOf(l)==='jobs'?(window.URKER_JOB_SYN||''):''].join(' ')).split(' ').filter(Boolean);return qs.every(x=>A.tokScore(x,tk)>0)});
  const jw=A.norm(window.URKER_JOB_SYN||'').split(' ').filter(Boolean),jh=qs.some(x=>A.tokScore(x,jw)>0);
