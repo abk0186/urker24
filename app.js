@@ -273,7 +273,8 @@ const POP_KZ={'сантехник':'сантехник','такси':'такси
  'уголь':'көмір','химчистка':'химтазалау','ассенизатор':'ассенизатор','кран':'кран','эвакуатор':'эвакуатор','сварка':'дәнекерлеу','репетитор':'репетитор','массаж':'массаж','уборка':'тазалау'};
 let POP=POP_FALLBACK.slice(),POP_SRC='builtin';
 // мусор/личное не показываем: цифры (телефоны), ссылки, длинные фразы; запрос должен совпадать с названием/синонимом раздела (не имя человека)
-function popOk(q){q=String(q||'').trim().toLowerCase();if(q.length<3||q.length>30||/[0-9@:/\\]/.test(q))return false;
+const POP_BLOCK=/^(ковр|ковёр|ковер|кілем)/;  // убрано по просьбе Асета (27.10)
+function popOk(q){q=String(q||'').trim().toLowerCase();if(POP_BLOCK.test(q))return false;if(q.length<3||q.length>30||/[0-9@:/\\]/.test(q))return false;
  const ws=norm(q).split(' ').filter(Boolean);if(!ws.length||ws.length>3)return false;
  if(!Object.keys(subTokens).some(id=>ws.every(w=>tokScore(w,subTokens[id])>0)))return false;
  const r=search(q);return !!(r&&r.list.length)}
