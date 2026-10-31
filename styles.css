@@ -595,3 +595,9 @@ main[data-view=home] .hero{margin-bottom:7px}
 .lsearch{margin:6px 0 8px}.lsearch input{width:100%;box-sizing:border-box;padding:9px 12px;font-size:15px;border:1px solid #ddd;border-radius:10px}
 .lcopy{margin-left:6px}
 .lnf{padding:16px 4px;color:#777}
+.galw{position:relative}
+.gal-a{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:30px;line-height:40px;padding:0;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center}
+.gal-a:hover{background:rgba(0,0,0,.72)}.gal-prev{left:10px}.gal-next{right:10px}
+.gal-d{display:flex;justify-content:center;gap:4px;margin:8px 0 0}.gal-d button{width:22px;height:22px;border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.gal-d button::after{content:'';width:8px;height:8px;border-radius:50%;background:#ccc}.gal-d button.on::after{background:var(--accent,#e8603c);width:10px;height:10px}
+.gal-d+.gal-n{margin-top:0}

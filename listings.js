@@ -137,7 +137,7 @@ async function viewItem(id){
  A.setMeta(l.title+' — '+t('lSec')[ES]+' · Уркер 24',(l.body||'').slice(0,150));
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/${ROUTE[ES]}${ES==='jobs'?'?k='+l.kind:''}'" aria-label="${t('back')}">←</button><h1 class="sm">${S.e} ${t('lSec')[ES]}</h1></div>
  <article class="article litem">
-  ${photos.length?`<div class="gallery" id="gal">${photos.map((u,i)=>URKER_PIC(u,true,`loading="${i?'lazy':'eager'}"`,esc)).join('')}</div>${photos.length>1?`<div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:''}`:''}
+  ${photos.length?`<div class="galw"><div class="gallery" id="gal">${photos.map((u,i)=>URKER_PIC(u,true,`loading="${i?'lazy':'eager'}"`,esc)).join('')}</div>${photos.length>1?`<button type="button" class="gal-a gal-prev" data-gd="-1" aria-label="${A.lang()==='kz'?'Алдыңғы фото':'Предыдущее фото'}">‹</button><button type="button" class="gal-a gal-next" data-gd="1" aria-label="${A.lang()==='kz'?'Келесі фото':'Следующее фото'}">›</button>`:''}</div>${photos.length>1?`<div class="gal-d">${photos.map((_,i)=>`<button type="button" data-gi="${i}" class="${i?'':'on'}" aria-label="${i+1} / ${photos.length}"></button>`).join('')}</div><div class="gal-n"><span id="galn">1</span> / ${photos.length}</div>`:''}`:''}
   <div class="nc-tags">${closed?`<span class="tag">${t('lClosed')[ES]}</span>`:''}${l.highlighted?`<span class="chip pin">⭐ ${t('lHighlight')}</span>`:''}<span class="chip">${esc(t('lKind')[l.kind]||'')}</span>${catLabel(l)?`<span class="chip">${esc(catLabel(l))}</span>`:''}</div>
   <h1>${esc(l.title)}</h1>${pr?`<div class="lprice">${esc(pr)}</div>`:''}
   ${l.place?`<p class="lmeta">📍 ${l.section==='lost'?t('lWhere')+': ':''}${esc(l.place)}</p>`:''}${l.event_date?`<p class="lmeta">🗓 ${t('lWhen')}: ${esc(fmtDate(l.event_date+'T12:00:00Z'))}</p>`:''}
@@ -146,7 +146,13 @@ async function viewItem(id){
   ${closed?'':contactBtns(l)}
   <a class="btn sm share" href="https://wa.me/?text=${encodeURIComponent(l.title+(pr?' — '+pr:'')+'\n'+link)}" target="_blank" rel="noopener">${A.WA_SVG}${t('lShare')}</a><button type="button" class="btn sm ghost lcopy" data-copy="${esc(link)}">${t('lCopy')}</button>
  </article>`;
- const g=$('#gal');if(g&&$('#galn'))g.addEventListener('scroll',()=>{$('#galn').textContent=Math.round(g.scrollLeft/g.clientWidth)+1},{passive:true});
+ const g=$('#gal');if(g&&$('#galn')){const N=photos.length,cur=()=>Math.round(g.scrollLeft/g.clientWidth);
+  const sync=()=>{const i=cur();$('#galn').textContent=i+1;A.app.querySelectorAll('.gal-d button').forEach((b,j)=>b.classList.toggle('on',j===i))};
+  g.addEventListener('scroll',sync,{passive:true});
+  const go=i=>{i=(i+N)%N;g.scrollTo({left:i*g.clientWidth,behavior:'smooth'})};
+  A.app.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>go(cur()+ +b.dataset.gd));
+  A.app.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>go(+b.dataset.gi));
+  GALKEY=go;}
  if(A.isLive()&&l.status==='approved'){try{const v=await SB.rpc('listing_view',{p_id:l.id,p_device_id:A.deviceId()});if(typeof v==='number'){l.views=v;const e=$('#lviews');if(e)e.textContent=v>0?' · '+t('lViews')(v):''}}catch(e){}}
 }
 function lerr(e){const c=String(e&&e.code||'');for(const k of Object.keys(T_ERR()))if(c.includes(k))return T_ERR()[k];return A.errMsg(e)}
@@ -331,6 +337,8 @@ function route(h){let m;
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-copy]');if(!b)return;const u=b.dataset.copy;if(!/^https:\/\/urker24\.kz\/i\/\d+\/$/.test(u))return;
  try{await navigator.clipboard.writeText(u)}catch(_){const ta=document.createElement('textarea');ta.value=u;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__){}ta.remove()}
  A.toast(A.lang()==='kz'?'Сілтеме көшірілді':'Ссылка скопирована')});
+// [gallery] ←/→ листают фото на странице объявления (десктоп)
+let GALKEY=null;document.addEventListener('keydown',e=>{if(!GALKEY||!document.getElementById('gal')||/INPUT|TEXTAREA|SELECT/.test((e.target||{}).tagName||''))return;const g=document.getElementById('gal'),i=Math.round(g.scrollLeft/g.clientWidth);if(e.key==='ArrowLeft'){e.preventDefault();GALKEY(i-1)}else if(e.key==='ArrowRight'){e.preventDefault();GALKEY(i+1)}});
 window.URKER_L={on:ON,route,load,homeStrip,homeTiles,searchHtml,count:()=>visible().length,uploadTo};  // uploadTo — для appeal.js
 })();
 
