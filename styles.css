@@ -601,3 +601,10 @@ main[data-view=home] .hero{margin-bottom:7px}
 .gal-d{display:flex;justify-content:center;gap:4px;margin:8px 0 0}.gal-d button{width:22px;height:22px;border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .gal-d button::after{content:'';width:8px;height:8px;border-radius:50%;background:#ccc}.gal-d button.on::after{background:var(--accent,#e8603c);width:10px;height:10px}
 .gal-d+.gal-n{margin-top:0}
+/* [rent] 7 разделов: на телефоне 4 колонки + «Подать» справа */
+#homeBody .stiles{grid-template-columns:repeat(4,minmax(0,1fr)) 52px}
+@media(max-width:329px){#homeBody .stiles{grid-template-columns:repeat(2,minmax(0,1fr)) 52px}#homeBody .stiles .stile.spost{grid-column:3;grid-row:1/span 4}}
+@media(min-width:640px){#homeBody .stiles{grid-template-columns:repeat(7,minmax(0,1fr)) 92px}#homeBody .stiles .stile.spost{grid-column:8;grid-row:1}}
+#homeBody .stiles .stile.spost{grid-column:5}
+@media(min-width:640px){#homeBody .stiles .stile.spost{grid-column:8}}
+.secshare{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 4px}.secshare .lcopy{margin-left:0}

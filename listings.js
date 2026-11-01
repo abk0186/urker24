@@ -8,16 +8,16 @@ const ON=!!(((window.URKER_CONFIG||{}).features||{}).listings);
 if(ON){const nv=document.querySelector('nav.bottom');if(nv)nv.innerHTML=[['#/','home','🏠','navHome',''],['#/bazar','bazar','🛍','navBazar',''],['#/post','post','➕','navPost',' class="post"'],['#/news','news','📰','navNews',''],['#/menu','menu','☰','navMenu','']].map(([h,k,e,i,c])=>`<a href="${h}" data-nav="${k}"${c}><span>${e}</span><b data-i18n="${i}">${A.t(i)||''}</b></a>`).join('')}
 A.addDict({
  navBazar:'Барахолка',navPost:'Подать',navMenu:'Меню',waGreetL:'Здравствуйте! Нашёл ваше объявление «{t}» на сайте {u}',
- lSec:{market:'Барахолка',ads:'Объявления',jobs:'Работа',lost:'Потеряшки'},
- lSecD:{market:'Продам, куплю, отдам даром',ads:'Аренда, подработка, услуги, попутчики',jobs:'Вакансии и резюме соседей',lost:'Потерял или нашёл'},
+ lSec:{market:'Барахолка',rent:'Сдам-сниму',ads:'Объявления',jobs:'Работа',lost:'Потеряшки'},
+ lSecD:{market:'Продам, куплю, отдам даром',rent:'Сдам или сниму комнату, дом, времянку, койко-место',ads:'Подработка, услуги, попутчики',jobs:'Вакансии и резюме соседей',lost:'Потерял или нашёл'},
  lKind:{sell:'Продам',buy:'Куплю',free:'Отдам даром',rent_offer:'Сдам',rent_seek:'Сниму',job_offer:'Вакансия',job_seek:'Ищу работу',gig:'Подработка',service:'Услуги частных лиц',ride:'Попутчики',other:'Разное',lost:'Потерял',found:'Нашёл'},
- lCat:{jobs:{other:''},market:{kids:'Детское',clothes:'Одежда',tech:'Техника',furniture:'Мебель',home:'Для дома и дачи',auto:'Авто и запчасти',animals:'Животные и скот',build:'Стройматериалы',other:'Прочее'},
+ lCat:{jobs:{other:''},rent:{room:'Комната, койко-место',house:'Дом, полдома, времянка',flat:'Квартира',other:'Помещения и другое'},market:{kids:'Детское',clothes:'Одежда',tech:'Техника',furniture:'Мебель',home:'Для дома и дачи',auto:'Авто и запчасти',animals:'Животные и скот',build:'Стройматериалы',other:'Прочее'},
   ads:{house:'Дом',flat:'Квартира',room:'Комната',garage:'Гараж',equipment:'Техника',other:'Другое'},
   lost:{animals:'Животные',docs:'Документы',keys:'Ключи',things:'Вещи',other:'Другое'}},
  lPrice:{free:'Даром',negotiable:'Договорная',none:''},lAll:'Все',lAllCats:'Все категории',
  lEmpty:'Пока объявлений нет',lEmptyS:'Подайте первое — это бесплатно. После проверки оно появится здесь.',lPostBtn:'➕ Подать объявление',
  lFresh:'Свежие объявления',jTab:{job_offer:'👷 Ищу работников',job_seek:'🙋 Ищу работу'},jPost:{job_offer:'➕ Подать вакансию',job_seek:'➕ Разместить резюме'},jTabD:{job_offer:'Вакансии от работодателей Уркера',job_seek:'Соседи, которые ищут работу'},jEmpty:{job_offer:'Вакансий пока нет',job_seek:'Резюме пока нет'},jWho:'Что вы хотите разместить?',jTitleO:'Кого ищете (должность)',jTitleOPh:'Например: охранник, продавец, повар',jTitleS:'Профессия / что умеете',jTitleSPh:'Например: водитель категории B, повар, няня',jName:'Ваше имя',jExp:'Опыт работы',jExpPh:'Например: 5 лет водителем в такси',jBodyO:'Условия: график, обязанности, требования',jBodyS:'О себе: график, пожелания',jPay:'Зарплата',jPayS:'Желаемая зарплата',jPayF:'Сумма, ₸',jPlaceO:'Где работа (адрес, район)',jPlaceS:'Где хотите работать',jNameL:'Имя',jExpL:'Опыт',lFreshAll:'Все объявления →',lFreshEmpty:'Пока объявлений нет — подайте первое',
- lClosed:{market:'Продано',ads:'Неактуально',jobs:'Неактуально',lost:'Нашлось'},lViews:n=>`👁 ${n}`,lPosted:'Опубликовано',lWhere:'Где',lWhen:'Когда',lShare:'Поделиться в WhatsApp',lCopy:'🔗 Скопировать ссылку',lCopied:'Ссылка скопирована',lSearchPh:'Поиск: люк, куртка…',lNoFound:q=>`По запросу «${q}» ничего не найдено`,
+ lClosed:{market:'Продано',rent:'Неактуально',ads:'Неактуально',jobs:'Неактуально',lost:'Нашлось'},lViews:n=>`👁 ${n}`,lPosted:'Опубликовано',lWhere:'Где',lWhen:'Когда',lShare:'Поделиться в WhatsApp',lCopy:'🔗 Скопировать ссылку',lCopied:'Ссылка скопирована',lSearchPh:'Поиск: люк, куртка…',lSearchRent:'Поиск: комната, времянка, дом…',lSecShare:'Поделиться разделом в WhatsApp',lSecShareT:'🏠 Сдам-сниму в Уркере — все объявления об аренде жилья',lNoFound:q=>`По запросу «${q}» ничего не найдено`,
  lHighlight:'Выделено',lNotFound:'Объявление не найдено или снято',lExpires:'Активно до',
  pTitle:'Подать объявление',pChoose:'Где разместить?',pKind:'Тип',pCat:'Категория',pTitleF:'Заголовок',pTitlePh:'Например: детская коляска, почти новая',
  pBody:'Описание',pPriceMode:'Цена',pPriceFixed:'Цена, ₸',pFixedR:'Указать цену',pNeg:'Договорная',pFree:'Даром',pNone:'Без цены',pPlace:'Где (улица, дом — по желанию)',pPlaceLost:'Где потеряли / нашли',
@@ -28,7 +28,7 @@ A.addDict({
  pUploading:'Загружаем фото…',pDone:'Готово!',pDonePending:'Объявление отправлено на проверку. После одобрения оно появится на сайте.',pDoneLive:'Объявление опубликовано.',
  pSecret:'Ваша секретная ссылка для изменения и удаления. Сохраните её — без неё управлять объявлением нельзя:',pCopy:'📋 Скопировать ссылку',pCopied:'Ссылка скопирована',
  pSaveWa:'💬 Отправить ссылку себе в WhatsApp',pShareTitle:'Поделиться объявлением',pSharePub:'Поделиться объявлением в WhatsApp',pPrivate:'⚠️ Это ЛИЧНАЯ ссылка для управления. Не пересылайте её в чаты и никому не отправляйте. Чтобы показать объявление другим, нажмите «Поделиться объявлением» — там обычная ссылка без доступа к управлению.',phAsk:'Подтвердите, что это вы',phAskD:'Введите последние 4 цифры номера, который вы указали в объявлении (или номер полностью).',phPh:'Последние 4 цифры',phOk:'Подтвердить',phBad:'Номер не совпадает',phLocked:'Слишком много попыток. Попробуйте через час.',mNoTok:'Откройте свою личную ссылку на этом телефоне или войдите через «Мои объявления».',pView:'Открыть объявление',pMy:'Мои объявления',pMyEmpty:'Здесь появятся объявления, поданные с этого телефона.',
- mStatus:{pending:'На проверке',approved:'Опубликовано',rejected:'Отклонено',closed:'Закрыто',deleted:'Удалено'},mExpires:'Показывается до',mEdit:'✏️ Изменить',mClose:{market:'✅ Продано',ads:'✅ Неактуально',jobs:'✅ Неактуально',lost:'✅ Нашлось'},
+ mStatus:{pending:'На проверке',approved:'Опубликовано',rejected:'Отклонено',closed:'Закрыто',deleted:'Удалено'},mExpires:'Показывается до',mEdit:'✏️ Изменить',mClose:{market:'✅ Продано',rent:'✅ Неактуально',ads:'✅ Неактуально',jobs:'✅ Неактуально',lost:'✅ Нашлось'},
  mRenew:'🔄 Продлить',mDelete:'🗑 Удалить',mConfirmDel:'Удалить объявление безвозвратно?',mDeleted:'Объявление удалено',mSaved:'Сохранено',mSavedPending:'Сохранено — отправлено на повторную проверку',
  mRenewed:'Продлено до',mBadLink:'Ссылка недействительна или объявление удалено',mManage:'Управление объявлением',
  pSavedMy:'Ссылка также сохранена в «Мои объявления» на этом телефоне.',pOpenMy:'🗂 Мои объявления',mExpired:'Срок показа истёк — нажмите «Продлить»',
@@ -38,16 +38,16 @@ A.addDict({
  lErr:{bad_token:'Ссылка недействительна',invalid_phone:'Проверьте номер телефона',bad_price:'Проверьте цену',bad_title:'Слишком короткий заголовок',bad_kind:'Выберите тип и категорию',too_many_photos:'Не больше 5 фото',locked:'Объявление отклонено модератором'}
 },{
  navBazar:'Барахолка',navPost:'Қосу',navMenu:'Мәзір',waGreetL:'Сәлеметсіз бе! Сіздің «{t}» хабарландыруыңызды urker24.kz сайтынан таптым: {u}',
- lSec:{market:'Барахолка',ads:'Хабарландырулар',jobs:'Жұмыс',lost:'Жоғалғандар'},
- lSecD:{market:'Сатамын, сатып аламын, тегін беремін',ads:'Жалға беру, қосымша жұмыс, қызмет, жолсерік',jobs:'Бос орындар мен көршілердің түйіндемелері',lost:'Жоғалттым немесе таптым'},
+ lSec:{market:'Барахолка',rent:'Жалға беру-алу',ads:'Хабарландырулар',jobs:'Жұмыс',lost:'Жоғалғандар'},
+ lSecD:{market:'Сатамын, сатып аламын, тегін беремін',rent:'Бөлме, үй, уақытша үй, төсек-орын жалға беремін не аламын',ads:'Қосымша жұмыс, қызмет, жолсерік',jobs:'Бос орындар мен көршілердің түйіндемелері',lost:'Жоғалттым немесе таптым'},
  lKind:{sell:'Сатамын',buy:'Сатып аламын',free:'Тегін беремін',rent_offer:'Жалға беремін',rent_seek:'Жалға аламын',job_offer:'Бос жұмыс орны',job_seek:'Жұмыс іздеймін',gig:'Қосымша жұмыс',service:'Жеке қызметтер',ride:'Жолсеріктер',other:'Әртүрлі',lost:'Жоғалттым',found:'Таптым'},
- lCat:{jobs:{other:''},market:{kids:'Балаларға',clothes:'Киім',tech:'Техника',furniture:'Жиһаз',home:'Үй мен саяжайға',auto:'Көлік және бөлшектер',animals:'Жануарлар мен мал',build:'Құрылыс материалдары',other:'Басқа'},
+ lCat:{jobs:{other:''},rent:{room:'Бөлме, төсек-орын',house:'Үй, жарты үй, уақытша үй',flat:'Пәтер',other:'Үй-жайлар және басқа'},market:{kids:'Балаларға',clothes:'Киім',tech:'Техника',furniture:'Жиһаз',home:'Үй мен саяжайға',auto:'Көлік және бөлшектер',animals:'Жануарлар мен мал',build:'Құрылыс материалдары',other:'Басқа'},
   ads:{house:'Үй',flat:'Пәтер',room:'Бөлме',garage:'Гараж',equipment:'Техника',other:'Басқа'},
   lost:{animals:'Жануарлар',docs:'Құжаттар',keys:'Кілттер',things:'Заттар',other:'Басқа'}},
  lPrice:{free:'Тегін',negotiable:'Келісімді',none:''},lAll:'Барлығы',lAllCats:'Барлық санат',
  lEmpty:'Әзірге хабарландыру жоқ',lEmptyS:'Біріншісін беріңіз — бұл тегін. Тексеруден кейін осында шығады.',lPostBtn:'➕ Хабарландыру беру',
  lFresh:'Жаңа хабарландырулар',jTab:{job_offer:'👷 Қызметкер іздеймін',job_seek:'🙋 Жұмыс іздеймін'},jPost:{job_offer:'➕ Бос орын беру',job_seek:'➕ Түйіндеме орналастыру'},jTabD:{job_offer:'Үркер жұмыс берушілерінің бос орындары',job_seek:'Жұмыс іздеп жүрген көршілер'},jEmpty:{job_offer:'Әзірге бос орын жоқ',job_seek:'Әзірге түйіндеме жоқ'},jWho:'Не орналастырғыңыз келеді?',jTitleO:'Кімді іздейсіз (лауазым)',jTitleOPh:'Мысалы: күзетші, сатушы, аспаз',jTitleS:'Мамандығыңыз / не істей аласыз',jTitleSPh:'Мысалы: B санатты жүргізуші, аспаз, бала күтуші',jName:'Атыңыз',jExp:'Жұмыс тәжірибесі',jExpPh:'Мысалы: таксиде 5 жыл жүргізуші',jBodyO:'Шарттары: кесте, міндеттер, талаптар',jBodyS:'Өзіңіз туралы: кесте, тілектер',jPay:'Жалақы',jPayS:'Қалаған жалақы',jPayF:'Сомасы, ₸',jPlaceO:'Жұмыс орны (мекенжай, аудан)',jPlaceS:'Қай жерде жұмыс істегіңіз келеді',jNameL:'Аты',jExpL:'Тәжірибесі',lFreshAll:'Барлық хабарландырулар →',lFreshEmpty:'Әзірге хабарландыру жоқ — біріншісін беріңіз',
- lClosed:{market:'Сатылды',ads:'Өзекті емес',jobs:'Өзекті емес',lost:'Табылды'},lViews:n=>`👁 ${n}`,lPosted:'Жарияланды',lWhere:'Қайда',lWhen:'Қашан',lShare:'WhatsApp-та бөлісу',lCopy:'🔗 Сілтемені көшіру',lCopied:'Сілтеме көшірілді',lSearchPh:'Іздеу: люк, куртка…',lNoFound:q=>`«${q}» бойынша ештеңе табылмады`,
+ lClosed:{market:'Сатылды',rent:'Өзекті емес',ads:'Өзекті емес',jobs:'Өзекті емес',lost:'Табылды'},lViews:n=>`👁 ${n}`,lPosted:'Жарияланды',lWhere:'Қайда',lWhen:'Қашан',lShare:'WhatsApp-та бөлісу',lCopy:'🔗 Сілтемені көшіру',lCopied:'Сілтеме көшірілді',lSearchPh:'Іздеу: люк, куртка…',lSearchRent:'Іздеу: бөлме, уақытша үй, үй…',lSecShare:'Бөліммен WhatsApp-та бөлісу',lSecShareT:'🏠 Үркерде жалға беру-алу — тұрғын үй жалдау хабарландырулары',lNoFound:q=>`«${q}» бойынша ештеңе табылмады`,
  lHighlight:'Ерекшеленген',lNotFound:'Хабарландыру табылмады немесе алынып тасталды',lExpires:'Белсенді мерзімі',
  pTitle:'Хабарландыру беру',pChoose:'Қай бөлімге?',pKind:'Түрі',pCat:'Санаты',pTitleF:'Тақырыбы',pTitlePh:'Мысалы: балалар арбасы, жаңа дерлік',
  pBody:'Сипаттамасы',pPriceMode:'Бағасы',pPriceFixed:'Бағасы, ₸',pFixedR:'Бағасын көрсету',pNeg:'Келісімді',pFree:'Тегін',pNone:'Бағасыз',pPlace:'Қайда (көше, үй — міндетті емес)',pPlaceLost:'Қайда жоғалттыңыз / таптыңыз',
@@ -58,7 +58,7 @@ A.addDict({
  pUploading:'Фото жүктелуде…',pDone:'Дайын!',pDonePending:'Хабарландыру тексеруге жіберілді. Мақұлданғаннан кейін сайтта шығады.',pDoneLive:'Хабарландыру жарияланды.',
  pSecret:'Өзгерту және жою үшін құпия сілтемеңіз. Оны сақтап қойыңыз — онсыз хабарландыруды басқару мүмкін емес:',pCopy:'📋 Сілтемені көшіру',pCopied:'Сілтеме көшірілді',
  pSaveWa:'💬 Сілтемені өзіме WhatsApp-қа жіберу',pShareTitle:'Хабарландырумен бөлісу',pSharePub:'Хабарландырумен WhatsApp-та бөлісу',pPrivate:'⚠️ Бұл басқаруға арналған ЖЕКЕ сілтеме. Оны чаттарға жібермеңіз және ешкімге бермеңіз. Хабарландыруды басқаларға көрсету үшін «Хабарландырумен бөлісу» батырмасын басыңыз — онда басқаруға рұқсатсыз қарапайым сілтеме.',phAsk:'Бұл сіз екеніңізді растаңыз',phAskD:'Хабарландыруда көрсеткен нөмірдің соңғы 4 цифрын (немесе толық нөмірді) енгізіңіз.',phPh:'Соңғы 4 цифр',phOk:'Растау',phBad:'Нөмір сәйкес келмейді',phLocked:'Әрекет тым көп. Бір сағаттан кейін қайталаңыз.',mNoTok:'Жеке сілтемеңізді осы телефонда ашыңыз немесе «Менің хабарландыруларым» арқылы кіріңіз.',pView:'Хабарландыруды ашу',pMy:'Менің хабарландыруларым',pMyEmpty:'Осы телефоннан берілген хабарландырулар осында шығады.',
- mStatus:{pending:'Тексеруде',approved:'Жарияланған',rejected:'Қабылданбады',closed:'Жабылды',deleted:'Жойылды'},mExpires:'Көрсетіледі',mEdit:'✏️ Өзгерту',mClose:{market:'✅ Сатылды',ads:'✅ Өзекті емес',jobs:'✅ Өзекті емес',lost:'✅ Табылды'},
+ mStatus:{pending:'Тексеруде',approved:'Жарияланған',rejected:'Қабылданбады',closed:'Жабылды',deleted:'Жойылды'},mExpires:'Көрсетіледі',mEdit:'✏️ Өзгерту',mClose:{market:'✅ Сатылды',rent:'✅ Өзекті емес',ads:'✅ Өзекті емес',jobs:'✅ Өзекті емес',lost:'✅ Табылды'},
  mRenew:'🔄 Ұзарту',mDelete:'🗑 Жою',mConfirmDel:'Хабарландыруды біржола жою керек пе?',mDeleted:'Хабарландыру жойылды',mSaved:'Сақталды',mSavedPending:'Сақталды — қайта тексеруге жіберілді',
  mRenewed:'Ұзартылды:',mBadLink:'Сілтеме жарамсыз немесе хабарландыру жойылған',mManage:'Хабарландыруды басқару',
  pSavedMy:'Сілтеме осы телефондағы «Менің хабарландыруларым» бөлімінде де сақталды.',pOpenMy:'🗂 Менің хабарландыруларым',mExpired:'Көрсету мерзімі бітті — «Ұзарту» басыңыз',
@@ -68,20 +68,23 @@ A.addDict({
  lErr:{bad_token:'Сілтеме жарамсыз',invalid_phone:'Телефон нөмірін тексеріңіз',bad_price:'Бағаны тексеріңіз',bad_title:'Тақырып тым қысқа',bad_kind:'Түрі мен санатын таңдаңыз',too_many_photos:'5 фотодан артық емес',locked:'Хабарландыруды модератор қабылдамады'}
 });
 const SECT={market:{e:'🛍',kinds:['sell','buy','free'],cats:['kids','clothes','tech','furniture','home','auto','animals','build','other']},
- ads:{e:'📋',kinds:['rent_offer','rent_seek','gig','service','ride','other'],cats:['house','flat','room','garage','equipment','other']},
+ rent:{e:'🏠',kinds:['rent_offer','rent_seek'],cats:['room','house','flat','other'],db:'ads'},
+ ads:{e:'📋',kinds:['gig','service','ride','other'],cats:['house','flat','room','garage','equipment','other']},
  jobs:{e:'💼',kinds:['job_offer','job_seek'],cats:['other'],db:'ads'},
  lost:{e:'🐾',kinds:['lost','found'],cats:['animals','docs','keys','things','other']}};
-const ROUTE={market:'bazar',ads:'ads',jobs:'jobs',lost:'lost'}, BYROUTE={bazar:'market',ads:'ads',jobs:'jobs',lost:'lost'};
+const ROUTE={market:'bazar',rent:'rent',ads:'ads',jobs:'jobs',lost:'lost'}, BYROUTE={bazar:'market',rent:'rent',ads:'ads',jobs:'jobs',lost:'lost'};
+// [rent] «Сдам-сниму» — витрина: в базе это section='ads' с kind rent_offer/rent_seek (без изменения схемы)
+const RENT_URL='https://urker24.kz/rent/';
 // [jobs] «Работа» — витрина: в базе это section='ads' с kind job_offer/job_seek
 const JOB=k=>k==='job_offer'||k==='job_seek';
-const secOf=l=>l&&l.section==='ads'&&JOB(l.kind)?'jobs':(l&&l.section);
+const secOf=l=>l&&l.section==='ads'&&JOB(l.kind)?'jobs':l&&l.section==='ads'&&(l.kind==='rent_offer'||l.kind==='rent_seek')?'rent':(l&&l.section);
 const RENT=k=>k==='rent_offer'||k==='rent_seek';
 const COLS='id,section,kind,category,title,body,price,price_mode,place,event_date,phone,has_wa,photos,status,closed_at,views,highlighted,published_at,sort_at,expires_at,created_at';
 let LST=[]; const MYK='urker_my_listings';
 const my=()=>{try{return JSON.parse(localStorage.getItem(MYK))||[]}catch(e){return[]}};
 const saveMy=a=>localStorage.setItem(MYK,JSON.stringify(a.slice(0,50)));
 const photoUrl=p=>p&&p.path?SB.publicUrl('listings',p.path):(p&&p.url)||'';
-const catLabel=(l)=>secOf(l)==='jobs'?'':(t('lCat')[l.section]||{})[l.category]||'';
+const catLabel=(l)=>secOf(l)==='jobs'?'':(t('lCat')[secOf(l)]||{})[l.category]||'';
 const fmtPrice=l=>l.price_mode==='fixed'&&l.price!=null?Number(l.price).toLocaleString('ru-RU').replace(/,/g,' ')+' ₸':(t('lPrice')[l.price_mode]||'');
 const fmtDate=iso=>{if(!iso)return '';const d=new Date(new Date(iso).getTime()+5*3600e3);return `${d.getUTCDate()} ${A.MONTHS[A.lang()][d.getUTCMonth()]}`};
 const fmtPhone=p=>p&&p.length===11?`8 ${p.slice(1,4)} ${p.slice(4,7)} ${p.slice(7,9)} ${p.slice(9)}`:p;
@@ -97,7 +100,7 @@ let F={kind:'',cat:''},lastSec='';
 function viewList(sec){
  if(sec!==lastSec){F={kind:'',cat:'',q:''};lastSec=sec}
  if(sec==='jobs')return viewJobs();
- const S=SECT[sec];const showCats=sec!=='ads'||RENT(F.kind);
+ const S=SECT[sec];const showCats=sec!=='ads';
  const list=visible().filter(l=>secOf(l)===sec&&(!F.kind||l.kind===F.kind)&&(!F.cat||l.category===F.cat));
  A.setMeta(t('lSec')[sec]+' — Уркер 24',t('lSecD')[sec]);
  A.app.innerHTML=`<div class="crumbs"><button class="back" onclick="location.hash='#/'" aria-label="${t('back')}">←</button><h1>${S.e} ${t('lSec')[sec]}</h1></div>
@@ -105,7 +108,8 @@ function viewList(sec){
  <div class="chips">${['',...S.kinds].map(k=>`<button class="${F.kind===k?'on':''}" data-lk="${k}">${k?esc(t('lKind')[k]):t('lAll')}</button>`).join('')}</div>
  ${showCats?`<div class="chips">${['',...S.cats].map(c=>`<button class="${F.cat===c?'on':''}" data-lc="${c}">${c?esc(t('lCat')[sec][c]):t('lAllCats')}</button>`).join('')}</div>`:''}
  <a class="btn primary lpost" href="#/post/${sec}">${t('lPostBtn')}</a>
- <div class="lsearch"><input type="search" id="lq" value="${esc(F.q||'')}" placeholder="${esc(t('lSearchPh'))}" aria-label="${esc(t('lSearchPh'))}" autocomplete="off"></div>
+ ${sec==='rent'?`<div class="secshare"><a class="btn wa sm" href="https://wa.me/?text=${encodeURIComponent(t('lSecShareT')+'\n'+RENT_URL)}" target="_blank" rel="noopener">${A.WA_SVG}${t('lSecShare')}</a><button type="button" class="btn sm ghost lcopy" data-copy="${RENT_URL}">${t('lCopy')}</button></div>`:''}
+ <div class="lsearch"><input type="search" id="lq" value="${esc(F.q||'')}" placeholder="${esc(t(sec==='rent'?'lSearchRent':'lSearchPh'))}" aria-label="${esc(t(sec==='rent'?'lSearchRent':'lSearchPh'))}" autocomplete="off"></div>
  <div id="lres"></div>`;
  const kw=x=>String(x||'').toLowerCase().replace(/ё/g,'е');
  const draw=()=>{const ws=kw(F.q).split(/\s+/).filter(Boolean);const f=ws.length?list.filter(l=>{const h=kw((l.title||'')+' '+(l.body||''));return ws.every(w=>h.includes(w))}):list;
@@ -192,7 +196,7 @@ function form(sec,row,onSubmit){
  const f=$('#lf');
  const pmDefault=row.price_mode&&row.price_mode!=='free'?row.price_mode:(sec==='lost'?'none':'fixed');
  const syncKind=()=>{const k=(f.querySelector('[name=lk]:checked')||{}).value;
-  $('#catf').hidden=(sec==='ads'&&!RENT(k))||J;$('#pricef').hidden=sec==='lost'||k==='free';
+  $('#catf').hidden=sec==='ads'||J;$('#pricef').hidden=sec==='lost'||k==='free';
   if(J){const s=k==='job_seek';$('#ltl').textContent=s?t('jTitleS'):t('jTitleO');$('#lt').placeholder=s?t('jTitleSPh'):t('jTitleOPh');$('#lbl').textContent=s?t('jBodyS'):t('jBodyO');
    $('#pml').textContent=s?t('jPayS'):t('jPay');$('#lp').placeholder=t('jPayF');$('#lpll').textContent=s?t('jPlaceS'):t('jPlaceO');if($('#jnf'))$('#jnf').hidden=!s;if($('#jef'))$('#jef').hidden=!s}
   const pm=(f.querySelector('[name=pm]:checked')||{}).value;$('#lp').hidden=pm!=='fixed'};
@@ -209,7 +213,7 @@ function form(sec,row,onSubmit){
   if(sec==='lost')pm='none';if(k==='free')pm='free';
   let body=$('#lb').value.trim();
   if(JN&&k==='job_seek'){const nm=$('#jn').value.trim(),ex=$('#je').value.trim();body=[nm?t('jNameL')+': '+nm:'',ex?t('jExpL')+': '+ex:'',body].filter(Boolean).join('\n')}
-  const p={section:S.db||sec,kind:k,category:(S.db||(sec==='ads'&&!RENT(k)))?'other':$('#lc').value,title:$('#lt').value.trim(),body,price_mode:pm,price:pm==='fixed'?$('#lp').value:'',
+  const p={section:S.db||sec,kind:k,category:((S.db&&sec!=='rent')||sec==='ads')?'other':$('#lc').value,title:$('#lt').value.trim(),body,price_mode:pm,price:pm==='fixed'?$('#lp').value:'',
    place:$('#lpl').value.trim(),event_date:sec==='lost'?$('#ld').value:'',phone:$('#lph').value,has_wa:$('#lwa').checked,lang:A.lang()};
   if(p.title.length<3){A.toast(t('pErrTitle'));$('#lt').focus();return}
   const d=p.phone.replace(/\D/g,'');if(!/^(8|7)?7\d{9}$/.test(d)){A.toast(t('pErrPhone'));$('#lph').focus();return}
@@ -313,8 +317,8 @@ function viewMenu(){A.setMeta(t('menuTitle')+' — Уркер 24','');
 function homeStrip(){if(!ON)return '';const l=visible().filter(x=>x.status==='approved').slice(0,12);
  return `<section class="ann-block lfresh"><div class="ann-h"><h2>🗂 ${t('lFresh')}</h2><a href="#/bazar">${t('lFreshAll')}</a></div>
  ${l.length?`<div class="lcards lhome">${l.map(x=>lcard(x,true)).join('')}</div>`:`<a class="ann-empty lnk-empty" href="#/post"><span>${t('lFreshEmpty')}</span><b>${t('lPostBtn')}</b></a>`}</section>`}
-function homeTiles(){if(!ON)return '';const it=[['#/bazar','🛍',t('lSec').market],['#/jobs','💼',t('lSec').jobs],['#/ads','📋',t('lSec').ads],['#/lost','🐾',t('lSec').lost],['#/news','📰',t('navNews')],['#/ann','⚠️',t('menuAlerts')],['#/post','➕',t('navPost')]];
- return `<div class="stiles">${it.map(([h,e,n])=>`<a class="stile${h==='#/post'?' spost':''}" href="${h}"><span>${e}</span><b${n.length>13?' class="wr"':''}>${esc(n).replace('Хабарландырулар','Хабарлан\u00ADдырулар')}</b></a>`).join('')}</div>`}
+function homeTiles(){if(!ON)return '';const it=[['#/bazar','🛍',t('lSec').market],['#/rent','🏠',t('lSec').rent],['#/jobs','💼',t('lSec').jobs],['#/ads','📋',t('lSec').ads],['#/lost','🐾',t('lSec').lost],['#/news','📰',t('navNews')],['#/ann','⚠️',t('menuAlerts')],['#/post','➕',t('navPost')]];
+ return `<div class="stiles">${it.map(([h,e,n])=>`<a class="stile${h==='#/post'?' spost':''}" href="${h}"><span>${e}</span><b${n.length>8?' class="wr"':''}>${esc(n).replace('Хабарландырулар','Хабарлан\u00ADдырулар').replace('Жоғалғандар','Жоғалған\u00ADдар').replace('Жаңалықтар','Жаңалық\u00ADтар').replace('Объявления','Объявле\u00ADния').replace('Отключения','Отклю\u00ADчения').replace('Потеряшки','Потеряш\u00ADки')}</b></a>`).join('')}</div>`}
 function searchHtml(q){if(!ON)return {n:0,html:''};const qs=A.norm(q).split(' ').filter(w=>w.length>=3);if(!qs.length)return {n:0,html:''};
  const hits=visible().filter(l=>{const tk=A.norm([l.title,l.body,l.place,T_KIND(l),catLabel(l),t('lSec')[secOf(l)],secOf(l)==='jobs'?(window.URKER_JOB_SYN||''):''].join(' ')).split(' ').filter(Boolean);return qs.every(x=>A.tokScore(x,tk)>0)});
  const jw=A.norm(window.URKER_JOB_SYN||'').split(' ').filter(Boolean),jh=qs.some(x=>A.tokScore(x,jw)>0);
@@ -323,7 +327,7 @@ function searchHtml(q){if(!ON)return {n:0,html:''};const qs=A.norm(q).split(' ')
 const T_KIND=l=>t('lKind')[l.kind]||'';
 function route(h){let m;
  if(!ON){if(/^#\/menu/.test(h)){viewMenu();return 'menu'}return null}
- if((m=h.match(/^#\/(bazar|ads|jobs|lost)(?:$|[/?])/))){viewList(BYROUTE[m[1]]);return m[1]==='bazar'?'bazar':'menu'}
+ if((m=h.match(/^#\/(bazar|rent|ads|jobs|lost)(?:$|[/?])/))){viewList(BYROUTE[m[1]]);return m[1]==='bazar'?'bazar':'menu'}
  if((m=h.match(/^#\/item\/(\d+)/))){viewItem(m[1]);return 'bazar'}
  if((m=h.match(/^#\/post(?:\/(\w+))?/))){viewPost(m[1]);return 'post'}
  if((m=h.match(/^#\/my\/(\d+)\/([0-9a-f]{64})/))){const id=+m[1],tok=m[2];  // токен убираем из адресной строки и истории
@@ -334,7 +338,7 @@ function route(h){let m;
  if(/^#\/menu/.test(h)){viewMenu();return 'menu'}
  return null}
 // [copy] копирование ПУБЛИЧНОЙ ссылки /i/<id>/ (никогда не /my/)
-document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-copy]');if(!b)return;const u=b.dataset.copy;if(!/^https:\/\/urker24\.kz\/i\/\d+\/$/.test(u))return;
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-copy]');if(!b)return;const u=b.dataset.copy;if(!/^https:\/\/urker24\.kz\/(i\/\d+|rent)\/$/.test(u))return;
  try{await navigator.clipboard.writeText(u)}catch(_){const ta=document.createElement('textarea');ta.value=u;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__){}ta.remove()}
  A.toast(A.lang()==='kz'?'Сілтеме көшірілді':'Ссылка скопирована')});
 // [gallery] ←/→ листают фото на странице объявления (десктоп)
